@@ -1,0 +1,19 @@
+{
+  "name": "cinekit",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "admin",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "dev:client": "npm --workspace client run dev",
+    "dev:admin": "npm --workspace admin run dev",
+    "dev:server": "npm --workspace server run dev",
+    "build:client": "npm --workspace client run build",
+    "build:admin": "npm --workspace admin run build",
+    "start:server": "npm --workspace server run start"
+  }
+}

@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-page font-sans text-ink antialiased;
+}
+
+@layer components {
+  .admin-shell {
+    @apply mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8;
+  }
+
+  .card-surface {
+    @apply rounded-card border border-line bg-card shadow-card transition-all duration-200 ease-in-out;
+  }
+
+  .pill-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out active:scale-95 md:text-base;
+  }
+
+  .primary-button {
+    @apply pill-button bg-primary text-white hover:bg-primary-hover;
+  }
+
+  .secondary-button {
+    @apply pill-button border border-line bg-white text-ink hover:bg-primary-light hover:text-primary-dark;
+  }
+
+  .input-shell {
+    @apply flex min-h-12 items-center gap-3 rounded-input border border-line bg-white px-4 transition-all duration-200 ease-in-out focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10;
+  }
+}
