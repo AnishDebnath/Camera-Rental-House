@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import { useAuth } from '../context/AuthContext';
+import { adminAppUrl, clientAppUrl } from '../utils/appUrls';
 
 type DemoRole = 'admin' | 'manager';
 
@@ -24,9 +25,6 @@ const ADMIN_ACCOUNTS: AdminAccount[] = [
     role: 'manager',
   },
 ];
-
-const buildAppUrl = (port: number, path: string) =>
-  `${window.location.protocol}//${window.location.hostname}:${port}${path}`;
 
 const Login = () => {
   const { login } = useAuth();
@@ -59,15 +57,12 @@ const Login = () => {
         role: matched.role,
         next: nextPath,
       });
-      window.location.href = buildAppUrl(
-        5174,
-        `/auth-redirect?${params.toString()}`,
-      );
+      window.location.href = `${adminAppUrl}/auth-redirect?${params.toString()}`;
       return;
     }
 
     await login(form);
-    window.location.href = buildAppUrl(5173, '/account');
+    window.location.href = `${clientAppUrl}/account`;
   };
 
   return (

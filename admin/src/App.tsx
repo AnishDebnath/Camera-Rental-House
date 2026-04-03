@@ -11,9 +11,7 @@ import ReleaseReturn from './pages/ReleaseReturn';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
 import { isDemoRole, startDemoSession } from './utils/demoAuth';
-
-const buildAppUrl = (port: number, path: string) =>
-  `${window.location.protocol}//${window.location.hostname}:${port}${path}`;
+import { authAppUrl } from './utils/appUrls';
 
 const ProtectedRoute = ({ children, allowManager = false }) => {
   const location = useLocation();
@@ -51,7 +49,7 @@ const AuthRedirect = () => {
     }
 
     const requestedPath = next && next.startsWith('/admin') ? next : '/admin';
-    const authUrl = buildAppUrl(5175, `/login?next=${encodeURIComponent(requestedPath)}`);
+    const authUrl = `${authAppUrl}/login?next=${encodeURIComponent(requestedPath)}`;
     window.location.replace(authUrl);
   }, [location.search, navigate]);
 

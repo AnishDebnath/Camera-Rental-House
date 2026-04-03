@@ -1,5 +1,6 @@
 import { Camera, Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { authAppUrl } from '../utils/appUrls';
 
 const Navbar = () => (
   <header className="fixed inset-x-0 top-0 z-40 border-b border-line/80 bg-white/95 backdrop-blur">
@@ -14,10 +15,10 @@ const Navbar = () => (
         </div>
       </Link>
       <div className="hidden items-center gap-2 md:flex">
-        <a href="http://localhost:5175/login" className="secondary-button">
+        <a href={`${authAppUrl}/login`} className="secondary-button">
           Login
         </a>
-        <a href="http://localhost:5175/signup" className="primary-button">
+        <a href={`${authAppUrl}/signup`} className="primary-button">
           Sign Up
         </a>
       </div>
