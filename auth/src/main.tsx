@@ -8,7 +8,7 @@ import { ToastProvider } from './context/ToastContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/auth">
+    <BrowserRouter basename={import.meta.env.PROD ? '/auth' : '/'}>
       <ToastProvider>
         <AuthProvider>
           <App />
