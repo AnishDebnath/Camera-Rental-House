@@ -17,7 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
     credentials: true,
   }),
 );
@@ -44,8 +44,11 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   return res.status(500).json({ message: error?.message || 'Internal server error.' });
 });
 
-const port = Number(process.env.PORT || 5000);
+export default app;
 
-app.listen(port, () => {
-  console.log(`CineKit server listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const port = Number(process.env.PORT || 5000);
+  app.listen(port, () => {
+    console.log(`CineKit server listening on port ${port}`);
+  });
+}
