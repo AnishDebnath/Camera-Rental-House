@@ -1,8 +1,30 @@
 import { Camera, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import { useAuth } from '../context/AuthContext';
+import { adminAppUrl } from '../utils/appUrls';
+
+type DemoRole = 'admin' | 'manager';
+
+type AdminAccount = {
+  identifiers: string[];
+  password: string;
+  role: DemoRole;
+};
+
+const ADMIN_ACCOUNTS: AdminAccount[] = [
+  {
+    identifiers: ['admin', 'admin@cinekit.com'],
+    password: 'admin123',
+    role: 'admin',
+  },
+  {
+    identifiers: ['manager', 'manager@cinekit.com'],
+    password: 'manager123',
+    role: 'manager',
+  },
+];
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,9 +34,28 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
+
+    const normalizedIdentifier = form.identifier.trim().toLowerCase();
+    const matchedAdmin = ADMIN_ACCOUNTS.find(
+      (account) =>
+        account.identifiers.includes(normalizedIdentifier) &&
+        account.password === form.password,
+    );
+
+    if (matchedAdmin) {
+      const nextPath = matchedAdmin.role === 'manager' ? '/admin/rentals' : '/admin';
+      const params = new URLSearchParams({
+        token: `demo-${matchedAdmin.role}-token`,
+        role: matchedAdmin.role,
+        next: nextPath,
+      });
+      window.location.href = `${adminAppUrl}/auth-redirect?${params.toString()}`;
+      return;
+    }
+
     await login(form);
     setLoading(false);
     navigate(location.state?.from || '/account');
@@ -28,7 +69,9 @@ const Login = () => {
             <Camera className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-bold text-ink">Welcome Back</h1>
-          <p className="mt-2 text-sm text-muted">Demo login for the CineKit client flow.</p>
+          <p className="mt-2 text-sm text-muted">
+            Client login by default. Admin demo: `admin / admin123` or `manager / manager123`.
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
