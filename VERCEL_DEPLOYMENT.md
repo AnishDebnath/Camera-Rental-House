@@ -7,6 +7,11 @@ This repository is a monorepo with four separate deployable apps:
 - `admin`: admin and manager frontend
 - `server`: API as Vercel Functions
 
+The repository root now includes a [vercel.json](C:\Users\PC\Desktop\Camera-Rental-House\vercel.json) that makes a single root Vercel project deploy the `client` app only:
+
+- Build Command: `npm run build:client`
+- Output Directory: `client/dist`
+
 Do not deploy the repository root as a single Vercel project. The current failed deployment used a root-level custom install command and cannot work correctly for this layout.
 
 ## Create Four Vercel Projects
