@@ -8,13 +8,15 @@ const browserOrigin = () => {
   return `${window.location.protocol}//${window.location.hostname}`;
 };
 
-const withFallbackOrigin = (envValue: string | undefined, fallbackPort: number) => {
-  const configured = envValue?.trim();
-  if (configured) {
-    return trimTrailingSlash(configured);
-  }
+const configuredAuthAppUrl = import.meta.env.VITE_AUTH_APP_URL?.trim();
+const isLocalDevelopment =
+  typeof window !== 'undefined' &&
+  ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-  return `${browserOrigin()}:${fallbackPort}`;
-};
+export const useExternalAuthApp = Boolean(configuredAuthAppUrl) || isLocalDevelopment;
 
-export const authAppUrl = withFallbackOrigin(import.meta.env.VITE_AUTH_APP_URL, 5175);
+export const authAppUrl = configuredAuthAppUrl
+  ? trimTrailingSlash(configuredAuthAppUrl)
+  : isLocalDevelopment
+    ? `${browserOrigin()}:5175`
+    : browserOrigin();

@@ -11,7 +11,7 @@ import Favourites from './pages/Favourites';
 import Account from './pages/Account';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import { authAppUrl } from './utils/appUrls';
+import { authAppUrl, useExternalAuthApp } from './utils/appUrls';
 
 function App() {
   const location = useLocation();
@@ -29,8 +29,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/account" element={<Account />} />
-          <Route path="/login" element={<meta httpEquiv="refresh" content={`0; url=${authAppUrl}/login`} />} />
-          <Route path="/signup" element={<meta httpEquiv="refresh" content={`0; url=${authAppUrl}/signup`} />} />
+          <Route path="/login" element={useExternalAuthApp ? <meta httpEquiv="refresh" content={`0; url=${authAppUrl}/login`} /> : <Login />} />
+          <Route path="/signup" element={useExternalAuthApp ? <meta httpEquiv="refresh" content={`0; url=${authAppUrl}/signup`} /> : <Signup />} />
         </Routes>
       </main>
       {!authPage ? <BottomNav /> : null}

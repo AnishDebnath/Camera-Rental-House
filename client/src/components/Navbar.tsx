@@ -1,6 +1,6 @@
 import { Camera, Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { authAppUrl } from '../utils/appUrls';
+import { authAppUrl, useExternalAuthApp } from '../utils/appUrls';
 
 const Navbar = () => (
   <header className="fixed inset-x-0 top-0 z-40 border-b border-line/80 bg-white/95 backdrop-blur">
@@ -15,12 +15,25 @@ const Navbar = () => (
         </div>
       </Link>
       <div className="hidden items-center gap-2 md:flex">
-        <a href={`${authAppUrl}/login`} className="secondary-button">
-          Login
-        </a>
-        <a href={`${authAppUrl}/signup`} className="primary-button">
-          Sign Up
-        </a>
+        {useExternalAuthApp ? (
+          <>
+            <a href={`${authAppUrl}/login`} className="secondary-button">
+              Login
+            </a>
+            <a href={`${authAppUrl}/signup`} className="primary-button">
+              Sign Up
+            </a>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="secondary-button">
+              Login
+            </Link>
+            <Link to="/signup" className="primary-button">
+              Sign Up
+            </Link>
+          </>
+        )}
       </div>
       <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full border border-line md:hidden">
         <Menu className="h-5 w-5" />

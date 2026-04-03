@@ -10,8 +10,9 @@ import Rentals from './pages/Rentals';
 import ReleaseReturn from './pages/ReleaseReturn';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
+import Login from './pages/Login';
 import { isDemoRole, startDemoSession } from './utils/demoAuth';
-import { authAppUrl } from './utils/appUrls';
+import { authAppUrl, useExternalAuthApp } from './utils/appUrls';
 
 const ProtectedRoute = ({ children, allowManager = false }) => {
   const location = useLocation();
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children, allowManager = false }) => {
 
   if (!token) {
     const next = `${location.pathname}${location.search}`;
-    return <Navigate to={`/auth-redirect?next=${encodeURIComponent(next)}`} replace />;
+    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
   if (!allowManager && role === 'manager') return <Navigate to="/admin/rentals" replace />;
 
@@ -48,6 +49,11 @@ const AuthRedirect = () => {
       return;
     }
 
+    if (!useExternalAuthApp) {
+      navigate(`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`, { replace: true });
+      return;
+    }
+
     const requestedPath = next && next.startsWith('/admin') ? next : '/admin';
     const authUrl = `${authAppUrl}/login?next=${encodeURIComponent(requestedPath)}`;
     window.location.replace(authUrl);
@@ -71,7 +77,7 @@ function App() {
       )}
       <main className={isAuthPage ? '' : 'lg:pl-72'}>
         <Routes>
-          <Route path="/login" element={<AuthRedirect />} />
+          <Route path="/login" element={useExternalAuthApp ? <AuthRedirect /> : <Login />} />
           <Route path="/auth-redirect" element={<AuthRedirect />} />
 
           <Route
