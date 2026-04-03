@@ -1,11 +1,14 @@
 import { Download, LogOut, Pencil, QrCode, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import formatDate from '../utils/formatDate';
+import { authAppUrl } from '../utils/appUrls';
 
 const Account = () => {
+  const navigate = useNavigate();
   const { user, rentals, refreshRentals, updateProfile, logout } = useAuth();
   const { addToast } = useToast();
   const [editing, setEditing] = useState(false);
@@ -19,6 +22,10 @@ const Account = () => {
   useEffect(() => {
     setDraft(user);
   }, [user]);
+
+  if (!user) {
+    return null;
+  }
 
   const activeRentals = rentals.filter((rental) =>
     rental.rental_items.some((item) => item.status !== 'returned'),
@@ -183,7 +190,11 @@ const Account = () => {
 
       <button
         type="button"
-        onClick={logout}
+        onClick={() => {
+          logout();
+          navigate('/');
+          window.location.replace(`${authAppUrl}/login`);
+        }}
         className="pill-button w-full border border-danger/20 bg-danger/5 text-danger"
       >
         <LogOut className="mr-2 h-4 w-4" /> Logout

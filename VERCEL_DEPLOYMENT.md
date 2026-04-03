@@ -10,6 +10,7 @@ This repository is a monorepo with four separate deployable apps:
 The repository root now includes a [vercel.json](C:\Users\PC\Desktop\Camera-Rental-House\vercel.json) that makes a single root Vercel project deploy:
 
 - `client` at `/`
+- `auth` at `/auth`
 - `admin` at `/admin`
 
 using:

@@ -1,4 +1,5 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import ToastViewport from './components/Toast';
@@ -12,6 +13,32 @@ import Account from './pages/Account';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { authAppUrl, useExternalAuthApp } from './utils/appUrls';
+import { useAuth } from './context/AuthContext';
+
+const AuthRedirect = ({ mode }: { mode: 'login' | 'signup' }) => {
+  const location = useLocation();
+  const target = new URL(`${authAppUrl}/${mode}`);
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
+
+  if (next) {
+    target.searchParams.set('next', next);
+  }
+
+  return <meta httpEquiv="refresh" content={`0; url=${target.toString()}`} />;
+};
+
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    const next = `${location.pathname}${location.search}`;
+    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
+  }
+
+  return children;
+};
 
 function App() {
   const location = useLocation();
@@ -26,11 +53,11 @@ function App() {
           <Route path="/browse" element={<Browse />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/favourites" element={<Favourites />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/login" element={useExternalAuthApp ? <meta httpEquiv="refresh" content={`0; url=${authAppUrl}/login`} /> : <Login />} />
-          <Route path="/signup" element={useExternalAuthApp ? <meta httpEquiv="refresh" content={`0; url=${authAppUrl}/signup`} /> : <Signup />} />
+          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="/login" element={useExternalAuthApp ? <AuthRedirect mode="login" /> : <Login />} />
+          <Route path="/signup" element={useExternalAuthApp ? <AuthRedirect mode="signup" /> : <Signup />} />
         </Routes>
       </main>
       {!authPage ? <BottomNav /> : null}

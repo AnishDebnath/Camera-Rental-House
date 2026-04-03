@@ -9,6 +9,10 @@
       "handle": "filesystem"
     },
     {
+      "src": "/auth(?:/.*)?",
+      "dest": "/auth/index.html"
+    },
+    {
       "src": "/admin(?:/.*)?",
       "dest": "/admin/index.html"
     },

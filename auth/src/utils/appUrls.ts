@@ -8,14 +8,20 @@ const browserOrigin = () => {
   return `${window.location.protocol}//${window.location.hostname}`;
 };
 
-const withFallbackOrigin = (envValue: string | undefined, fallbackPort: number) => {
+const withAppFallback = (
+  envValue: string | undefined,
+  fallbackPort: number,
+  productionPath = '',
+) => {
   const configured = envValue?.trim();
   if (configured) {
     return trimTrailingSlash(configured);
   }
 
-  return `${browserOrigin()}:${fallbackPort}`;
+  return ['localhost', '127.0.0.1'].includes(typeof window !== 'undefined' ? window.location.hostname : '')
+    ? `${browserOrigin()}:${fallbackPort}`
+    : `${browserOrigin()}${productionPath}`;
 };
 
-export const clientAppUrl = withFallbackOrigin(import.meta.env.VITE_CLIENT_APP_URL, 5173);
-export const adminAppUrl = withFallbackOrigin(import.meta.env.VITE_ADMIN_APP_URL, 5174);
+export const clientAppUrl = withAppFallback(import.meta.env.VITE_CLIENT_APP_URL, 5173);
+export const adminAppUrl = withAppFallback(import.meta.env.VITE_ADMIN_APP_URL, 5174, '/admin');

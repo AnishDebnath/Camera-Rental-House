@@ -20,13 +20,14 @@ export const AuthProvider = ({ children }) => {
   const { addToast } = useToast();
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('cinekit_demo_user');
-    return stored ? JSON.parse(stored) : defaultUser;
+    return stored ? JSON.parse(stored) : null;
   });
   const [rentals] = useState(mockRentals);
 
   const value = useMemo(
     () => ({
       user,
+      isAuthenticated: Boolean(user),
       rentals,
       login: async () => {
         localStorage.setItem('cinekit_demo_user', JSON.stringify(defaultUser));
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       },
       logout: () => {
         localStorage.removeItem('cinekit_demo_user');
-        setUser(defaultUser);
+        setUser(null);
         addToast({ title: 'Signed out', message: 'Demo state reset.', tone: 'info' });
       },
       refreshRentals: async () => {},

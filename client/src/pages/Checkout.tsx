@@ -25,6 +25,10 @@ const Checkout = () => {
 
   const totalCost = subtotal * totalDays;
 
+  if (!user) {
+    return null;
+  }
+
   const handleConfirm = async () => {
     setLoading(true);
     await new Promise((resolve) => window.setTimeout(resolve, 1000));

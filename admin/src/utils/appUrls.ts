@@ -13,10 +13,10 @@ const isLocalDevelopment =
   typeof window !== 'undefined' &&
   ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-export const useExternalAuthApp = Boolean(configuredAuthAppUrl) || isLocalDevelopment;
+export const useExternalAuthApp = true;
 
 export const authAppUrl = configuredAuthAppUrl
   ? trimTrailingSlash(configuredAuthAppUrl)
   : isLocalDevelopment
     ? `${browserOrigin()}:5175`
-    : browserOrigin();
+    : `${browserOrigin()}/auth`;
