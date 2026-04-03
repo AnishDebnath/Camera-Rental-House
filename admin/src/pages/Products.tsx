@@ -21,7 +21,7 @@ const Products = () => {
           <h1 className="text-2xl font-bold text-ink">Products</h1>
           <p className="text-sm text-muted">Manage inventory, pricing, and quantity.</p>
         </div>
-        <Link to="/admin/products/add" className="primary-button">
+        <Link to="/products/add" className="primary-button">
           <Plus className="mr-2 h-4 w-4" />
           Add Product
         </Link>
@@ -55,7 +55,7 @@ const Products = () => {
             label: 'Actions',
             render: (row) => (
               <div className="flex items-center gap-2">
-                <Link to={`/admin/products/${row.id}/edit`} className="secondary-button">
+                <Link to={`/products/${row.id}/edit`} className="secondary-button">
                   <Pencil className="h-4 w-4" />
                 </Link>
                 <button

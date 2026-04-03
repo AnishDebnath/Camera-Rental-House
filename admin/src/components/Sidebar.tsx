@@ -4,11 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { getDemoRole } from '../utils/demoAuth';
 
 const items = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, adminOnly: true },
-  { label: 'Products', href: '/admin/products', icon: Package, adminOnly: true },
-  { label: 'Users', href: '/admin/users', icon: Users, adminOnly: true },
-  { label: 'Rentals', href: '/admin/rentals', icon: CalendarClock },
-  { label: 'Release / Return', href: '/admin/release', icon: ScanLine },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard, adminOnly: true },
+  { label: 'Products', href: '/products', icon: Package, adminOnly: true },
+  { label: 'Users', href: '/users', icon: Users, adminOnly: true },
+  { label: 'Rentals', href: '/rentals', icon: CalendarClock },
+  { label: 'Release / Return', href: '/release', icon: ScanLine },
 ];
 
 const Sidebar = ({ open, onClose }) => {

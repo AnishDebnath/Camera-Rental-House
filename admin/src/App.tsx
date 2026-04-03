@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children, allowManager = false }) => {
     const next = `${location.pathname}${location.search}`;
     return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
-  if (!allowManager && role === 'manager') return <Navigate to="/admin/rentals" replace />;
+  if (!allowManager && role === 'manager') return <Navigate to="/rentals" replace />;
 
   return <>{children}</>;
 };
@@ -43,7 +43,7 @@ const AuthRedirect = () => {
     if (token && isDemoRole(role)) {
       localStorage.setItem('cinekit_admin_token', token);
       startDemoSession(role);
-      navigate(next && next.startsWith('/admin') ? next : role === 'manager' ? '/admin/rentals' : '/admin', {
+      navigate(next?.startsWith('/') ? next : role === 'manager' ? '/rentals' : '/', {
         replace: true,
       });
       return;
@@ -54,7 +54,7 @@ const AuthRedirect = () => {
       return;
     }
 
-    const requestedPath = next && next.startsWith('/admin') ? next : '/admin';
+    const requestedPath = next?.startsWith('/') ? next : '/';
     const authUrl = `${authAppUrl}/login?next=${encodeURIComponent(requestedPath)}`;
     window.location.replace(authUrl);
   }, [location.search, navigate]);
@@ -81,7 +81,7 @@ function App() {
           <Route path="/auth-redirect" element={<AuthRedirect />} />
 
           <Route
-            path="/admin"
+            path="/"
             element={
               <ProtectedRoute>
                 <Dashboard />
@@ -89,7 +89,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/products"
+            path="/products"
             element={
               <ProtectedRoute>
                 <Products />
@@ -97,7 +97,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/products/add"
+            path="/products/add"
             element={
               <ProtectedRoute>
                 <AddProduct />
@@ -105,7 +105,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/products/:id/edit"
+            path="/products/:id/edit"
             element={
               <ProtectedRoute>
                 <EditProduct />
@@ -113,7 +113,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/users"
+            path="/users"
             element={
               <ProtectedRoute>
                 <Users />
@@ -121,7 +121,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/users/:id"
+            path="/users/:id"
             element={
               <ProtectedRoute>
                 <UserDetail />
@@ -129,7 +129,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/rentals"
+            path="/rentals"
             element={
               <ProtectedRoute allowManager>
                 <Rentals />
@@ -137,16 +137,14 @@ function App() {
             }
           />
           <Route
-            path="/admin/release"
+            path="/release"
             element={
               <ProtectedRoute allowManager>
                 <ReleaseReturn />
               </ProtectedRoute>
             }
           />
-          {/* Redirect root and unknown paths to admin dashboard (which triggers ProtectedRoute) */}
-          <Route path="/" element={<Navigate to="/admin" replace />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>

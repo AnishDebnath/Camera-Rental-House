@@ -25,7 +25,7 @@ const Login = () => {
       }
 
       startDemoSession(matchedDemo.role);
-      navigate(matchedDemo.role === 'manager' ? '/admin/rentals' : '/admin');
+      navigate(matchedDemo.role === 'manager' ? '/rentals' : '/');
     } catch (error: any) {
       alert(error.message || 'Login failed.');
     } finally {

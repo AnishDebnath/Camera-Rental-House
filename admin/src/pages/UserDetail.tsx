@@ -23,7 +23,7 @@ const UserDetail = () => {
           </p>
           <button
             type="button"
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate('/users')}
             className="primary-button"
           >
             Back to Users

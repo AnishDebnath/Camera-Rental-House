@@ -48,7 +48,7 @@ const Users = () => {
             key: 'actions',
             label: 'View',
             render: (row) => (
-              <Link to={`/admin/users/${row.id}`} className="secondary-button">
+              <Link to={`/users/${row.id}`} className="secondary-button">
                 View
               </Link>
             ),
@@ -63,7 +63,7 @@ const Users = () => {
               <span className="text-sm font-semibold text-primary">
                 {formatCurrency(row.totalSpent)}
               </span>
-              <Link to={`/admin/users/${row.id}`} className="secondary-button">
+              <Link to={`/users/${row.id}`} className="secondary-button">
                 View
               </Link>
             </div>

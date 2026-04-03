@@ -59,10 +59,10 @@ const AddProduct = () => {
       <div className="admin-shell space-y-6 py-6">
         <PrintLabel product={createdProduct} />
         <div className="grid gap-3 md:grid-cols-2">
-          <Link to="/admin/products/add" className="secondary-button">
+          <Link to="/products/add" className="secondary-button">
             Add Another Product
           </Link>
-          <Link to="/admin/products" className="primary-button">
+          <Link to="/products" className="primary-button">
             Go to Products
           </Link>
         </div>

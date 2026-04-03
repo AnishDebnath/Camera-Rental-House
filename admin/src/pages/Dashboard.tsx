@@ -45,21 +45,21 @@ const Dashboard = () => {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <Link to="/admin/products/add" className="card-surface flex items-center justify-between p-5">
+        <Link to="/products/add" className="card-surface flex items-center justify-between p-5">
           <div>
             <p className="text-sm font-semibold text-ink">Add Product</p>
             <p className="text-sm text-muted">Create a new inventory item with QR label.</p>
           </div>
           <PackagePlus className="h-5 w-5 text-primary" />
         </Link>
-        <Link to="/admin/rentals" className="card-surface flex items-center justify-between p-5">
+        <Link to="/rentals" className="card-surface flex items-center justify-between p-5">
           <div>
             <p className="text-sm font-semibold text-ink">Upcoming Rentals</p>
             <p className="text-sm text-muted">View tomorrow’s pickups and returns.</p>
           </div>
           <CalendarClock className="h-5 w-5 text-primary" />
         </Link>
-        <Link to="/admin/release" className="card-surface flex items-center justify-between p-5">
+        <Link to="/release" className="card-surface flex items-center justify-between p-5">
           <div>
             <p className="text-sm font-semibold text-ink">Release Return Station</p>
             <p className="text-sm text-muted">Scan codes and verify users at the counter.</p>
@@ -74,7 +74,7 @@ const Dashboard = () => {
             <h2 className="text-xl font-semibold text-ink">Recent Activity</h2>
             <p className="text-sm text-muted">Last 10 rental confirmations.</p>
           </div>
-          <Link to="/admin/rentals" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+          <Link to="/rentals" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
             View all
             <ArrowRight className="h-4 w-4" />
           </Link>
