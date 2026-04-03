@@ -1,4 +1,11 @@
-const DatePicker = ({ label, value, onChange, min }) => (
+type DatePickerProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  min?: string;
+};
+
+const DatePicker = ({ label, value, onChange, min }: DatePickerProps) => (
   <label className="space-y-2">
     <span className="text-sm font-medium text-ink">{label}</span>
     <div className="input-shell">

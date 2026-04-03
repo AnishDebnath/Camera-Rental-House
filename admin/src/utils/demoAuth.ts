@@ -1,5 +1,8 @@
 export type DemoRole = 'admin' | 'manager';
 
+export const isDemoRole = (value: string | null): value is DemoRole =>
+  value === 'admin' || value === 'manager';
+
 export const DEMO_CREDENTIALS: Array<{
   label: string;
   username: string;

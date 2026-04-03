@@ -5,15 +5,20 @@
   "workspaces": [
     "client",
     "admin",
-    "server"
+    "server",
+    "auth"
   ],
   "scripts": {
-    "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:auth\"",
     "dev:client": "npm --workspace client run dev",
     "dev:admin": "npm --workspace admin run dev",
+    "dev:auth": "npm --workspace auth run dev",
     "dev:server": "npm --workspace server run dev",
+    "build": "npm run build --workspaces --if-present",
     "build:client": "npm --workspace client run build",
     "build:admin": "npm --workspace admin run build",
+    "build:auth": "npm --workspace auth run build",
+    "build:server": "npm --workspace server run build",
     "start:server": "npm --workspace server run start"
   }
 }

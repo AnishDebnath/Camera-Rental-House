@@ -14,12 +14,12 @@ const Navbar = () => (
         </div>
       </Link>
       <div className="hidden items-center gap-2 md:flex">
-        <Link to="/login" className="secondary-button">
+        <a href="http://localhost:5175/login" className="secondary-button">
           Login
-        </Link>
-        <Link to="/signup" className="primary-button">
+        </a>
+        <a href="http://localhost:5175/signup" className="primary-button">
           Sign Up
-        </Link>
+        </a>
       </div>
       <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full border border-line md:hidden">
         <Menu className="h-5 w-5" />

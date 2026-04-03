@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import Login from './pages/Login';
+import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import AddProduct from './pages/AddProduct';
@@ -11,43 +10,72 @@ import Rentals from './pages/Rentals';
 import ReleaseReturn from './pages/ReleaseReturn';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
+import { isDemoRole, startDemoSession } from './utils/demoAuth';
+
+const buildAppUrl = (port: number, path: string) =>
+  `${window.location.protocol}//${window.location.hostname}:${port}${path}`;
 
 const ProtectedRoute = ({ children, allowManager = false }) => {
+  const location = useLocation();
   const token = localStorage.getItem('cinekit_admin_token');
   const role = localStorage.getItem('cinekit_admin_role');
 
   if (!token) {
-    return <Navigate to="/admin/login" replace />;
+    const next = `${location.pathname}${location.search}`;
+    return <Navigate to={`/auth-redirect?next=${encodeURIComponent(next)}`} replace />;
   }
+  if (!allowManager && role === 'manager') return <Navigate to="/admin/rentals" replace />;
 
-  if (!allowManager && role === 'manager') {
-    return <Navigate to="/admin/rentals" replace />;
-  }
-
-  return children;
+  return <>{children}</>;
 };
 
-const adminPathsWithoutChrome = ['/admin/login'];
+const AUTH_PATHS = ['/login', '/auth-redirect'];
+
+const AuthRedirect = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    const role = params.get('role');
+    const next = params.get('next');
+
+    if (token && isDemoRole(role)) {
+      localStorage.setItem('cinekit_admin_token', token);
+      startDemoSession(role);
+      navigate(next && next.startsWith('/admin') ? next : role === 'manager' ? '/admin/rentals' : '/admin', {
+        replace: true,
+      });
+      return;
+    }
+
+    const requestedPath = next && next.startsWith('/admin') ? next : '/admin';
+    const authUrl = buildAppUrl(5175, `/login?next=${encodeURIComponent(requestedPath)}`);
+    window.location.replace(authUrl);
+  }, [location.search, navigate]);
+
+  return <div className="admin-shell py-10 text-sm text-muted">Redirecting to login...</div>;
+};
 
 function App() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const hideChrome = useMemo(
-    () => adminPathsWithoutChrome.includes(location.pathname),
-    [location.pathname],
-  );
+  const isAuthPage = AUTH_PATHS.includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-page text-ink">
-      {hideChrome ? null : (
+      {!isAuthPage && (
         <>
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
         </>
       )}
-      <main className={hideChrome ? '' : 'lg:pl-72'}>
+      <main className={isAuthPage ? '' : 'lg:pl-72'}>
         <Routes>
-          <Route path="/admin/login" element={<Login />} />
+          <Route path="/login" element={<AuthRedirect />} />
+          <Route path="/auth-redirect" element={<AuthRedirect />} />
+
           <Route
             path="/admin"
             element={
@@ -112,7 +140,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/admin/login" replace />} />
+          {/* Redirect root and unknown paths to admin dashboard (which triggers ProtectedRoute) */}
+          <Route path="/" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </main>
     </div>

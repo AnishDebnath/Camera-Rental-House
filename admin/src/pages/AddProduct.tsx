@@ -1,29 +1,50 @@
 import { ImagePlus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PrintLabel from '../components/PrintLabel';
 
 const categories = ['Cameras', 'Lenses', 'Lights', 'Audio', 'Tripods', 'Drones', 'Accessories'];
+
+type ProductForm = {
+  name: string;
+  category: string;
+  description: string;
+  pricePerDay: string;
+  quantity: string;
+};
+
+type CreatedProduct = {
+  name: string;
+  unique_code: string;
+  qr_base64: string;
+};
 
 const initialForm = {
   name: '',
   category: 'Cameras',
   description: '',
   pricePerDay: '',
-  quantity: 1,
-};
+  quantity: '1',
+} satisfies ProductForm;
+
+const productFields = [
+  { key: 'name', label: 'Product Name' },
+  { key: 'description', label: 'Description' },
+  { key: 'pricePerDay', label: 'Price Per Day' },
+  { key: 'quantity', label: 'Quantity' },
+] as const;
 
 const AddProduct = () => {
-  const [form, setForm] = useState(initialForm);
-  const [previews, setPreviews] = useState([]);
-  const [createdProduct, setCreatedProduct] = useState(null);
+  const [form, setForm] = useState<ProductForm>(initialForm);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [createdProduct, setCreatedProduct] = useState<CreatedProduct | null>(null);
 
-  const handleImages = (files) => {
+  const handleImages = (files: FileList | null) => {
     const nextPreviews = Array.from(files || []).map((file) => URL.createObjectURL(file));
     setPreviews(nextPreviews);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCreatedProduct({
       name: form.name || 'New Product',
@@ -83,12 +104,7 @@ const AddProduct = () => {
           </div>
         ) : null}
 
-        {[
-          ['name', 'Product Name'],
-          ['description', 'Description'],
-          ['pricePerDay', 'Price Per Day'],
-          ['quantity', 'Quantity'],
-        ].map(([key, label]) => (
+        {productFields.map(({ key, label }) => (
           <label key={key} className="space-y-2">
             <span className="text-sm font-medium text-ink">{label}</span>
             <div className="input-shell">

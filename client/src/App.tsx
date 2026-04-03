@@ -28,8 +28,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/account" element={<Account />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<meta httpEquiv="refresh" content="0; url=http://localhost:5175/login" />} />
+          <Route path="/signup" element={<meta httpEquiv="refresh" content="0; url=http://localhost:5175/signup" />} />
         </Routes>
       </main>
       {!authPage ? <BottomNav /> : null}

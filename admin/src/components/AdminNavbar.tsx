@@ -1,9 +1,10 @@
 import { Camera, LogOut, Menu } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { clearDemoSession, getDemoRole } from '../utils/demoAuth';
 
+const buildAppUrl = (port: number, path: string) =>
+  `${window.location.protocol}//${window.location.hostname}:${port}${path}`;
+
 const AdminNavbar = ({ onOpenSidebar }) => {
-  const navigate = useNavigate();
   const role = getDemoRole();
   const isManager = role === 'manager';
 
@@ -49,7 +50,7 @@ const AdminNavbar = ({ onOpenSidebar }) => {
           type="button"
           onClick={() => {
             clearDemoSession();
-            navigate('/admin/login');
+            window.location.replace(buildAppUrl(5175, '/login'));
           }}
           className={isManager ? 'pill-button border border-amber-200 bg-white text-amber-700' : 'secondary-button'}
         >
