@@ -3,14 +3,10 @@
   "framework": "vite",
   "installCommand": "npm install",
   "buildCommand": "npm run build:vercel",
-  "outputDirectory": "client/dist",
+  "outputDirectory": "apps/client/dist",
   "routes": [
     {
       "handle": "filesystem"
-    },
-    {
-      "src": "/auth(?:/.*)?",
-      "dest": "/auth/index.html"
     },
     {
       "src": "/admin(?:/.*)?",

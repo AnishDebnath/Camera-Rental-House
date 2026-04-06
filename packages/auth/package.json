@@ -1,0 +1,15 @@
+{
+  "name": "@cinekit/auth",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./appUrls": "./appUrls.ts",
+    "./guards": "./guards.ts",
+    "./permissions": "./permissions.ts",
+    "./roles": "./roles.ts",
+    "./tokens": "./tokens.ts",
+    "./useAuth": "./useAuth.ts"
+  }
+}

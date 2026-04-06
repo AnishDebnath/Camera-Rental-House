@@ -1,0 +1,11 @@
+{
+  "name": "@cinekit/types",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./api.types": "./api.types.ts",
+    "./user.types": "./user.types.ts"
+  }
+}
