@@ -4,7 +4,7 @@ import { useCart } from '../store/CartContext';
 
 const tabs = [
   { label: 'Home', href: '/', Icon: House },
-  { label: 'Browse', href: '/browse', Icon: Grid2x2 },
+  { label: 'Category', href: '/category', Icon: Grid2x2 },
   { label: 'Favourites', href: '/favourites', Icon: Heart },
   { label: 'Cart', href: '/cart', Icon: ShoppingBag },
   { label: 'Account', href: '/account', Icon: UserRound },

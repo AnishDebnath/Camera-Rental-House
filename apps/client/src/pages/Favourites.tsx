@@ -21,8 +21,8 @@ const Favourites = () => {
         <EmptyState
           title="No favourites yet"
           message="Save your go-to camera bodies, lenses, and accessories for faster checkouts."
-          actionLabel="Browse Gear"
-          actionTo="/browse"
+          actionLabel="Explore Category"
+          actionTo="/category"
           icon={<Heart className="h-8 w-8" />}
         />
       )}

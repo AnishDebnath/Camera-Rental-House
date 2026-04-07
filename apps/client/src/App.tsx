@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import ToastViewport from './components/Toast';
 import Landing from './pages/Landing';
-import Browse from './pages/Browse';
+import Category from './pages/Category';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -36,7 +36,7 @@ function App() {
       <main className={authPage ? '' : 'pb-24 pt-20 md:pb-8 md:pt-24'}>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/browse" element={<Browse />} />
+          <Route path="/category" element={<Category />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />

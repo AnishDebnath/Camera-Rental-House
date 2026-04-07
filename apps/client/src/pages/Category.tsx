@@ -11,14 +11,36 @@ import { categories, mockProducts } from '../data/mockProducts';
 import useDebounce from '../hooks/useDebounce';
 import usePullToRefresh from '../hooks/usePullToRefresh';
 
-const Browse = () => {
+const Category = () => {
   const [params, setParams] = useSearchParams();
-  const [search, setSearch] = useState('');
+  const initialSearch = params.get('q') || '';
+  const [search, setSearch] = useState(initialSearch);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [itemsToShow, setItemsToShow] = useState(8);
   const activeCategory = params.get('category') || 'All';
   const debouncedSearch = useDebounce(search, 250);
+
+  // Sync state with URL params
+  useEffect(() => {
+    const q = params.get('q');
+    if (q !== null && q !== search) {
+      setSearch(q);
+    }
+  }, [params]);
+
+  // Sync URL params with state
+  useEffect(() => {
+    const nextParams = new URLSearchParams(params);
+    if (debouncedSearch) {
+      nextParams.set('q', debouncedSearch);
+    } else {
+      nextParams.delete('q');
+    }
+    if (nextParams.toString() !== params.toString()) {
+      setParams(nextParams, { replace: true });
+    }
+  }, [debouncedSearch]);
 
   const refresh = async () => {
     setLoading(true);
@@ -55,7 +77,7 @@ const Browse = () => {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-ink">Browse Gear</h1>
+            <h1 className="text-2xl font-bold text-ink">Category Gear</h1>
             <p className="text-sm text-muted">Curated inventory for production days.</p>
           </div>
           <p className="rounded-pill bg-primary-light px-4 py-2 text-xs font-semibold text-primary-dark">
@@ -85,7 +107,7 @@ const Browse = () => {
             title="No gear found"
             message="Try a different search or clear your filters to see more equipment."
             actionLabel="Clear Filters"
-            actionTo="/browse"
+            actionTo="/category"
             icon={<SearchX className="h-8 w-8" />}
           />
         )}
@@ -117,4 +139,4 @@ const Browse = () => {
   );
 };
 
-export default Browse;
+export default Category;

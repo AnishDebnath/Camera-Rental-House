@@ -39,8 +39,8 @@ const Cart = () => {
         <EmptyState
           title="Your rent cart is empty"
           message="Start with cameras, lenses, and production accessories tailored for your next shoot."
-          actionLabel="Browse Gear"
-          actionTo="/browse"
+          actionLabel="Explore Category"
+          actionTo="/category"
           icon={<ShoppingBag className="h-8 w-8" />}
         />
       )}
@@ -59,7 +59,7 @@ const Cart = () => {
         </div>
       ) : (
         <div className="text-center text-sm text-muted">
-          <Link to="/browse" className="font-semibold text-primary">Continue browsing</Link>
+          <Link to="/category" className="font-semibold text-primary">Continue Shopping</Link>
         </div>
       )}
     </div>

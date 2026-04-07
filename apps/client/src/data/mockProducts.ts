@@ -5,7 +5,7 @@ export const heroSlides = [
     id: 's1',
     title: 'Cinema-ready gear for fast shoots',
     copy: 'Mobile-first rental flow for camera bodies, lenses, lights, audio, and support.',
-    cta: 'Browse Gear',
+    cta: 'Explore Category',
     image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80',
   },
   {

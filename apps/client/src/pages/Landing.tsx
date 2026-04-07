@@ -51,7 +51,7 @@ const Landing = () => {
             <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => navigate('/browse')}
+                onClick={() => navigate('/category')}
                 className="primary-button w-fit"
               >
                 {heroSlides[activeSlide].cta}
@@ -82,7 +82,7 @@ const Landing = () => {
             <p className="text-sm text-muted">Fast-moving kits ready for pickup.</p>
           </div>
           <Link
-            to="/browse"
+            to="/category"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary"
           >
             See All
@@ -99,7 +99,7 @@ const Landing = () => {
       <section className="app-shell space-y-4">
         <div>
           <h2 className="text-xl font-semibold text-ink md:text-2xl">
-            Browse by category
+            Explore Categories
           </h2>
           <p className="text-sm text-muted">
             Tap a lane and jump straight into matching gear.
@@ -109,7 +109,7 @@ const Landing = () => {
           categories={categories}
           activeCategory="All"
           onSelect={(category) =>
-            navigate(category === 'All' ? '/browse' : `/browse?category=${category}`)
+            navigate(category === 'All' ? '/category' : `/category?category=${category}`)
           }
         />
       </section>
