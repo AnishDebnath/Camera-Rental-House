@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { homeCategoriesList } from '../../data/uiConfig';
+import { CategoriesList } from '../../data/categories';
 import { LayoutGrid } from 'lucide-react';
 
 const CategorySelection = () => {
@@ -10,7 +10,7 @@ const CategorySelection = () => {
       </div>
 
       <div className="grid grid-cols-3 gap-3 sm:gap-4 md:grid-cols-6 lg:gap-5">
-        {homeCategoriesList.map((item) => {
+        {CategoriesList.map((item) => {
           return (
             <Link
               key={item.category}

@@ -7,7 +7,8 @@ import SkeletonCard from '../components/SkeletonCard';
 import CategoryChips from '../components/CategoryChips';
 import SearchBar from '../components/SearchBar';
 import EmptyState from '../components/EmptyState';
-import { categories, mockProducts } from '../data/mockProducts';
+import { mockProducts } from '../data/mockProducts';
+import { Categories as categories } from '../data/categories';
 import useDebounce from '../hooks/useDebounce';
 import usePullToRefresh from '../hooks/usePullToRefresh';
 

@@ -1,7 +1,3 @@
-// Easy to edit UI Configuration for the Home Page
-// You can replace these image strings with actual imports if you move images into src/assets:
-// e.g. import cameraImg from '../assets/camera.png'; -> image: cameraImg
-
 export const homeHeroBanner = [
   {
     id: 'slide-1',
@@ -23,33 +19,5 @@ export const homeHeroBanner = [
     copy: 'Designed for professional rental houses that need clarity, speed, and confidence.',
     cta: 'Start Renting',
     image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1400&q=80',
-  },
-];
-
-export const homeCategoriesList = [
-  {
-    category: 'Cameras',
-    image: 'src/assets/categories/camera.png', // The custom image you just added!
-    path: '/category?category=Cameras',
-  },
-  {
-    category: 'Lenses',
-    image: 'src/assets/categories/lense.png',
-    path: '/category?category=Lenses',
-  },
-  {
-    category: 'Lights',
-    image: 'src/assets/categories/light.png',
-    path: '/category?category=Lights',
-  },
-  {
-    category: 'Audio',
-    image: 'src/assets/categories/mic.png',
-    path: '/category?category=Audio',
-  },
-  {
-    category: 'Tripods',
-    image: 'src/assets/categories/tripod.png',
-    path: '/category?category=Tripods',
   },
 ];
