@@ -21,9 +21,9 @@ const FeaturedGear = () => {
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>
-      <div className="hide-scrollbar flex gap-3 overflow-x-auto pb-2">
-        {mockProducts.slice(0, 5).map((product) => (
-          <ProductCard key={product.id} product={product} compact />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+        {mockProducts.slice(0, 8).map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>
