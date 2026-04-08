@@ -2,9 +2,9 @@ import { useState, useEffect, Fragment } from 'react';
 import { Camera, Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Popover, Transition } from '@headlessui/react';
-import { useAuth } from '../store/AuthContext';
-import { useCart } from '../store/CartContext';
-import { useFavourites } from '../store/FavouritesContext';
+import { useAuth } from '../../../store/AuthContext';
+import { useCart } from '../../../store/CartContext';
+import { useFavourites } from '../../../store/FavouritesContext';
 import clsx from 'clsx';
 
 const Navbar = () => {

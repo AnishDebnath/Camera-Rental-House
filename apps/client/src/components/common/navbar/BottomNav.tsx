@@ -1,12 +1,12 @@
 import { Grid2x2, Heart, House, ShoppingBag, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useCart } from '../store/CartContext';
+import { useCart } from '../../../store/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const tabs = [
   { label: 'Home', href: '/', Icon: House },
   { label: 'Explore', href: '/category', Icon: Grid2x2 },
-  { label: 'Favs', href: '/favourites', Icon: Heart },
+  { label: 'Favourite', href: '/favourites', Icon: Heart },
   { label: 'Cart', href: '/cart', Icon: ShoppingBag },
   { label: 'Account', href: '/account', Icon: UserRound },
 ];

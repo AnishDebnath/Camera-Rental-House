@@ -2,10 +2,10 @@ import { type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Login from './auth/Login';
 import Signup from './auth/Signup';
-import Navbar from './components/Navbar';
-import BottomNav from './components/BottomNav';
+import Navbar from './components/common/navbar/Navbar';
+import BottomNav from './components/common/navbar/BottomNav';
 import ToastViewport from './components/Toast';
-import Landing from './pages/Landing';
+import Home from './pages/home';
 import Category from './pages/Category';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
@@ -43,7 +43,7 @@ function App() {
       {!authPage ? <Navbar /> : null}
       <main className={authPage ? '' : 'pb-32 pt-20 md:pb-8 md:pt-24'}>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Home />} />
           <Route path="/category" element={<Category />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
