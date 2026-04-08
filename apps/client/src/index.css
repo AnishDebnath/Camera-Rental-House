@@ -8,10 +8,16 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: scroll !important;
 }
 
 body {
-  @apply bg-page font-sans text-ink antialiased;
+  @apply font-sans text-ink antialiased bg-page selection:bg-primary/20 selection:text-primary-dark;
+  padding-right: 0 !important;
+  margin: 0;
+  width: 100% !important;
+  overflow-x: hidden;
 }
 
 * {

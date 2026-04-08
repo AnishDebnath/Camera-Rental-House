@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Camera, Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu as HeadlessMenu, Transition } from '@headlessui/react';
+import { Popover, Transition } from '@headlessui/react';
 import { useAuth } from '../store/AuthContext';
 import { useCart } from '../store/CartContext';
 import { useFavourites } from '../store/FavouritesContext';
@@ -39,7 +39,7 @@ const Navbar = () => {
           setPlaceholderText(currentPhrase.slice(0, placeholderText.length + 1));
         }, 100);
       } else {
-        timeout = setTimeout(() => setIsTyping(false), 2000); // Wait at end
+        timeout = setTimeout(() => setIsTyping(false), 2000);
       }
     } else {
       if (placeholderText.length > 0) {
@@ -73,21 +73,27 @@ const Navbar = () => {
   return (
     <header
       className={clsx(
-        'fixed inset-x-0 top-0 z-50 transition-all duration-300',
+        'fixed inset-x-0 top-0 z-50 transition-all duration-500',
         isScrolled
-          ? 'border-b border-line/40 bg-white/80 py-3 backdrop-blur-xl shadow-sm'
+          ? 'bg-white/30 backdrop-blur-[40px] py-3 border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)]'
           : 'bg-transparent py-5'
       )}
     >
-      <div className="app-shell flex items-center justify-between gap-4 md:gap-8">
+      {/* Liquid Glass Highlight Overlay (shows only when scrolled) */}
+      <div className={clsx(
+        'absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none transition-opacity duration-500',
+        isScrolled ? 'opacity-100' : 'opacity-0'
+      )} />
+
+      <div className="relative app-shell flex items-center justify-between gap-4 md:gap-8 z-10">
         {/* Left: Logo Section - Refined for professional weight */}
         <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover text-white shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
             <Camera className="h-4.5 w-4.5" />
           </div>
           <div className="flex flex-col">
             <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">CineKit</p>
-            <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80 mt-1">Pro Rentals</p>
+            <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80">Pro Rentals</p>
           </div>
         </Link>
 
@@ -104,11 +110,11 @@ const Navbar = () => {
             placeholder={placeholderText}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-14 rounded-2xl border border-line/60 bg-page/40 backdrop-blur-sm text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-4 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
+            className="w-full h-12 pl-12 pr-14 rounded-2xl border border-white/60 bg-white/40 ring-1 ring-black/[0.03] backdrop-blur-md text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-4 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
           />
           <Link
             to="/category"
-            className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-white/40"
             title="View Categories"
           >
             <LayoutGrid className="h-4 w-4" />
@@ -121,7 +127,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={() => navigate('/category')}
-            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full hover:bg-page transition-colors"
+            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/60 hover:bg-white/60 transition-colors"
           >
             <Search className="h-5 w-5 text-ink" />
           </button>
@@ -129,7 +135,7 @@ const Navbar = () => {
           {/* Favourites & Cart Icons (xl+ only) */}
           <Link
             to="/favourites"
-            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-page transition-colors"
+            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
           >
             <Heart className="h-5 w-5 text-ink group-hover:text-primary transition-colors" />
             {favourites.length > 0 && (
@@ -141,7 +147,7 @@ const Navbar = () => {
 
           <Link
             to="/cart"
-            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-page transition-colors"
+            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
           >
             <ShoppingBag className="h-5 w-5 text-ink group-hover:text-primary transition-colors" />
             {items.length > 0 && (
@@ -153,18 +159,19 @@ const Navbar = () => {
 
           {/* User Profile / Auth */}
           {isAuthenticated ? (
-            <HeadlessMenu as="div" className="relative">
-              <HeadlessMenu.Button className="flex items-center gap-2.5 rounded-full p-1 pr-3 border border-line/40 hover:bg-page hover:border-line transition-all duration-200 focus:outline-none">
+            <Popover className="relative">
+              <Popover.Button className="flex items-center gap-2.5 rounded-full p-1 pr-3 border border-white/60 bg-white/40 backdrop-blur-md hover:bg-white/60 transition-all duration-200 focus:outline-none">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-primary-hover text-white font-bold text-sm shrink-0">
                   {user?.fullName?.[0] || 'U'}
                 </div>
                 <span className="text-sm font-semibold text-ink max-w-[80px] sm:max-w-[150px] lg:max-w-[200px] truncate">
-                  Hey, <span className="text-primary">{user?.fullName}</span>
+                  <span className="opacity-60 font-medium">Hey, </span>{user?.fullName}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted shrink-0" />
-              </HeadlessMenu.Button>
+              </Popover.Button>
 
               <Transition
+                as={Fragment}
                 enter="transition duration-100 ease-out"
                 enterFrom="transform scale-95 opacity-0"
                 enterTo="transform scale-100 opacity-100"
@@ -172,50 +179,38 @@ const Navbar = () => {
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <HeadlessMenu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-line rounded-2xl bg-white p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
+                <Popover.Panel className="absolute right-0 mt-2 w-56 origin-top-right z-50 divide-y divide-line rounded-2xl bg-white/95 backdrop-blur-xl p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
                   <div className="px-3 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted">Signed in as</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
                     <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>
                   </div>
-                  <div className="py-2">
-                    <HeadlessMenu.Item>
-                      {({ active }) => (
-                        <Link to="/account" className={clsx('group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors', active ? 'bg-primary-light text-primary' : 'text-ink/80 hover:text-primary')}>
-                          <User className="h-4 w-4" /> My Profile
-                        </Link>
-                      )}
-                    </HeadlessMenu.Item>
-                    <HeadlessMenu.Item>
-                      {({ active }) => (
-                        <Link to="/account?tab=rentals" className={clsx('group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors', active ? 'bg-primary-light text-primary' : 'text-ink/80 hover:text-primary')}>
-                          <Package className="h-4 w-4" /> My Rentals
-                        </Link>
-                      )}
-                    </HeadlessMenu.Item>
+                  <div className="py-2 text-ink/80">
+                    <Link to="/account" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                      <User className="h-4 w-4" /> My Profile
+                    </Link>
+                    <Link to="/account?tab=rentals" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                      <Package className="h-4 w-4" /> My Rentals
+                    </Link>
                   </div>
                   <div className="py-2">
-                    <HeadlessMenu.Item>
-                      {({ active }) => (
-                        <button onClick={logout} className={clsx('group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors', active ? 'bg-danger/10' : 'hover:bg-danger/5')}>
-                          <LogOut className="h-4 w-4" /> Log out
-                        </button>
-                      )}
-                    </HeadlessMenu.Item>
+                    <button onClick={logout} className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger/5">
+                      <LogOut className="h-4 w-4" /> Log out
+                    </button>
                   </div>
-                </HeadlessMenu.Items>
+                </Popover.Panel>
               </Transition>
-            </HeadlessMenu>
+            </Popover>
           ) : (
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="secondary-button !h-10 min-w-[70px] sm:min-w-[90px] !px-4 !text-sm flex items-center justify-center !rounded-full"
+                className="secondary-button !h-10 min-w-[70px] sm:min-w-[90px] !px-4 !text-sm flex items-center justify-center !rounded-full border border-white/60 bg-white/40"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="primary-button !h-10 min-w-[70px] sm:min-w-[90px] !px-4 !text-sm flex items-center justify-center !rounded-full"
+                className="primary-button !h-10 min-w-[70px] sm:min-w-[90px] !px-4 !text-sm flex items-center justify-center !rounded-full shadow-lg shadow-primary/20"
               >
                 Join
               </Link>

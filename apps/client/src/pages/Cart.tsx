@@ -9,7 +9,7 @@ const Cart = () => {
   const { items, subtotal, removeFromCart } = useCart();
 
   return (
-    <div className="page-animate app-shell space-y-6 pb-32">
+    <div className="page-animate app-shell space-y-6 pb-44">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ink">My Rent Cart</h1>
@@ -46,7 +46,7 @@ const Cart = () => {
       )}
 
       {items.length ? (
-        <div className="fixed inset-x-0 bottom-20 border-t border-line bg-white/95 px-4 py-4 backdrop-blur md:bottom-0 md:px-8">
+        <div className="fixed inset-x-0 bottom-24 border-t border-line bg-white/95 px-4 py-4 backdrop-blur md:bottom-0 md:px-8">
           <div className="mx-auto flex max-w-4xl items-center gap-4">
             <div className="min-w-28">
               <p className="text-xs text-tertiary">Subtotal</p>

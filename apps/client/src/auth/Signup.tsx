@@ -75,7 +75,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-page px-4 py-6">
+    <div className="min-h-screen px-4 py-6">
       <div className="mx-auto max-w-2xl space-y-6">
         <header className="flex items-center justify-between">
           <button type="button" onClick={() => (step ? setStep((current) => current - 1) : navigate(-1))} className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white">
