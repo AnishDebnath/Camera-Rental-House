@@ -44,3 +44,49 @@ export const CategoriesList = [
     path: '/category?category=Tripods',
   },
 ];
+
+
+import CanonImg from '../assets/brands/canon.png';
+import SonyImg from '../assets/brands/sony.png';
+import LeicaImg from '../assets/brands/leica.png';
+import NikonImg from '../assets/brands/nikon.png';
+import ZeissImg from '../assets/brands/zeiss.png';
+
+// Core application categories for UI chips and navigation filters
+export const Brands = [
+  'All',
+  'Canon',
+  'Sony',
+  'Leica',
+  'Nikon',
+  'Zeiss'
+];
+
+// Visual mapped categories for the Home Page and marketing sections
+export const BrandsList = [
+  {
+    category: 'Canon',
+    image: CanonImg,
+    path: '/category?category=Canon',
+  },
+  {
+    category: 'Sony',
+    image: SonyImg,
+    path: '/category?category=Sony',
+  },
+  {
+    category: 'Leica',
+    image: LeicaImg,
+    path: '/category?category=Leica',
+  },
+  {
+    category: 'Nikon',
+    image: NikonImg,
+    path: '/category?category=Nikon',
+  },
+  {
+    category: 'Zeiss',
+    image: ZeissImg,
+    path: '/category?category=Zeiss',
+  },
+];

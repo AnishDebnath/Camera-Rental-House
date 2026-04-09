@@ -1,6 +1,7 @@
 import Hero from './Hero';
 import FeaturedGear from './FeaturedGear';
 import CategorySelection from './CategorySelection';
+import BrandSelection from './BrandSelection';
 import Footer from '../../components/common/footer/Footer';
 
 const Home = () => {
@@ -9,6 +10,7 @@ const Home = () => {
       <Hero />
       <CategorySelection />
       <FeaturedGear />
+      <BrandSelection />
       <Footer />
     </div>
   );
