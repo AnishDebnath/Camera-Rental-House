@@ -8,7 +8,7 @@ const Testimonials = () => {
   const duplicatedReviews = [...reviews, ...reviews, ...reviews];
 
   return (
-    <section className="space-y-6 pb-12 overflow-hidden">
+    <section className="space-y-6 pb-6 overflow-hidden">
       <div className="app-shell flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-ink md:text-2xl pl-5">Reviews</h2>

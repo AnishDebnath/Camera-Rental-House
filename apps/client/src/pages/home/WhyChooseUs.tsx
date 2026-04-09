@@ -29,7 +29,7 @@ const reasons = [
 
 const WhyChooseUs = () => {
   return (
-    <section className="app-shell  pb-8">
+    <section className="app-shell">
       <div className="flex items-center justify-between pl-4 mb-6">
         <h2 className="text-xl font-bold text-ink md:text-2xl">
           Why Rent From Us
