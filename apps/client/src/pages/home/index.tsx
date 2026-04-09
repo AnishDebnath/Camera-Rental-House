@@ -2,6 +2,7 @@ import Hero from './Hero';
 import FeaturedGear from './FeaturedGear';
 import CategorySelection from './CategorySelection';
 import BrandSelection from './BrandSelection';
+import WhyChooseUs from './WhyChooseUs';
 import Testimonials from './Testimonials';
 import Footer from '../../components/common/footer/Footer';
 
@@ -12,6 +13,7 @@ const Home = () => {
       <CategorySelection />
       <FeaturedGear />
       <BrandSelection />
+      <WhyChooseUs />
       <Testimonials />
       <Footer />
     </div>
