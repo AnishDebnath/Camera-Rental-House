@@ -1,3 +1,9 @@
+import CameraImg from '../assets/categories/camera.png';
+import LenseImg from '../assets/categories/lense.png';
+import LightImg from '../assets/categories/light.png';
+import AudioImg from '../assets/categories/mic.png';
+import TripodImg from '../assets/categories/tripod.png';
+
 // Core application categories for UI chips and navigation filters
 export const Categories = [
   'All',
@@ -14,27 +20,27 @@ export const Categories = [
 export const CategoriesList = [
   {
     category: 'Cameras',
-    image: 'src/assets/categories/camera.png',
+    image: CameraImg,
     path: '/category?category=Cameras',
   },
   {
     category: 'Lenses',
-    image: 'src/assets/categories/lense.png',
+    image: LenseImg,
     path: '/category?category=Lenses',
   },
   {
     category: 'Lights',
-    image: 'src/assets/categories/light.png',
+    image: LightImg,
     path: '/category?category=Lights',
   },
   {
     category: 'Audio',
-    image: 'src/assets/categories/mic.png',
+    image: AudioImg,
     path: '/category?category=Audio',
   },
   {
     category: 'Tripods',
-    image: 'src/assets/categories/tripod.png',
+    image: TripodImg,
     path: '/category?category=Tripods',
   },
 ];
