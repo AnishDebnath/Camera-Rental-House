@@ -7,9 +7,30 @@
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden;
   overflow-y: scroll !important;
+  scroll-behavior: initial !important;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 body {
@@ -18,6 +39,7 @@ body {
   margin: 0;
   width: 100% !important;
   overflow-x: hidden;
+  position: relative;
 }
 
 * {

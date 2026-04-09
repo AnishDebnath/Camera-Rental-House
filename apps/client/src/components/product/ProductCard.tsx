@@ -4,6 +4,8 @@ import { useCart } from '../../store/CartContext';
 import { useFavourites } from '../../store/FavouritesContext';
 import formatCurrency from '../../utils/formatCurrency';
 
+import LazyImage from '../feature/LazyImage';
+
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -16,11 +18,11 @@ const ProductCard = ({ product }) => {
       <div className="p-2.5 pb-0">
         <div className="relative aspect-[5/4] overflow-hidden rounded-[18px] bg-slate-50 border border-slate-100 shadow-inner">
           <Link to={`/product/${product.id}`} className="absolute inset-0 z-0">
-            <img
+            <LazyImage
               src={product.images[0]?.image_url}
               alt={product.name}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              aspectRatio="aspect-auto h-full w-full"
+              className="transition-transform duration-700 ease-out group-hover:scale-105"
             />
           </Link>
 

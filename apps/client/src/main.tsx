@@ -8,6 +8,8 @@ import { AuthProvider } from './store/AuthContext';
 import { CartProvider } from './store/CartContext';
 import { FavouritesProvider } from './store/FavouritesContext';
 
+import SmoothScroll from './components/feature/SmoothScroll';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -15,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <AuthProvider>
           <FavouritesProvider>
             <CartProvider>
-              <App />
+              <SmoothScroll>
+                <App />
+              </SmoothScroll>
             </CartProvider>
           </FavouritesProvider>
         </AuthProvider>

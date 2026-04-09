@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { homeHeroBanner as heroSlides } from '../../data/uiConfig';
+import { homeHeroBanner as heroSlides } from '../../data/herobanner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Hero = () => {

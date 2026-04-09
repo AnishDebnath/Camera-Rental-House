@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import Login from './auth/Login';
 import Signup from './auth/Signup';
 import Navbar from './components/common/navbar/Navbar';
@@ -13,6 +14,7 @@ import Checkout from './pages/Checkout';
 import Favourites from './pages/Favourites';
 import Account from './pages/Account';
 import { useAuth } from './store/AuthContext';
+import PageTransition from './components/feature/PageTransition';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -42,17 +44,19 @@ function App() {
       </div>
       {!authPage ? <Navbar /> : null}
       <main className={authPage ? '' : 'pb-32 pt-20 md:pb-8 md:pt-24'}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-          <Route path="/favourites" element={<Favourites />} />
-          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+            <Route path="/category" element={<PageTransition><Category /></PageTransition>} />
+            <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+            <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+            <Route path="/checkout" element={<ProtectedRoute><PageTransition><Checkout /></PageTransition></ProtectedRoute>} />
+            <Route path="/favourites" element={<PageTransition><Favourites /></PageTransition>} />
+            <Route path="/account" element={<ProtectedRoute><PageTransition><Account /></PageTransition></ProtectedRoute>} />
+            <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+            <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
       </main>
       {!authPage ? <BottomNav /> : null}
       <ToastViewport />

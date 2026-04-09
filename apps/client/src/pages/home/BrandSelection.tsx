@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { BrandsList } from '../../data/categories';
 import { LayoutGrid } from 'lucide-react';
 
+import LazyImage from '../../components/feature/LazyImage';
+
 const BrandSelection = () => {
   return (
     <section className="app-shell space-y-5">
@@ -17,10 +19,11 @@ const BrandSelection = () => {
               to={item.path}
               className="group flex flex-col items-center justify-center rounded-[24px] bg-white/60 backdrop-blur-xl aspect-square shadow-[0_4px_16px_rgba(0,0,0,0.02)] border border-white/60 transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(31,56,82,0.08)] hover:-translate-y-1 active:scale-95"
             >
-              <img
+              <LazyImage
                 src={item.image}
                 alt={item.category}
-                className="h-12 w-12 sm:h-14 sm:w-14 object-contain mb-3 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm"
+                aspectRatio="h-12 w-12 sm:h-14 sm:w-14"
+                className="object-contain mb-3 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm"
               />
               <span className="text-xs sm:text-sm font-bold text-slate-800 text-center tracking-tight transition-colors group-hover:text-primary">
                 {item.category}
