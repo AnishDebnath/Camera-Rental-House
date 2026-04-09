@@ -1,7 +1,7 @@
 export const mockProducts = [
   {
     id: '1',
-    name: 'Sony FX3 Cinema Camera',
+    name: 'Canon EOS 6D 20.1 MP CMOS Digital SLR Camera',
     category: 'Cameras',
     price_per_day: 4200,
     available_quantity: 2,

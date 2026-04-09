@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ProductCard from '../../components/ProductCard';
+import ProductCard from '../../components/product/ProductCard';
 import { mockProducts } from '../../data/mockProducts';
 
 const FeaturedGear = () => {
@@ -11,7 +11,7 @@ const FeaturedGear = () => {
           <h2 className="text-xl font-semibold text-ink md:text-2xl">
             Available Now
           </h2>
-          <p className="text-sm text-muted">Fast-moving kits ready for pickup.</p>
+          {/* <p className="text-sm text-muted">Fast-moving kits ready for pickup.</p> */}
         </div>
         <Link
           to="/category"

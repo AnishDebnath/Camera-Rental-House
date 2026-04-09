@@ -1,8 +1,8 @@
 import { Heart, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../store/CartContext';
-import { useFavourites } from '../store/FavouritesContext';
-import formatCurrency from '../utils/formatCurrency';
+import { useCart } from '../../store/CartContext';
+import { useFavourites } from '../../store/FavouritesContext';
+import formatCurrency from '../../utils/formatCurrency';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -45,7 +45,7 @@ const ProductCard = ({ product }) => {
             {product.category}
           </p>
           <Link to={`/product/${product.id}`} className="block">
-            <h3 className="line-clamp-2 text-xs font-bold leading-tight text-slate-800 md:text-sm transition-colors group-hover:text-primary">
+            <h3 className="line-clamp-2 h-[2.5em] text-xs font-bold leading-tight text-slate-800 md:text-sm transition-colors group-hover:text-primary">
               {product.name}
             </h3>
           </Link>
@@ -70,8 +70,8 @@ const ProductCard = ({ product }) => {
             }}
             className="flex h-9 w-full items-center justify-center gap-2 rounded-[12px] bg-slate-900 border border-slate-800 px-3 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-primary hover:border-primary hover:shadow-[0_4px_12px_rgba(255,107,0,0.2)] active:scale-95"
           >
-            <span>Add to Rent</span>
             <ShoppingBag className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <span>Add to Rent</span>
           </button>
         </div>
       </div>

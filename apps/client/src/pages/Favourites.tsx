@@ -1,6 +1,6 @@
 import { Heart } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 import { useFavourites } from '../store/FavouritesContext';
 
 const Favourites = () => {
