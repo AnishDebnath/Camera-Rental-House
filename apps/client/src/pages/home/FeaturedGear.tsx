@@ -6,9 +6,9 @@ import { mockProducts } from '../../data/mockProducts';
 const FeaturedGear = () => {
   return (
     <section className="app-shell space-y-4">
-      <div className="flex items-center justify-between pl-4">
+      <div className="flex items-center justify-between px-4">
         <div>
-          <h2 className="text-xl font-semibold text-ink md:text-2xl">
+          <h2 className="text-xl font-bold text-ink md:text-2xl">
             Available Now
           </h2>
           {/* <p className="text-sm text-muted">Fast-moving kits ready for pickup.</p> */}

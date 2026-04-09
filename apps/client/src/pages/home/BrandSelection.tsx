@@ -7,7 +7,7 @@ import LazyImage from '../../components/feature/LazyImage';
 const BrandSelection = () => {
   return (
     <section className="app-shell space-y-5">
-      <div className="flex items-center justify-between pl-4">
+      <div className="flex items-center justify-between px-4">
         <h2 className="text-xl font-bold text-ink md:text-2xl">More Brands</h2>
       </div>
 
