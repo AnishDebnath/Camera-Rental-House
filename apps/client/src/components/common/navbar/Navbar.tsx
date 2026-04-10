@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Camera, Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Popover, Transition } from '@headlessui/react';
 import { useAuth } from '../../../store/AuthContext';
 import { useCart } from '../../../store/CartContext';
@@ -9,6 +9,8 @@ import clsx from 'clsx';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isCategoryPage = location.pathname === '/category';
   const { user, isAuthenticated, logout } = useAuth();
   const { items } = useCart();
   const { favourites } = useFavourites();
@@ -98,39 +100,43 @@ const Navbar = () => {
         </Link>
 
         {/* Center: Search Bar (Desktop) with Typing Animation */}
-        <form
-          onSubmit={handleSearch}
-          className="hidden md:flex flex-1 max-w-2xl items-center relative group"
-        >
-          <div className="absolute left-4 z-10">
-            <Search className="h-4.5 w-4.5 text-muted group-focus-within:text-primary transition-colors" />
-          </div>
-          <input
-            type="text"
-            placeholder={placeholderText}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-14 rounded-2xl border border-white/60 bg-white/40 ring-1 ring-black/[0.03] backdrop-blur-md text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-4 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
-          />
-          <Link
-            to="/category"
-            className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-white/40"
-            title="View Categories"
+        {!isCategoryPage && (
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-2xl items-center relative group"
           >
-            <LayoutGrid className="h-4 w-4" />
-          </Link>
-        </form>
+            <div className="absolute left-4 z-10">
+              <Search className="h-4.5 w-4.5 text-muted group-focus-within:text-primary transition-colors" />
+            </div>
+            <input
+              type="text"
+              placeholder={placeholderText}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 pl-12 pr-14 rounded-2xl border border-white/60 bg-white/40 ring-1 ring-black/[0.03] backdrop-blur-md text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-4 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
+            />
+            <Link
+              to="/category"
+              className="absolute right-2 h-8 w-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-white/40"
+              title="View Categories"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Link>
+          </form>
+        )}
 
         {/* Right Section: Balanced icons & account */}
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {/* Mobile Search Button */}
-          <button
-            type="button"
-            onClick={() => navigate('/category')}
-            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/60 hover:bg-white/60 transition-colors"
-          >
-            <Search className="h-5 w-5 text-ink" />
-          </button>
+          {!isCategoryPage && (
+            <button
+              type="button"
+              onClick={() => navigate('/category')}
+              className="flex md:hidden h-10 w-10 items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/60 hover:bg-white/60 transition-colors"
+            >
+              <Search className="h-5 w-5 text-ink" />
+            </button>
+          )}
 
           {/* Favourites & Cart Icons (xl+ only) */}
           <Link
