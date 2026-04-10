@@ -75,7 +75,8 @@ const Navbar = () => {
   return (
     <header
       className={clsx(
-        'fixed inset-x-0 top-0 z-50 transition-all duration-500',
+        isCategoryPage ? 'absolute' : 'fixed',
+        'inset-x-0 top-0 z-50 transition-all duration-500',
         isScrolled
           ? 'bg-white/30 backdrop-blur-[40px] py-3 border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)]'
           : 'bg-transparent py-5'

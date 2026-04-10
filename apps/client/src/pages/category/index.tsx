@@ -53,29 +53,29 @@ const Category = () => {
   const filteredProducts = useMemo(
     () =>
       mockProducts.filter((product) => {
-        const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
+        const matchesFilter = activeCategory === 'All' || product.category === activeCategory || product.name.toLowerCase().includes(activeCategory.toLowerCase());
         const matchesSearch = product.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-        return matchesCategory && matchesSearch;
+        return matchesFilter && matchesSearch;
       }),
     [activeCategory, debouncedSearch],
   );
 
   return (
-    <div className="page-animate app-shell space-y-6">
+    <div className="min-h-screen">
       <CategoryHeader
         pullDistance={pullDistance}
         search={search}
         setSearch={setSearch}
         setShowFilters={setShowFilters}
-        activeCategory={activeCategory}
-        setParams={setParams}
       />
-      <CategoryProducts
-        loading={loading}
-        filteredProducts={filteredProducts}
-        itemsToShow={itemsToShow}
-        setItemsToShow={setItemsToShow}
-      />
+      <div className="app-shell mt-6">
+        <CategoryProducts
+          loading={loading}
+          filteredProducts={filteredProducts}
+          itemsToShow={itemsToShow}
+          setItemsToShow={setItemsToShow}
+        />
+      </div>
       <MobileFilters
         showFilters={showFilters}
         setShowFilters={setShowFilters}
