@@ -26,7 +26,7 @@ const Footer = () => {
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">Contact</h3>
-            <div className="space-y-2 text-sm text-muted">
+            <div className="flex flex-col gap-2 text-sm text-muted">
               <button
                 type="button"
                 onClick={() =>
@@ -82,7 +82,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 border-t border-line pt-4 text-xs text-tertiary">
-          2026 CineKit. Demo mode.
+          2026 CineKit.
         </div>
       </div>
     </footer>

@@ -43,7 +43,7 @@ function App() {
         <div className="absolute -top-[10%] left-[10%] h-[40%] w-[80%] rounded-[100%] bg-primary/10 blur-[130px]" />
       </div>
       {!authPage ? <Navbar /> : null}
-      <main className={authPage ? '' : 'pb-32 pt-20 md:pb-8 md:pt-24'}>
+      <main className={authPage ? '' : 'pb-10 pt-20 md:pt-24'}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<PageTransition><Home /></PageTransition>} />
