@@ -6,6 +6,7 @@ import { useAuth } from '../../../store/AuthContext';
 import { useCart } from '../../../store/CartContext';
 import { useFavourites } from '../../../store/FavouritesContext';
 import clsx from 'clsx';
+import { useTypewriter } from '../../../hooks/useTypewriter';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -16,46 +17,7 @@ const Navbar = () => {
   const { favourites } = useFavourites();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Typing animation for placeholder
-  const placeholderPhrases = [
-    'Search premium cameras...',
-    'Search high-end lenses...',
-    'Search pro lighting kits...',
-    'Search cinema drones...',
-    'Search audio equipment...',
-    'Search production gear...'
-  ];
-
-  const [placeholderText, setPlaceholderText] = useState('');
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(true);
-
-  useEffect(() => {
-    const currentPhrase = placeholderPhrases[phraseIndex];
-    let timeout: NodeJS.Timeout;
-
-    if (isTyping) {
-      if (placeholderText.length < currentPhrase.length) {
-        timeout = setTimeout(() => {
-          setPlaceholderText(currentPhrase.slice(0, placeholderText.length + 1));
-        }, 100);
-      } else {
-        timeout = setTimeout(() => setIsTyping(false), 2000);
-      }
-    } else {
-      if (placeholderText.length > 0) {
-        timeout = setTimeout(() => {
-          setPlaceholderText(placeholderText.slice(0, placeholderText.length - 1));
-        }, 50);
-      } else {
-        setPhraseIndex((prev) => (prev + 1) % placeholderPhrases.length);
-        setIsTyping(true);
-      }
-    }
-
-    return () => clearTimeout(timeout);
-  }, [placeholderText, isTyping, phraseIndex]);
+  const placeholderText = useTypewriter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
