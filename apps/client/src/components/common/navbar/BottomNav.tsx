@@ -17,7 +17,7 @@ const BottomNav = () => {
 
   return (
     <nav className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4 xl:hidden pointer-events-none">
-      <div className="relative flex h-16 w-full max-w-[420px] items-center justify-between rounded-[3rem] bg-indigo-50/20 px-2 shadow-[0_20px_50px_rgba(31,_38,_135,_0.1)] backdrop-blur-[40px] pointer-events-auto border border-white/60 before:absolute before:inset-0 before:rounded-[3rem] before:bg-gradient-to-br before:from-white/40 before:to-transparent before:p-[1px] before:-z-10 overflow-hidden ring-1 ring-black/[0.02]">
+      <div className="relative flex h-16 w-full max-w-[420px] items-center justify-between rounded-[3rem] bg-gradient-to-r from-blue-500/20 to-blue-300/20 px-2 shadow-[0_20px_50px_rgba(31,_38,_135,_0.1)] backdrop-blur-[40px] pointer-events-auto border border-white/60 before:absolute before:inset-0 before:rounded-[3rem] before:bg-gradient-to-br before:from-white/40 before:to-transparent before:p-[1px] before:-z-10 overflow-hidden ring-1 ring-black/[0.02]">
         {/* Subtle Liquid Highlight */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none rounded-[3rem]" />
 
