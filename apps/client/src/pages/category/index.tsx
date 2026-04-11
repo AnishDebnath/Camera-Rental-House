@@ -60,6 +60,8 @@ const Category = () => {
     [activeCategory, debouncedSearch],
   );
 
+  const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
+
   return (
     <div className="min-h-screen">
       <CategoryHeader
@@ -81,12 +83,14 @@ const Category = () => {
           setItemsToShow={setItemsToShow}
         />
       </div>
-      <MobileFilters
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-        activeCategory={activeCategory}
-        setParams={setParams}
-      />
+      {!isDesktop && (
+        <MobileFilters
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          activeCategory={activeCategory}
+          setParams={setParams}
+        />
+      )}
     </div>
   );
 };

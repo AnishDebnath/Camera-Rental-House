@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import SearchBar from '../../components/ui/SearchBar';
 import { X } from 'lucide-react';
+import { Transition } from '@headlessui/react';
 import clsx from 'clsx';
 import FilterChips from './FilterChips';
 import { useLenis } from '../../context/LenisContext';
@@ -36,22 +37,16 @@ const CategoryHeader = ({
     }
   }, []);
 
-  // IntersectionObserver works with Lenis, native scroll, anything —
-  // it fires whenever the sentinel element enters/exits the viewport.
+  // IntersectionObserver for sticky bar
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // When sentinel is NOT intersecting (scrolled above viewport), fix the bar
         setIsFixed(!entry.isIntersecting);
       },
-      {
-        root: null,       // viewport
-        threshold: 0,     // trigger the moment any part leaves
-        rootMargin: '0px',
-      }
+      { root: null, threshold: 0, rootMargin: '0px' }
     );
 
     observer.observe(sentinel);
@@ -60,11 +55,11 @@ const CategoryHeader = ({
 
   const lenis = useLenis();
 
-  // Lock/unlock Lenis scroll when desktop filter opens/closes
+  // Scroll lock for desktop
   useEffect(() => {
     const isDesktop = window.innerWidth >= 1024;
-    if (!isDesktop) return;
-    if (showFilters) {
+    // Only apply scroll lock on desktop if filters are shown
+    if (isDesktop && showFilters) {
       lenis?.stop();
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -77,10 +72,12 @@ const CategoryHeader = ({
     };
   }, [showFilters, lenis]);
 
-  // Close filter on click outside
+  // Click outside listener
   useEffect(() => {
     if (!showFilters) return;
     const handleClickOutside = (e: MouseEvent) => {
+      // If we're on mobile, let Dialog handle it. On desktop, we handle it here.
+      if (window.innerWidth < 1024) return;
       if (filterPanelRef.current && !filterPanelRef.current.contains(e.target as Node)) {
         setShowFilters(false);
       }
@@ -91,13 +88,9 @@ const CategoryHeader = ({
 
   return (
     <>
-      {/* Sentinel: sits exactly where the search bar should begin */}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 0 }} />
-
-      {/* Placeholder holds layout height when the bar is lifted to fixed */}
       {isFixed && <div style={{ height: barHeight }} aria-hidden="true" />}
 
-      {/* Search bar — switches between relative and fixed */}
       <div
         ref={barRef}
         className={clsx(
@@ -107,7 +100,6 @@ const CategoryHeader = ({
             : 'relative bg-transparent pb-3'
         )}
       >
-        {/* Liquid glass gradient overlay — same as Navbar */}
         <div
           className={clsx(
             'absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none transition-opacity duration-500',
@@ -115,27 +107,31 @@ const CategoryHeader = ({
           )}
         />
 
-        {/* Visual-only backdrop — pointer-events-none so scroll is never blocked */}
+        {/* Desktop Backdrop Animation */}
         <div 
           className={clsx(
-            "hidden lg:block fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 pointer-events-none",
+            "hidden lg:block fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-none z-[-1] transition-opacity duration-500",
             showFilters ? "opacity-100" : "opacity-0"
           )}
+          aria-hidden="true" 
         />
 
         <div ref={filterPanelRef} className="relative app-shell">
           <SearchBar 
             value={search} 
             onChange={setSearch} 
-            onFilterClick={() => setShowFilters(!showFilters)} 
+            onFilterClick={() => {
+              console.log('Filter button clicked, current state:', showFilters);
+              setShowFilters(!showFilters);
+            }} 
           />
 
-          {/* Desktop Filters Overlay */}
+          {/* Desktop Filters Dropdown Overlay */}
           <div className={clsx(
             "hidden lg:block absolute top-full left-4 md:left-6 lg:left-8 right-4 md:right-6 lg:right-8 z-[201] transition-all duration-500 ease-out",
-            showFilters ? "translate-y-4 opacity-100" : "translate-y-0 opacity-0 pointer-events-none"
+            showFilters ? "translate-y-4 opacity-100 pointer-events-auto" : "translate-y-0 opacity-0 pointer-events-none"
           )}>
-            <div className="p-8 rounded-[32px] bg-white shadow-[0_40px_80px_rgba(0,0,0,0.1)] border border-slate-100 relative overflow-hidden">
+            <div className="p-6 md:p-8 rounded-[32px] bg-white shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 relative overflow-hidden">
                <div className="relative">
                  <div className="mb-6 flex justify-between items-start">
                     <div>
