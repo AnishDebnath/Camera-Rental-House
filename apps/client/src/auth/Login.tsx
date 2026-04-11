@@ -1,4 +1,4 @@
-import { Camera, Eye, EyeOff } from 'lucide-react';
+import { Camera, Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
@@ -49,58 +49,106 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md rounded-[32px] border border-line bg-white p-6 shadow-card md:p-8">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-primary-light text-primary">
-            <Camera className="h-6 w-6" />
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="w-full max-w-[440px] relative group">
+        {/* Modern Background Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/5 to-primary/15 rounded-[40px] blur-xl opacity-50 transition duration-1000" />
+
+        <div className="relative rounded-[32px] border border-white/60 bg-white/70 backdrop-blur-2xl p-6 md:p-8 shadow-2xl overflow-hidden">
+          {/* Decorative Corner Gradient */}
+          <div className="absolute -top-24 -right-24 h-48 w-48 bg-primary/10 blur-[60px] rounded-full" />
+          <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-primary/5 blur-[50px] rounded-full" />
+
+          <div className="relative mb-6 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] bg-white shadow-lg ring-1 ring-black/[0.05]">
+              <Camera className="h-7 w-7 text-primary" strokeWidth={1.5} />
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-ink leading-tight">Welcome Back</h1>
+            <p className="mt-2 text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+              Ready to create your next masterpiece? Sign in to access your gear.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-ink">Welcome Back</h1>
-          <p className="mt-2 text-sm text-muted">
-            Client login by default. Admin demo: `admin / admin123` or `manager / manager123`.
-          </p>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2">
+                <User className="h-3.5 w-3.5" />
+                Email or Username
+              </label>
+              <div className="relative">
+                <input
+                  required
+                  value={form.identifier}
+                  onChange={(event) => setForm((current) => ({ ...current, identifier: event.target.value }))}
+                  className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5" />
+                  Password
+                </label>
+                {/* <Link to="/forgot-password" title="Coming soon!" className="text-[12px] font-medium text-primary hover:underline">
+                  Forgot password?
+                </Link> */}
+              </div>
+              <div className="relative">
+                <input
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                  className="w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-1">
+              <LoadingButton
+                loading={loading}
+                type="submit"
+                className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all"
+              >
+                Sign In
+              </LoadingButton>
+            </div>
+          </form>
+
+          {/* Social / Divider (Visual only) */}
+          {/* <div className="mt-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">demo access</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <p className="text-[12px] text-slate-500 leading-relaxed text-center italic">
+              Use <b className="text-slate-700">admin / admin123</b> for the dashboard or just click Sign In for the store.
+            </p>
+          </div> */}
+
+          <div className="mt-8 pt-6 border-t border-slate-100/60 text-center">
+            <p className="text-sm text-slate-500">
+              New here?{' '}
+              <Link to="/signup" className="font-bold text-primary inline-flex items-center gap-1 hover:underline group/sign">
+                Create Account
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/sign:translate-x-1" />
+              </Link>
+            </p>
+          </div>
         </div>
-
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <label className="space-y-2">
-            <span className="text-sm font-medium text-ink">Email, phone, or username</span>
-            <div className="input-shell">
-              <input
-                value={form.identifier}
-                onChange={(event) => setForm((current) => ({ ...current, identifier: event.target.value }))}
-                className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
-                placeholder="alex@example.com"
-              />
-            </div>
-          </label>
-
-          <label className="space-y-2">
-            <span className="text-sm font-medium text-ink">Password</span>
-            <div className="input-shell">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={form.password}
-                onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-                className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
-                placeholder="Enter password"
-              />
-              <button type="button" onClick={() => setShowPassword((current) => !current)}>
-                {showPassword ? <EyeOff className="h-4 w-4 text-tertiary" /> : <Eye className="h-4 w-4 text-tertiary" />}
-              </button>
-            </div>
-          </label>
-
-          <LoadingButton loading={loading} type="submit">
-            Login
-          </LoadingButton>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted">
-          New to CineKit?{' '}
-          <Link to="/signup" className="font-semibold text-primary">
-            Create an account
-          </Link>
-        </p>
       </div>
     </div>
   );
