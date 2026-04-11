@@ -6,7 +6,7 @@ const ToastViewport = () => {
   const { toasts, removeToast } = useToast();
 
   return (
-    <div className="pointer-events-none fixed inset-x-4 top-4 z-50 flex flex-col gap-3 md:left-auto md:right-6 md:w-96">
+    <div className="pointer-events-none fixed inset-x-4 top-4 z-[9999] flex flex-col gap-3 md:left-auto md:right-6 md:w-96">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
