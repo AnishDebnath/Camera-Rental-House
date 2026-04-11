@@ -3,110 +3,128 @@ import { CategoriesList, BrandsList } from '../../data/categories';
 
 interface FilterChipsProps {
   activeCategory: string;
-  onSelect: (category: string) => void;
+  activeBrand: string;
+  onSelect: (type: 'category' | 'brand', value: string) => void;
   isDark?: boolean;
 }
 
-const FilterChips = ({ activeCategory, onSelect, isDark = false }: FilterChipsProps) => (
+const FilterChips = ({ activeCategory, activeBrand, onSelect, isDark = false }: FilterChipsProps) => (
   <div className="space-y-6">
-    {/* Categories Roll */}
+    {/* Categories Slider */}
     <div className="space-y-2.5">
       <p className={clsx(
         "text-xs font-bold uppercase tracking-wider pl-1",
-        isDark ? "text-white/60" : "text-muted/80"
-      )}>Categories</p>
-      <div className="hide-scrollbar flex gap-3 overflow-x-auto pb-2">
+        isDark ? "text-white/60" : "text-ink/60"
+      )}>Gears</p>
+      <div
+        data-lenis-prevent
+        className="hide-scrollbar flex gap-3 overflow-x-auto snap-x snap-proximity pb-2 -mx-1 px-1 touch-pan-x"
+      >
         <button
           type="button"
-          onClick={() => onSelect('All')}
+          onClick={() => onSelect('category', 'All')}
           className={clsx(
-            'flex flex-col items-center justify-center min-w-[76px] h-[86px] rounded-[20px] transition-all flex-shrink-0',
+            'flex flex-col items-center justify-center aspect-square h-20 w-20 min-w-[80px] rounded-2xl snap-start transition-colors',
             activeCategory === 'All'
-              ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+              ? 'bg-primary text-white'
               : clsx(
-                  'border transition-colors',
-                  isDark 
-                    ? 'border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20' 
-                    : 'border-white/60 bg-white/40 text-ink hover:bg-white/60 hover:border-primary/30'
-                )
+                'border',
+                isDark
+                  ? 'border-white/10 bg-white/5 text-white'
+                  : 'border-slate-100 bg-slate-50/50 text-ink hover:bg-white'
+              )
           )}
         >
-          <span className="text-[11px] font-bold uppercase tracking-wider">All Gear</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-center px-1">All <br />Gear</span>
         </button>
         {CategoriesList.map((item) => (
           <button
             key={item.category}
             type="button"
-            onClick={() => onSelect(item.category)}
+            onClick={() => onSelect('category', item.category)}
             className={clsx(
-              'group flex flex-col items-center justify-between min-w-[86px] h-[86px] rounded-[20px] p-2 transition-all flex-shrink-0',
+              'group flex flex-col items-center justify-between aspect-square h-20 w-20 min-w-[80px] rounded-2xl p-2.5 snap-start transition-colors',
               activeCategory === item.category
-                ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+                ? 'bg-primary text-white'
                 : clsx(
-                    'border transition-colors',
-                    isDark 
-                      ? 'border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20' 
-                      : 'border-white/60 bg-white/40 text-ink hover:bg-white/60 hover:border-primary/30'
-                  )
+                  'border',
+                  isDark
+                    ? 'border-white/10 bg-white/5 text-white'
+                    : 'border-slate-100 bg-slate-50/50 text-ink hover:bg-white'
+                )
             )}
           >
-            <div className="h-12 w-12 flex items-center justify-center p-1">
-              <img 
-                src={item.image} 
-                alt={item.category} 
+            <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
+              <img
+                src={item.image}
+                alt={item.category}
                 className={clsx(
-                  "object-contain max-h-full max-w-full drop-shadow-sm transition-transform group-hover:scale-110",
-                  activeCategory === item.category ? "" : (isDark ? "brightness-0 invert" : "mix-blend-multiply")
-                )} 
+                  "object-contain max-h-8 max-w-8",
+                  isDark ? "brightness-0 invert" : ""
+                )}
               />
             </div>
-            <span className={clsx(
-              "text-[11px] font-semibold tracking-wide",
-              isDark && activeCategory !== item.category ? "text-white/80" : ""
-            )}>{item.category}</span>
+            <span className="text-[10px] font-bold tracking-wide text-center w-full truncate pointer-events-none">{item.category}</span>
           </button>
         ))}
       </div>
     </div>
 
-    {/* Brands Roll */}
+    {/* Brands Slider */}
     <div className="space-y-2.5">
       <p className={clsx(
         "text-xs font-bold uppercase tracking-wider pl-1",
-        isDark ? "text-white/60" : "text-muted/80"
+        isDark ? "text-white/60" : "text-ink/60"
       )}>Top Brands</p>
-      <div className="hide-scrollbar flex gap-3 overflow-x-auto pb-4">
+      <div
+        data-lenis-prevent
+        className="hide-scrollbar flex gap-3 overflow-x-auto snap-x snap-proximity pb-2 -mx-1 px-1 touch-pan-x"
+      >
+        <button
+          type="button"
+          onClick={() => onSelect('brand', 'All')}
+          className={clsx(
+            'flex flex-col items-center justify-center aspect-square h-20 w-20 min-w-[80px] rounded-2xl snap-start transition-colors',
+            activeBrand === 'All'
+              ? 'bg-primary text-white'
+              : clsx(
+                'border',
+                isDark
+                  ? 'border-white/10 bg-white/5 text-white'
+                  : 'border-slate-100 bg-slate-50/50 text-ink hover:bg-white'
+              )
+          )}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-center px-1">All<br />Brand</span>
+        </button>
         {BrandsList.map((item) => (
           <button
             key={item.category}
             type="button"
-            onClick={() => onSelect(item.category)}
+            onClick={() => onSelect('brand', item.category)}
             className={clsx(
-              'group flex flex-col items-center justify-between min-w-[86px] h-[86px] rounded-[20px] p-2 transition-all flex-shrink-0',
-              activeCategory === item.category
-                ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+              'group flex flex-col items-center justify-between aspect-square h-20 w-20 min-w-[80px] rounded-2xl p-2.5 snap-start transition-colors',
+              activeBrand === item.category
+                ? 'bg-primary text-white'
                 : clsx(
-                    'border transition-colors',
-                    isDark 
-                      ? 'border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20' 
-                      : 'border-white/60 bg-white/40 text-ink hover:bg-white/60 hover:border-primary/30'
-                  )
+                  'border',
+                  isDark
+                    ? 'border-white/10 bg-white/5 text-white'
+                    : 'border-slate-100 bg-slate-50/50 text-ink hover:bg-white'
+                )
             )}
           >
-            <div className="h-10 w-10 flex items-center justify-center mt-1">
-              <img 
-                src={item.image} 
-                alt={item.category} 
+            <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
+              <img
+                src={item.image}
+                alt={item.category}
                 className={clsx(
-                  "object-contain max-h-full max-w-full drop-shadow-sm transition-transform group-hover:scale-110",
-                  activeCategory === item.category && item.category !== 'Sony' ? 'brightness-0 invert' : (isDark ? 'brightness-0 invert' : '')
-                )} 
+                  "object-contain max-h-7 max-w-10",
+                  isDark ? "brightness-0 invert" : ""
+                )}
               />
             </div>
-            <span className={clsx(
-              "text-[11px] font-semibold tracking-wide",
-              isDark && activeCategory !== item.category ? "text-white/80" : ""
-            )}>{item.category}</span>
+            <span className="text-[10px] font-bold tracking-wide text-center w-full truncate pointer-events-none">{item.category}</span>
           </button>
         ))}
       </div>

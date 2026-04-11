@@ -8,10 +8,11 @@ interface MobileFiltersProps {
   showFilters: boolean;
   setShowFilters: (val: boolean) => void;
   activeCategory: string;
-  setParams: (params: any) => void;
+  activeBrand: string;
+  onSelectFilter: (type: 'category' | 'brand', value: string) => void;
 }
 
-const MobileFilters = ({ showFilters, setShowFilters, activeCategory, setParams }: MobileFiltersProps) => {
+const MobileFilters = ({ showFilters, setShowFilters, activeCategory, activeBrand, onSelectFilter }: MobileFiltersProps) => {
   const lenis = useLenis();
 
   // Lock scroll (Lenis + native) when mobile filter sheet is open
@@ -59,29 +60,29 @@ const MobileFilters = ({ showFilters, setShowFilters, activeCategory, setParams 
                 leaveTo="translate-y-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-full max-w-full">
-                  <div className="rounded-t-[32px] bg-white p-6 shadow-2xl ring-1 ring-black/5">
+                  <div className="rounded-t-[32px] bg-white p-5 shadow-2xl ring-1 ring-black/5">
                     {/* Refined Drag Handle Indicator */}
-                    <div className="flex justify-center pt-3 pb-3">
-                      <div className="w-14 h-1.5 rounded-full bg-primary/20 ring-1 ring-primary/10 shadow-sm" />
+                    <div className="flex justify-center pt-2 pb-4">
+                      <div className="w-14 h-1 rounded-full bg-primary/20 ring-1 ring-primary/10" />
                     </div>
-                    <div className="mb-5 flex items-center justify-between">
+                    <div className="mb-4 flex items-center justify-between">
                       <div>
-                        <p className="text-lg font-semibold text-ink">Filter Gears</p>
-                        <p className="text-sm text-muted">Choose the category or brand you need.</p>
+                        <p className="text-lg font-semibold text-ink leading-none">Filter Gears</p>
+                        <p className="text-xs text-muted mt-1">Choose the category or brand you need.</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowFilters(false)}
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-page active:scale-95 transition-transform"
+                        className="flex h-9 w-9 items-center justify-center rounded-full bg-page active:scale-95 transition-transform"
                       >
-                        <X className="h-5 w-5" />
+                        <X className="h-4.5 w-4.5" />
                       </button>
                     </div>
                     <FilterChips
                       activeCategory={activeCategory}
-                      onSelect={(category) => {
-                        setParams(category === 'All' ? {} : { category });
-                        setShowFilters(false);
+                      activeBrand={activeBrand}
+                      onSelect={(type, value) => {
+                        onSelectFilter(type, value);
                       }}
                     />
                   </div>

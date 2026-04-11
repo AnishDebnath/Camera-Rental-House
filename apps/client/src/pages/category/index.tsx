@@ -14,7 +14,9 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [itemsToShow, setItemsToShow] = useState(8);
+  
   const activeCategory = params.get('category') || 'All';
+  const activeBrand = params.get('brand') || 'All';
   const debouncedSearch = useDebounce(search, 250);
 
   // Sync state with URL params
@@ -48,19 +50,36 @@ const Category = () => {
 
   useEffect(() => {
     refresh();
-  }, [activeCategory]);
+  }, [activeCategory, activeBrand]);
 
   const filteredProducts = useMemo(
     () =>
       mockProducts.filter((product) => {
-        const matchesFilter = activeCategory === 'All' || product.category === activeCategory || product.name.toLowerCase().includes(activeCategory.toLowerCase());
+        const matchesCategory = activeCategory === 'All' || 
+          product.category === activeCategory || 
+          product.name.toLowerCase().includes(activeCategory.toLowerCase());
+          
+        const matchesBrand = activeBrand === 'All' || 
+          product.name.toLowerCase().includes(activeBrand.toLowerCase());
+
         const matchesSearch = product.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-        return matchesFilter && matchesSearch;
+        
+        return matchesCategory && matchesBrand && matchesSearch;
       }),
-    [activeCategory, debouncedSearch],
+    [activeCategory, activeBrand, debouncedSearch],
   );
 
   const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
+
+  const handleFilterSelect = (type: 'category' | 'brand', value: string) => {
+    const nextParams = new URLSearchParams(params);
+    if (value === 'All') {
+      nextParams.delete(type);
+    } else {
+      nextParams.set(type, value);
+    }
+    setParams(nextParams);
+  };
 
   return (
     <div className="min-h-screen">
@@ -71,9 +90,8 @@ const Category = () => {
         showFilters={showFilters}
         setShowFilters={setShowFilters}
         activeCategory={activeCategory}
-        onSelectCategory={(category) => {
-          setParams(category === 'All' ? {} : { category });
-        }}
+        activeBrand={activeBrand}
+        onSelectFilter={handleFilterSelect}
       />
       <div className="app-shell mt-6">
         <CategoryProducts
@@ -88,7 +106,8 @@ const Category = () => {
           showFilters={showFilters}
           setShowFilters={setShowFilters}
           activeCategory={activeCategory}
-          setParams={setParams}
+          activeBrand={activeBrand}
+          onSelectFilter={handleFilterSelect}
         />
       )}
     </div>

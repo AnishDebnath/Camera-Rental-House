@@ -13,7 +13,8 @@ interface CategoryHeaderProps {
   showFilters: boolean;
   setShowFilters: (val: boolean) => void;
   activeCategory: string;
-  onSelectCategory: (category: string) => void;
+  activeBrand: string;
+  onSelectFilter: (type: 'category' | 'brand', value: string) => void;
 }
 
 const CategoryHeader = ({ 
@@ -22,7 +23,8 @@ const CategoryHeader = ({
   showFilters, 
   setShowFilters, 
   activeCategory, 
-  onSelectCategory 
+  activeBrand,
+  onSelectFilter 
 }: CategoryHeaderProps) => {
   const [isFixed, setIsFixed] = useState(false);
   const [barHeight, setBarHeight] = useState(0);
@@ -121,7 +123,6 @@ const CategoryHeader = ({
             value={search} 
             onChange={setSearch} 
             onFilterClick={() => {
-              console.log('Filter button clicked, current state:', showFilters);
               setShowFilters(!showFilters);
             }} 
           />
@@ -131,12 +132,12 @@ const CategoryHeader = ({
             "hidden lg:block absolute top-full left-4 md:left-6 lg:left-8 right-4 md:right-6 lg:right-8 z-[201] transition-all duration-500 ease-out",
             showFilters ? "translate-y-4 opacity-100 pointer-events-auto" : "translate-y-0 opacity-0 pointer-events-none"
           )}>
-            <div className="p-6 md:p-8 rounded-[32px] bg-white shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 relative overflow-hidden">
+            <div className="p-5 md:p-6 rounded-[32px] bg-white shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 relative overflow-hidden">
                <div className="relative">
-                 <div className="mb-6 flex justify-between items-start">
+                 <div className="mb-4 flex justify-between items-start">
                     <div>
                        <h3 className="text-lg font-semibold text-ink">Filter Gears</h3>
-                       <p className="text-sm text-muted">Choose the category or brand you need to refine your search.</p>
+                       <p className="text-sm text-muted">Choose the category or brand you need.</p>
                     </div>
                     <button 
                       onClick={() => setShowFilters(false)}
@@ -147,7 +148,8 @@ const CategoryHeader = ({
                  </div>
                  <FilterChips 
                     activeCategory={activeCategory} 
-                    onSelect={onSelectCategory}
+                    activeBrand={activeBrand}
+                    onSelect={onSelectFilter}
                     isDark={false}
                  />
                </div>
@@ -160,4 +162,3 @@ const CategoryHeader = ({
 };
 
 export default CategoryHeader;
-
