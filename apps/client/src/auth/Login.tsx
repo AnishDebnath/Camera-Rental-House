@@ -1,6 +1,6 @@
-import { Camera, Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
+import { Camera, Eye, EyeOff, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import { findDemoAdminAccount, startDemoUserSession } from '../../../../packages/auth';
 import {
@@ -16,6 +16,7 @@ const resolveClientNextPath = (requestedNext: string | null) =>
     : '/account';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
@@ -55,6 +56,15 @@ const Login = () => {
         <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/5 to-primary/15 rounded-[40px] blur-xl opacity-50 transition duration-1000" />
 
         <div className="relative rounded-[32px] border border-white/60 bg-white/70 backdrop-blur-2xl p-6 md:p-8 shadow-2xl overflow-hidden">
+          {/* Refined Back Button */}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="absolute top-6 left-6 flex h-10 w-10 items-center justify-center rounded-[14px] bg-white border border-slate-100 text-slate-500 hover:text-primary shadow-[0_8px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition-all active:scale-90 z-10"
+            title="Go Back"
+          >
+            <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
+          </button>
           {/* Decorative Corner Gradient */}
           <div className="absolute -top-24 -right-24 h-48 w-48 bg-primary/10 blur-[60px] rounded-full" />
           <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-primary/5 blur-[50px] rounded-full" />
@@ -139,7 +149,8 @@ const Login = () => {
             </p>
           </div> */}
 
-          <div className="mt-8 pt-6 border-t border-slate-100/60 text-center">
+          <div className="mt-6 pt-5 text-center relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-px bg-slate-200" />
             <p className="text-sm text-slate-500">
               New here?{' '}
               <Link to="/signup" className="font-bold text-primary inline-flex items-center gap-1 hover:underline group/sign">
