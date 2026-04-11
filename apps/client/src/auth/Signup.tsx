@@ -4,7 +4,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import clsx from 'clsx';
 
-type UploadKey = 'aadhaarDoc' | 'voterDoc';
+type UploadKey = 'aadhaarDoc' | 'voterDoc' | 'selfie';
 
 type UploadFile = {
   file: File;
@@ -46,12 +46,14 @@ const Signup = () => {
   const [files, setFiles] = useState<Record<UploadKey, UploadFile | null>>({
     aadhaarDoc: null,
     voterDoc: null,
+    selfie: null,
   });
 
   const storageRefAadhaar = useRef<HTMLInputElement>(null);
   const cameraRefAadhaar = useRef<HTMLInputElement>(null);
   const storageRefVoter = useRef<HTMLInputElement>(null);
   const cameraRefVoter = useRef<HTMLInputElement>(null);
+  const cameraRefSelfie = useRef<HTMLInputElement>(null);
 
   const handleFile = (key: UploadKey, file?: File) => {
     if (file) {
@@ -65,19 +67,19 @@ const Signup = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    await new Promise((resolve) => window.setTimeout(resolve, 600));
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
     setLoading(false);
     const next = new URLSearchParams(location.search).get('next');
     navigate(next?.startsWith('/') ? `/login?next=${encodeURIComponent(next)}` : '/login');
   };
 
-  const titleForStep = ["Personal Info", "Identity Verification", "Social Connection"];
-  const iconForStep = [User, ShieldCheck, Share2];
+  const titleForStep = ["Personal Info", "Identity Verification", "Social Connection", "Profile Picture"];
+  const iconForStep = [User, ShieldCheck, Share2, Camera];
   const ActiveIcon = iconForStep[step];
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[500px] relative group">
+      <div className="w-full max-w-[500px] relative group px-2">
         <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/5 to-primary/15 rounded-[40px] blur-xl opacity-50 transition duration-1000" />
 
         <div className="relative rounded-[32px] border border-white/60 bg-white/70 backdrop-blur-2xl p-6 md:p-8 shadow-2xl overflow-hidden">
@@ -89,8 +91,8 @@ const Signup = () => {
             <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
           </button>
 
-          <div className="absolute top-8 right-8 flex items-center gap-1.5">
-            {[0, 1, 2].map((idx) => (
+          <div className="absolute top-8 right-8 flex items-center gap-1">
+            {[0, 1, 2, 3].map((idx) => (
               <div key={idx} className={clsx("h-1.5 rounded-full transition-all duration-300", idx === step ? "w-6 bg-primary" : "w-1.5 bg-slate-200")} />
             ))}
           </div>
@@ -178,7 +180,7 @@ const Signup = () => {
             )}
 
             {step === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {/* Aadhaar Section */}
                 <div className="space-y-4">
                   <div className="space-y-1.5">
@@ -248,7 +250,63 @@ const Signup = () => {
                   </div>
                 ))}
                 <div className="pt-2">
-                  <LoadingButton type="submit" loading={loading} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Complete Signup</LoadingButton>
+                  <LoadingButton type="button" onClick={() => setStep(3)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-6">
+                <div className="space-y-4 text-center">
+                  <span className="text-[13px] font-semibold text-slate-700 flex items-center justify-center gap-2">
+                    <User className="h-4 w-4" /> Live Capture
+                  </span>
+
+                  <div className="flex justify-center">
+                    <div className={clsx(
+                      "relative h-48 w-48 rounded-full border-2 overflow-hidden transition-all duration-500",
+                      files.selfie ? "border-primary shadow-xl scale-105" : "border-dashed border-slate-200 bg-slate-50/50"
+                    )}>
+                      {files.selfie ? (
+                        <img src={files.selfie.preview} className="h-full w-full object-cover" alt="Profile Picture" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full gap-2">
+                          <User className="h-16 w-16 text-slate-300" />
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Image</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {!files.selfie ? (
+                      <button
+                        type="button"
+                        onClick={() => cameraRefSelfie.current?.click()}
+                        className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all hover:border-primary/30 active:scale-95"
+                      >
+                        <Camera className="h-5 w-5 text-primary" /> Take Profile Photo
+                      </button>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-green-50 border border-green-100 text-sm font-bold text-green-600">
+                          <ShieldCheck className="h-5 w-5" /> Profile Photo Captured!
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => cameraRefSelfie.current?.click()}
+                          className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-500 hover:text-primary hover:bg-slate-50 transition-all active:scale-95"
+                        >
+                          Retake Profile Photo
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={cameraRefSelfie} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => handleFile('selfie', e.target.files?.[0])} />
+                </div>
+
+                <div className="pt-2">
+                  <LoadingButton type="submit" loading={loading} className="w-full h-12 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-xl transition-all">Complete Registration</LoadingButton>
                 </div>
               </div>
             )}
