@@ -59,15 +59,19 @@ const MobileFilters = ({ showFilters, setShowFilters, activeCategory, setParams 
                 leaveTo="translate-y-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-full max-w-full">
-                  <div className="rounded-t-[28px] bg-white p-6 shadow-2xl ring-1 ring-black/5">
+                  <div className="rounded-t-[32px] bg-white p-6 shadow-2xl ring-1 ring-black/5">
+                    {/* Refined Drag Handle Indicator */}
+                    <div className="flex justify-center pt-3 pb-3">
+                      <div className="w-14 h-1.5 rounded-full bg-primary/20 ring-1 ring-primary/10 shadow-sm" />
+                    </div>
                     <div className="mb-5 flex items-center justify-between">
                       <div>
                         <p className="text-lg font-semibold text-ink">Filter Gears</p>
                         <p className="text-sm text-muted">Choose the category or brand you need.</p>
                       </div>
-                      <button 
-                        type="button" 
-                        onClick={() => setShowFilters(false)} 
+                      <button
+                        type="button"
+                        onClick={() => setShowFilters(false)}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-page active:scale-95 transition-transform"
                       >
                         <X className="h-5 w-5" />
