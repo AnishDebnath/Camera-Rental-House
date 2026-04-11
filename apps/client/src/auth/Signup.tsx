@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, EyeOff, Upload, User, Phone, Mail, Lock, Camera, ArrowRight, ShieldCheck, Share2, IdCard, Facebook, Instagram, Youtube, FileText, Image } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Upload, User, Phone, Mail, Lock, Camera, ArrowRight, ShieldCheck, Share2, IdCard, Facebook, Instagram, Youtube, FileText, Image, AlertCircle } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
@@ -12,15 +12,15 @@ type UploadFile = {
 };
 
 const signupFields = [
-  { key: 'fullName', label: 'Full name', placeholder: 'Alex Director', icon: User },
-  { key: 'phone', label: 'Phone number', placeholder: '9876543210', icon: Phone },
-  { key: 'email', label: 'Email address', placeholder: 'alex@example.org', icon: Mail },
+  { key: 'fullName', label: 'Full Name', placeholder: 'Enter your full name', icon: User },
+  { key: 'phone', label: 'Phone Number', placeholder: '10 digit phone number', icon: Phone },
+  { key: 'email', label: 'Email Address', placeholder: 'Enter your email address', icon: Mail },
 ] as const;
 
 const socialFields = [
-  { key: 'facebook', label: 'Facebook URL', icon: Facebook },
-  { key: 'instagram', label: 'Instagram Handle', icon: Instagram },
-  { key: 'youtube', label: 'YouTube Channel', icon: Youtube },
+  { key: 'facebook', label: 'Facebook Profile', icon: Facebook },
+  { key: 'instagram', label: 'Instagram Profile', icon: Instagram },
+  { key: 'youtube', label: 'YouTube Channel (Optional)', icon: Youtube },
 ] as const;
 
 const Signup = () => {
@@ -30,6 +30,8 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [form, setForm] = useState({
     fullName: '',
     phone: '',
@@ -61,17 +63,83 @@ const Signup = () => {
         ...current,
         [key]: { file, preview: URL.createObjectURL(file) }
       }));
+      setErrors((prev) => ({ ...prev, [key]: '' }));
+    }
+  };
+
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+
+    if (currentStep === 0) {
+      if (!form.fullName) newErrors.fullName = "Full Name is required";
+      if (!form.phone) newErrors.phone = "Phone Number is required";
+      else if (!/^\d{10}$/.test(form.phone)) newErrors.phone = "Must be 10 digits";
+
+      if (!form.email) newErrors.email = "Email is required";
+      else if (!/^[^\s@]+@gmail\.com$/.test(form.email)) newErrors.email = "Invalid email address";
+
+      if (!form.password) newErrors.password = "Password is required";
+      else if (form.password.length < 6) newErrors.password = "Minimum 6 characters";
+
+      if (!form.confirmPassword) newErrors.confirmPassword = "Confirm password is required";
+      else if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords match failed";
+    }
+
+    if (currentStep === 1) {
+      if (!form.aadhaarNo) newErrors.aadhaarNo = "Aadhaar Number is required";
+      else if (!/^\d{12}$/.test(form.aadhaarNo.replace(/-/g, ''))) newErrors.aadhaarNo = "Must be 12 digits";
+
+      if (!files.aadhaarDoc) newErrors.aadhaarDoc = "Upload Aadhaar photo";
+
+      if (!form.voterNo) newErrors.voterNo = "Voter ID is required";
+      else if (form.voterNo.length < 10) newErrors.voterNo = "Invalid Voter ID";
+
+      if (!files.voterDoc) newErrors.voterDoc = "Upload Voter Card photo";
+    }
+
+    if (currentStep === 2) {
+      if (!form.facebook) newErrors.facebook = "Facebook URL is required";
+      else if (!/^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/.+/.test(form.facebook)) newErrors.facebook = "Invalid Facebook URL";
+
+      if (!form.instagram) newErrors.instagram = "Instagram URL is required";
+      else if (!/^(https?:\/\/)?(www\.)?instagram\.com\/.+/.test(form.instagram) && !/^@?[a-zA-Z0-9._]+$/.test(form.instagram)) newErrors.instagram = "Invalid Instagram handle";
+
+      if (form.youtube && !/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(form.youtube)) {
+        newErrors.youtube = "Invalid YouTube URL";
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!files.selfie) newErrors.selfie = "Profile capture is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = (nextStep: number) => {
+    if (validateStep(step)) {
+      setStep(nextStep);
     }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!validateStep(step)) return;
+
     setLoading(true);
-    await new Promise((resolve) => window.setTimeout(resolve, 800));
+    await new Promise((resolve) => window.setTimeout(resolve, 1000));
     setLoading(false);
     const next = new URLSearchParams(location.search).get('next');
     navigate(next?.startsWith('/') ? `/login?next=${encodeURIComponent(next)}` : '/login');
   };
+
+  const ErrorMsg = ({ name, centered }: { name: string, centered?: boolean }) => errors[name] ? (
+    <div className={clsx("flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1", centered && "justify-center")}>
+      <AlertCircle className="h-3 w-3" />
+      {errors[name]}
+    </div>
+  ) : null;
 
   const titleForStep = ["Personal Info", "Identity Verification", "Social Connection", "Profile Picture"];
   const iconForStep = [User, ShieldCheck, Share2, Camera];
@@ -122,85 +190,113 @@ const Signup = () => {
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 border-r border-slate-100 pr-3 mr-3">+91</div>
                       )}
                       <input
-                        required
+                        type={key === 'phone' ? 'tel' : 'text'}
+                        inputMode={key === 'phone' ? 'numeric' : 'text'}
                         value={form[key]}
-                        onChange={(e) => setForm((curr) => ({ ...curr, [key]: e.target.value }))}
-                        className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm", key === 'phone' ? "pl-[72px]" : "")}
+                        onChange={(e) => {
+                          let val = e.target.value;
+                          if (key === 'phone') {
+                            val = val.replace(/\D/g, '').slice(0, 10);
+                          }
+                          setForm((curr) => ({ ...curr, [key]: val }));
+                          if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }));
+                        }}
+                        className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
+                          errors[key] ? "border-red-400 focus:border-red-500" : "border-slate-200 focus:border-primary/50",
+                          key === 'phone' ? "pl-[72px]" : ""
+                        )}
                         placeholder={placeholder}
                       />
                     </div>
+                    <ErrorMsg name={key} />
                   </div>
                 ))}
 
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2">
-                      <Lock className="h-3.5 w-3.5" />
-                      Password
-                    </label>
+                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><Lock className="h-3.5 w-3.5" />Create Password</label>
                     <div className="relative">
                       <input
-                        required
                         type={showPassword ? 'text' : 'password'}
                         value={form.password}
-                        onChange={(e) => setForm((curr) => ({ ...curr, password: e.target.value }))}
-                        className="w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-sm"
-                        placeholder="••••••••"
+                        onChange={(e) => {
+                          setForm((curr) => ({ ...curr, password: e.target.value }));
+                          if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                        }}
+                        className={clsx("w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
+                          errors.password ? "border-red-400" : "border-slate-200"
+                        )}
+                        placeholder="Enter your password"
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                         {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                       </button>
                     </div>
+                    <ErrorMsg name="password" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2">
-                      <Lock className="h-3.5 w-3.5" />
-                      Confirm Password
-                    </label>
+                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><Lock className="h-3.5 w-3.5" />Confirm Password</label>
                     <div className="relative">
                       <input
-                        required
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={form.confirmPassword}
-                        onChange={(e) => setForm((curr) => ({ ...curr, confirmPassword: e.target.value }))}
-                        className="w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-sm"
-                        placeholder="••••••••"
+                        onChange={(e) => {
+                          setForm((curr) => ({ ...curr, confirmPassword: e.target.value }));
+                          if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+                        }}
+                        className={clsx("w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
+                          errors.confirmPassword ? "border-red-400" : "border-slate-200"
+                        )}
+                        placeholder="Enter your confirm password"
                       />
                       <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                         {showConfirmPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                       </button>
                     </div>
+                    <ErrorMsg name="confirmPassword" />
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <LoadingButton type="button" onClick={() => setStep(1)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
+                  <LoadingButton type="button" onClick={() => handleNext(1)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
                 </div>
               </div>
             )}
 
             {step === 1 && (
               <div className="space-y-5">
-                {/* Aadhaar Section */}
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><IdCard className="h-3.5 w-3.5" />Aadhaar number</label>
-                    <input required value={form.aadhaarNo} onChange={(e) => setForm((curr) => ({ ...curr, aadhaarNo: e.target.value }))} className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-sm" placeholder="XXXX-XXXX-XXXX" />
+                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><IdCard className="h-3.5 w-3.5" />Aadhaar Number</label>
+                    <input
+                      value={form.aadhaarNo}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                        setForm((curr) => ({ ...curr, aadhaarNo: val }));
+                        if (errors.aadhaarNo) setErrors(prev => ({ ...prev, aadhaarNo: '' }));
+                      }}
+                      className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
+                        errors.aadhaarNo ? "border-red-400" : "border-slate-200"
+                      )}
+                      placeholder="12 digit Aadhaar number"
+                    />
+                    <ErrorMsg name="aadhaarNo" />
                   </div>
                   <div className="space-y-3">
-                    <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Aadhaar photocopy</span>
+                    <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Aadhaar Card Photo</span>
                     <div className="grid grid-cols-2 gap-3">
-                      <button type="button" onClick={() => storageRefAadhaar.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", files.aadhaarDoc && "border-primary text-primary bg-primary/5")}>
+                      <button type="button" onClick={() => storageRefAadhaar.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", errors.aadhaarDoc ? "border-red-400 text-red-400 bg-red-50/50" : "border-slate-200 bg-white")}>
                         <Image className="h-4 w-4" /> From Storage
                       </button>
-                      <button type="button" onClick={() => cameraRefAadhaar.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", files.aadhaarDoc && "border-primary text-primary bg-primary/5")}>
+                      <button type="button" onClick={() => cameraRefAadhaar.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", errors.aadhaarDoc ? "border-red-400 text-red-400 bg-red-50/50" : "border-slate-200 bg-white")}>
                         <Camera className="h-4 w-4" /> Take Photo
                       </button>
                     </div>
+                    <ErrorMsg name="aadhaarDoc" />
                     {files.aadhaarDoc && (
                       <div className="relative mt-2 rounded-2xl overflow-hidden aspect-[3/4] border border-slate-100 shadow-sm transition-all animate-in fade-in zoom-in duration-300">
                         <img src={files.aadhaarDoc.preview} className="w-full h-full object-cover" alt="Preview" />
-                        <button type="button" onClick={() => setFiles({ ...files, aadhaarDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm shadow-lg hover:bg-black/70 transition-colors">✕</button>
+                        <button type="button" onClick={() => setFiles({ ...files, aadhaarDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm">✕</button>
                       </div>
                     )}
                     <input ref={storageRefAadhaar} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile('aadhaarDoc', e.target.files?.[0])} />
@@ -208,26 +304,38 @@ const Signup = () => {
                   </div>
                 </div>
 
-                {/* Voter Section */}
                 <div className="space-y-4 pt-4 border-t border-slate-100/50">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><IdCard className="h-3.5 w-3.5" />Voter Card number</label>
-                    <input required value={form.voterNo} onChange={(e) => setForm((curr) => ({ ...curr, voterNo: e.target.value }))} className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-sm" placeholder="Enter Voter ID" />
+                    <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><IdCard className="h-3.5 w-3.5" />Voter ID Number</label>
+                    <input
+                      value={form.voterNo}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 10);
+                        setForm((curr) => ({ ...curr, voterNo: val }));
+                        if (errors.voterNo) setErrors(prev => ({ ...prev, voterNo: '' }));
+                      }}
+                      className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
+                        errors.voterNo ? "border-red-400" : "border-slate-200"
+                      )}
+                      placeholder="10 digit Voter ID number"
+                    />
+                    <ErrorMsg name="voterNo" />
                   </div>
                   <div className="space-y-3">
-                    <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Voter card photocopy</span>
+                    <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Voter Card Photo</span>
                     <div className="grid grid-cols-2 gap-3">
-                      <button type="button" onClick={() => storageRefVoter.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", files.voterDoc && "border-primary text-primary bg-primary/5")}>
+                      <button type="button" onClick={() => storageRefVoter.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", errors.voterDoc ? "border-red-400 text-red-400 bg-red-50/50" : "border-slate-200 bg-white")}>
                         <Image className="h-4 w-4" /> From Storage
                       </button>
-                      <button type="button" onClick={() => cameraRefVoter.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", files.voterDoc && "border-primary text-primary bg-primary/5")}>
+                      <button type="button" onClick={() => cameraRefVoter.current?.click()} className={clsx("flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed transition-all hover:bg-slate-50 text-xs font-bold text-slate-600", errors.voterDoc ? "border-red-400 text-red-400 bg-red-50/50" : "border-slate-200 bg-white")}>
                         <Camera className="h-4 w-4" /> Take Photo
                       </button>
                     </div>
+                    <ErrorMsg name="voterDoc" />
                     {files.voterDoc && (
                       <div className="relative mt-2 rounded-2xl overflow-hidden aspect-[3/4] border border-slate-100 shadow-sm transition-all animate-in fade-in zoom-in duration-300">
                         <img src={files.voterDoc.preview} className="w-full h-full object-cover" alt="Preview" />
-                        <button type="button" onClick={() => setFiles({ ...files, voterDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm shadow-lg hover:bg-black/70 transition-colors">✕</button>
+                        <button type="button" onClick={() => setFiles({ ...files, voterDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm">✕</button>
                       </div>
                     )}
                     <input ref={storageRefVoter} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile('voterDoc', e.target.files?.[0])} />
@@ -235,8 +343,8 @@ const Signup = () => {
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <LoadingButton type="button" onClick={() => setStep(2)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Almost Done</LoadingButton>
+                <div className="pt-4">
+                  <LoadingButton type="button" onClick={() => handleNext(2)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Almost Done</LoadingButton>
                 </div>
               </div>
             )}
@@ -246,11 +354,22 @@ const Signup = () => {
                 {socialFields.map(({ key, label, icon: Icon }) => (
                   <div key={key} className="space-y-1.5">
                     <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><Icon className="h-3.5 w-3.5" />{label}</label>
-                    <input value={form[key]} onChange={(e) => setForm((curr) => ({ ...curr, [key]: e.target.value }))} className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-sm" placeholder={`Enter ${label.split(' ')[0]} URL`} />
+                    <input
+                      value={form[key]}
+                      onChange={(e) => {
+                        setForm((curr) => ({ ...curr, [key]: e.target.value }));
+                        if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }));
+                      }}
+                      className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
+                        errors[key] ? "border-red-400" : "border-slate-200"
+                      )}
+                      placeholder={`Enter ${label.split(' ')[0]} URL`}
+                    />
+                    <ErrorMsg name={key} />
                   </div>
                 ))}
                 <div className="pt-2">
-                  <LoadingButton type="button" onClick={() => setStep(3)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
+                  <LoadingButton type="button" onClick={() => handleNext(3)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Just One More</LoadingButton>
                 </div>
               </div>
             )}
@@ -258,18 +377,10 @@ const Signup = () => {
             {step === 3 && (
               <div className="space-y-6">
                 <div className="space-y-4 text-center">
-                  <span className="text-[13px] font-semibold text-slate-700 flex items-center justify-center gap-2">
-                    <User className="h-4 w-4" /> Live Capture
-                  </span>
-
+                  <span className="text-[13px] font-semibold text-slate-700 flex items-center justify-center gap-2"><User className="h-4 w-4" /> Live Capture</span>
                   <div className="flex justify-center">
-                    <div className={clsx(
-                      "relative h-48 w-48 rounded-full border-2 overflow-hidden transition-all duration-500",
-                      files.selfie ? "border-primary shadow-xl scale-105" : "border-dashed border-slate-200 bg-slate-50/50"
-                    )}>
-                      {files.selfie ? (
-                        <img src={files.selfie.preview} className="h-full w-full object-cover" alt="Profile Picture" />
-                      ) : (
+                    <div className={clsx("relative h-48 w-48 rounded-full border-2 overflow-hidden transition-all duration-500", errors.selfie ? "border-red-400 bg-red-50/30" : files.selfie ? "border-primary shadow-xl scale-105" : "border-dashed border-slate-200 bg-slate-50/50")}>
+                      {files.selfie ? (<img src={files.selfie.preview} className="h-full w-full object-cover" alt="Profile" />) : (
                         <div className="flex flex-col items-center justify-center h-full gap-2">
                           <User className="h-16 w-16 text-slate-300" />
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Image</span>
@@ -277,34 +388,21 @@ const Signup = () => {
                       )}
                     </div>
                   </div>
-
+                  <ErrorMsg name="selfie" centered />
                   <div className="flex flex-col gap-3">
                     {!files.selfie ? (
-                      <button
-                        type="button"
-                        onClick={() => cameraRefSelfie.current?.click()}
-                        className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all hover:border-primary/30 active:scale-95"
-                      >
+                      <button type="button" onClick={() => cameraRefSelfie.current?.click()} className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all hover:border-primary/30 active:scale-95">
                         <Camera className="h-5 w-5 text-primary" /> Take Profile Photo
                       </button>
                     ) : (
                       <div className="space-y-3">
-                        <div className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-green-50 border border-green-100 text-sm font-bold text-green-600">
-                          <ShieldCheck className="h-5 w-5" /> Profile Photo Captured!
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => cameraRefSelfie.current?.click()}
-                          className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-500 hover:text-primary hover:bg-slate-50 transition-all active:scale-95"
-                        >
-                          Retake Profile Photo
-                        </button>
+                        <div className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-green-50 border border-green-100 text-sm font-bold text-green-600"><ShieldCheck className="h-5 w-5" /> Profile Photo Captured!</div>
+                        <button type="button" onClick={() => cameraRefSelfie.current?.click()} className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-500 hover:text-primary hover:bg-slate-50 transition-all active:scale-95">Retake Profile Photo</button>
                       </div>
                     )}
                   </div>
                   <input ref={cameraRefSelfie} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => handleFile('selfie', e.target.files?.[0])} />
                 </div>
-
                 <div className="pt-2">
                   <LoadingButton type="submit" loading={loading} className="w-full h-12 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-xl transition-all">Complete Registration</LoadingButton>
                 </div>

@@ -83,7 +83,7 @@ const Login = () => {
             <div className="space-y-1.5">
               <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
-                Email or Username
+                Email or Phone Number
               </label>
               <div className="relative">
                 <input
@@ -91,7 +91,7 @@ const Login = () => {
                   value={form.identifier}
                   onChange={(event) => setForm((current) => ({ ...current, identifier: event.target.value }))}
                   className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email or phone number"
                 />
               </div>
             </div>
