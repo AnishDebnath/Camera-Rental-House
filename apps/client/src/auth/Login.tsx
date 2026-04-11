@@ -1,7 +1,8 @@
-import { Camera, Eye, EyeOff, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Camera, Eye, EyeOff, Lock, User, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
+import clsx from 'clsx';
 import { findDemoAdminAccount, startDemoUserSession } from '../../../../packages/auth';
 import {
   resolveAdminAppUrl,
@@ -20,12 +21,40 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
+  const [error, setError] = useState('');
+
+  const validate = () => {
+    const val = form.identifier.trim();
+    if (!val) return "Email or phone number is required";
+
+    // Check if input is numeric
+    const isNumeric = /^\d+$/.test(val);
+    if (isNumeric) {
+      if (val.length !== 10) return "Phone number must be exactly 10 digits";
+    } else {
+      // Basic email regex
+      const isEmail = /^[^\s@]+@gmail\.com$/.test(val);
+      if (!isEmail) return "Please enter the valid email or 10-digit phone number";
+    }
+
+    if (!form.password) return "Password is required";
+    return "";
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError('');
     setLoading(true);
     const currentParams = new URLSearchParams(window.location.search);
     const requestedNext = currentParams.get('next');
+
+    // Artificial delay for better UX
+    await new Promise(r => setTimeout(r, 600));
 
     const matched = findDemoAdminAccount(form.identifier, form.password);
 
@@ -87,13 +116,26 @@ const Login = () => {
               </label>
               <div className="relative">
                 <input
-                  required
                   value={form.identifier}
-                  onChange={(event) => setForm((current) => ({ ...current, identifier: event.target.value }))}
-                  className="w-full h-11 px-4 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm"
+                  onChange={(event) => {
+                    setForm((current) => ({ ...current, identifier: event.target.value }));
+                    if (error) setError('');
+                  }}
+                  className={clsx(
+                    "w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
+                    error && error.includes('phone') || error.includes('email') || error.includes('required') && !form.identifier
+                      ? "border-red-400 focus:border-red-500"
+                      : "border-slate-200 focus:border-primary/50"
+                  )}
                   placeholder="Enter your email or phone number"
                 />
               </div>
+              {error && (error.includes('phone') || error.includes('email') || error.includes('required') && !form.identifier) && (
+                <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 px-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {error}
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -102,17 +144,19 @@ const Login = () => {
                   <Lock className="h-3.5 w-3.5" />
                   Password
                 </label>
-                {/* <Link to="/forgot-password" title="Coming soon!" className="text-[12px] font-medium text-primary hover:underline">
-                  Forgot password?
-                </Link> */}
               </div>
               <div className="relative">
                 <input
-                  required
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
-                  onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-                  className="w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border border-slate-200 outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm"
+                  onChange={(event) => {
+                    setForm((current) => ({ ...current, password: event.target.value }));
+                    if (error && error.includes('Password')) setError('');
+                  }}
+                  className={clsx(
+                    "w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
+                    error && error.includes('Password') ? "border-red-400 focus:border-red-500" : "border-slate-200 focus:border-primary/50"
+                  )}
                   placeholder="Enter your password"
                 />
                 <button
@@ -123,6 +167,12 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
+              {error && error.includes('Password') && (
+                <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 px-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {error}
+                </div>
+              )}
             </div>
 
             <div className="pt-1">
