@@ -66,7 +66,12 @@ const Category = () => {
         pullDistance={pullDistance}
         search={search}
         setSearch={setSearch}
+        showFilters={showFilters}
         setShowFilters={setShowFilters}
+        activeCategory={activeCategory}
+        onSelectCategory={(category) => {
+          setParams(category === 'All' ? {} : { category });
+        }}
       />
       <div className="app-shell mt-6">
         <CategoryProducts

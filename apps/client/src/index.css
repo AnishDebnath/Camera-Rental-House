@@ -10,6 +10,7 @@ html {
   overflow-x: hidden;
   overflow-y: scroll !important;
   scroll-behavior: initial !important;
+  scrollbar-gutter: stable;
 }
 
 html.lenis,

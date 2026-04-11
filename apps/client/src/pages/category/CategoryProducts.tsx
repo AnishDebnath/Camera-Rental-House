@@ -15,8 +15,7 @@ const CategoryProducts = ({ loading, filteredProducts, itemsToShow, setItemsToSh
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ink">Category Gear</h1>
-          <p className="text-sm text-muted">Curated inventory for production days.</p>
+          <h1 className="text-2xl font-bold text-ink">Explore Gears</h1>
         </div>
         <p className="rounded-pill bg-primary-light px-4 py-2 text-xs font-semibold text-primary-dark">
           {filteredProducts.length} items
