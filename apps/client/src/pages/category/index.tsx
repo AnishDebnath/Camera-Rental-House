@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import CategoryHeader from './CategoryHeader';
 import CategoryProducts from './CategoryProducts';
 import MobileFilters from './MobileFilters';
+import Footer from '../../components/common/footer/Footer';
 import { mockProducts } from '../../data/mockProducts';
 import useDebounce from '../../hooks/useDebounce';
 import usePullToRefresh from '../../hooks/usePullToRefresh';
@@ -14,7 +15,7 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [itemsToShow, setItemsToShow] = useState(8);
-  
+
   const activeCategory = params.get('category') || 'All';
   const activeBrand = params.get('brand') || 'All';
   const debouncedSearch = useDebounce(search, 250);
@@ -55,15 +56,15 @@ const Category = () => {
   const filteredProducts = useMemo(
     () =>
       mockProducts.filter((product) => {
-        const matchesCategory = activeCategory === 'All' || 
-          product.category === activeCategory || 
+        const matchesCategory = activeCategory === 'All' ||
+          product.category === activeCategory ||
           product.name.toLowerCase().includes(activeCategory.toLowerCase());
-          
-        const matchesBrand = activeBrand === 'All' || 
+
+        const matchesBrand = activeBrand === 'All' ||
           product.name.toLowerCase().includes(activeBrand.toLowerCase());
 
         const matchesSearch = product.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-        
+
         return matchesCategory && matchesBrand && matchesSearch;
       }),
     [activeCategory, activeBrand, debouncedSearch],
@@ -110,6 +111,9 @@ const Category = () => {
           onSelectFilter={handleFilterSelect}
         />
       )}
+      <div className="mt-12 md:mt-18">
+        <Footer />
+      </div>
     </div>
   );
 };
