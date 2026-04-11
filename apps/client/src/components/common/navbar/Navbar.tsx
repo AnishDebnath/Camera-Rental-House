@@ -38,7 +38,7 @@ const Navbar = () => {
     <header
       className={clsx(
         isCategoryPage ? 'absolute' : 'fixed',
-        'inset-x-0 top-0 z-50 transition-all duration-500',
+        'inset-x-0 top-0 z-[1000] transition-all duration-500',
         isScrolled
           ? 'bg-white/30 backdrop-blur-[40px] py-3 border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)]'
           : 'bg-transparent py-5'
@@ -148,7 +148,7 @@ const Navbar = () => {
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <Popover.Panel className="absolute right-0 mt-2 w-56 origin-top-right z-50 divide-y divide-line rounded-2xl bg-white/95 backdrop-blur-xl p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
+                <Popover.Panel className="absolute right-0 mt-2 w-56 origin-top-right z-[1001] divide-y divide-line rounded-2xl bg-white/95 backdrop-blur-xl p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
                   <div className="px-3 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
                     <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>

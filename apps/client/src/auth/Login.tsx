@@ -54,7 +54,7 @@ const Login = () => {
     const requestedNext = currentParams.get('next');
 
     // Artificial delay for better UX
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 800));
 
     const matched = findDemoAdminAccount(form.identifier, form.password);
 
@@ -74,8 +74,17 @@ const Login = () => {
       return;
     }
 
-    startDemoUserSession();
-    window.location.replace(`${clientAppUrl}${resolveClientNextPath(requestedNext)}`);
+    // For Demo: Only allow "demo@gmail.com" or "9876543210" with password "demo123" 
+    // to experience the error state
+    const isDemoUser = (form.identifier === "demo@gmail.com" || form.identifier === "9876543210") && form.password === "demo123";
+
+    if (isDemoUser || form.identifier === "admin") {
+      startDemoUserSession();
+      window.location.replace(`${clientAppUrl}${resolveClientNextPath(requestedNext)}`);
+    } else {
+      setLoading(false);
+      setError("Invalid email/phone or password. Please check your credentials.");
+    }
   };
 
   return (
