@@ -67,7 +67,7 @@ const MobileFilters = ({ showFilters, setShowFilters, activeCategory, activeBran
                     </div>
                     <div className="mb-4 flex items-center justify-between">
                       <div>
-                        <p className="text-lg font-semibold text-ink leading-none">Filter Gears</p>
+                        <p className="text-xl md:text-2xl font-bold text-ink leading-none">Filter Gears</p>
                         <p className="text-xs text-muted mt-1">Choose the category or brand you need.</p>
                       </div>
                       <button

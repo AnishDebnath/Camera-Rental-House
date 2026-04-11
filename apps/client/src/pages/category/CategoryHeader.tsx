@@ -17,14 +17,14 @@ interface CategoryHeaderProps {
   onSelectFilter: (type: 'category' | 'brand', value: string) => void;
 }
 
-const CategoryHeader = ({ 
-  search, 
-  setSearch, 
-  showFilters, 
-  setShowFilters, 
-  activeCategory, 
+const CategoryHeader = ({
+  search,
+  setSearch,
+  showFilters,
+  setShowFilters,
+  activeCategory,
   activeBrand,
-  onSelectFilter 
+  onSelectFilter
 }: CategoryHeaderProps) => {
   const [isFixed, setIsFixed] = useState(false);
   const [barHeight, setBarHeight] = useState(0);
@@ -99,7 +99,7 @@ const CategoryHeader = ({
           'w-full z-[200] transition-all duration-500',
           isFixed
             ? 'fixed top-0 left-0 right-0 bg-white/30 backdrop-blur-[40px] border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)] py-3'
-            : 'relative bg-transparent pb-3'
+            : 'relative bg-transparent pb-2'
         )}
       >
         <div
@@ -110,21 +110,21 @@ const CategoryHeader = ({
         />
 
         {/* Desktop Backdrop Animation */}
-        <div 
+        <div
           className={clsx(
             "hidden lg:block fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-none z-[-1] transition-opacity duration-500",
             showFilters ? "opacity-100" : "opacity-0"
           )}
-          aria-hidden="true" 
+          aria-hidden="true"
         />
 
         <div ref={filterPanelRef} className="relative app-shell">
-          <SearchBar 
-            value={search} 
-            onChange={setSearch} 
+          <SearchBar
+            value={search}
+            onChange={setSearch}
             onFilterClick={() => {
               setShowFilters(!showFilters);
-            }} 
+            }}
           />
 
           {/* Desktop Filters Dropdown Overlay */}
@@ -133,26 +133,26 @@ const CategoryHeader = ({
             showFilters ? "translate-y-4 opacity-100 pointer-events-auto" : "translate-y-0 opacity-0 pointer-events-none"
           )}>
             <div className="p-5 md:p-6 rounded-[32px] bg-white shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 relative overflow-hidden">
-               <div className="relative">
-                 <div className="mb-4 flex justify-between items-start">
-                    <div>
-                       <h3 className="text-lg font-semibold text-ink">Filter Gears</h3>
-                       <p className="text-sm text-muted">Choose the category or brand you need.</p>
-                    </div>
-                    <button 
-                      onClick={() => setShowFilters(false)}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-page hover:bg-slate-200 transition-colors"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                 </div>
-                 <FilterChips 
-                    activeCategory={activeCategory} 
-                    activeBrand={activeBrand}
-                    onSelect={onSelectFilter}
-                    isDark={false}
-                 />
-               </div>
+              <div className="relative">
+                <div className="mb-4 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold text-ink">Filter Gears</h3>
+                    <p className="text-sm text-muted">Choose the category or brand you need.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-page hover:bg-slate-200 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <FilterChips
+                  activeCategory={activeCategory}
+                  activeBrand={activeBrand}
+                  onSelect={onSelectFilter}
+                  isDark={false}
+                />
+              </div>
             </div>
           </div>
         </div>
