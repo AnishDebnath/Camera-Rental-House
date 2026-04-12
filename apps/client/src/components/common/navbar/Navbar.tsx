@@ -57,8 +57,8 @@ const Navbar = () => {
             <Camera className="h-4.5 w-4.5" />
           </div>
           <div className="flex flex-col">
-            <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">CineKit</p>
-            <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80">Pro Rentals</p>
+            <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">Camera Rental House</p>
+            <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80">Premium Rentals</p>
           </div>
         </Link>
 

@@ -3,7 +3,7 @@ export type DemoRole = 'admin' | 'manager';
 export const DEMO_ADMIN_CREDENTIALS = [
   {
     label: 'Admin Demo',
-    identifiers: ['admin', 'admin@cinekit.com'],
+    identifiers: ['admin', 'admin@camerarentalhouse.in'],
     username: 'admin',
     password: 'admin123',
     role: 'admin' as const,
@@ -11,7 +11,7 @@ export const DEMO_ADMIN_CREDENTIALS = [
   },
   {
     label: 'Manager Demo',
-    identifiers: ['manager', 'manager@cinekit.com'],
+    identifiers: ['manager', 'manager@camerarentalhouse.in'],
     username: 'manager',
     password: 'manager123',
     role: 'manager' as const,

@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
-    service: 'cinekit-server',
+    service: 'camera-rental-house-server',
     requestId: crypto.randomUUID(),
   });
 });
@@ -49,6 +49,6 @@ export default app;
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const port = Number(process.env.PORT || 5000);
   app.listen(port, () => {
-    console.log(`CineKit server listening on port ${port}`);
+    console.log(`Camera Rental House server listening on port ${port}`);
   });
 }

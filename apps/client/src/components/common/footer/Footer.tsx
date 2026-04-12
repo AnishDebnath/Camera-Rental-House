@@ -14,7 +14,7 @@ const Footer = () => {
                 <Camera className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base font-bold">CineKit</p>
+                <p className="text-base font-bold">Camera Rental House</p>
                 <p className="text-xs text-muted">Professional camera rental house</p>
               </div>
             </div>
@@ -51,7 +51,7 @@ const Footer = () => {
                 }
                 className="inline-flex items-center gap-2"
               >
-                <Mail className="h-4 w-4 text-primary" /> hello@cinekit.in
+                <Mail className="h-4 w-4 text-primary" /> hello@camerarentalhouse.in
               </button>
             </div>
           </div>
@@ -82,7 +82,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 border-t border-line pt-4 text-xs text-tertiary">
-          2026 CineKit.
+          2026 Camera Rental House.
         </div>
       </div>
     </footer>

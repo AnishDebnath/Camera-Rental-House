@@ -37,7 +37,7 @@ const AdminNavbar = ({ onOpenSidebar }) => {
             </div>
             <div>
               <p className="text-base font-bold text-ink">
-                {isManager ? 'CineKit Counter' : 'CineKit Admin'}
+                {isManager ? 'Camera Rental House Counter' : 'Camera Rental House Admin'}
               </p>
               <p className="text-xs text-muted capitalize">
                 {isManager ? 'manager counter mode' : 'admin control mode'}

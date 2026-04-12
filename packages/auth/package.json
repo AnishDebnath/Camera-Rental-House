@@ -1,5 +1,5 @@
 {
-  "name": "@cinekit/auth",
+  "name": "@camera-rental-house/auth",
   "private": true,
   "version": "1.0.0",
   "type": "module",

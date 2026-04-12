@@ -1,5 +1,5 @@
 {
-  "name": "@cinekit/client",
+  "name": "@camera-rental-house/client",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.0",
+    "@camera-rental-house/auth": "*",
+    "@camera-rental-house/types": "*",
+    "@camera-rental-house/ui": "*",
+    "@headlessui/react": "^2.1.2",
     "@heroicons/react": "^2.2.0",
     "axios": "^1.8.4",
     "clsx": "^2.1.1",

@@ -10,7 +10,7 @@ export const defaultDemoUser = {
   facebook: '',
   instagram: '@alexdirector',
   youtube: '',
-  userQrBase64: 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=CineKit-Alex-Director',
+  userQrBase64: 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=Camera-Rental-House-Alex-Director',
 };
 
 export type DemoUser = typeof defaultDemoUser;

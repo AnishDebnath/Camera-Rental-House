@@ -22,7 +22,7 @@ const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 const ProtectedRoute = ({ children, allowManager = false }) => {
   const location = useLocation();
   const token = localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
-  const role = localStorage.getItem('cinekit_admin_role');
+  const role = localStorage.getItem('camera_rental_house_admin_role');
 
   if (!token) {
     const next = `${location.pathname}${location.search}`;

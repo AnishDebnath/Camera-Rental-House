@@ -6,13 +6,13 @@ const CartContext = createContext(null);
 export const CartProvider = ({ children }) => {
   const { addToast } = useToast();
   const [items, setItems] = useState(() => {
-    const stored = localStorage.getItem('cinekit_demo_cart');
+    const stored = localStorage.getItem('camera_rental_house_demo_cart');
     return stored ? JSON.parse(stored) : [];
   });
 
   const persist = (next) => {
     setItems(next);
-    localStorage.setItem('cinekit_demo_cart', JSON.stringify(next));
+    localStorage.setItem('camera_rental_house_demo_cart', JSON.stringify(next));
   };
 
   const value = useMemo(

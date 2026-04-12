@@ -6,13 +6,13 @@ const FavouritesContext = createContext(null);
 export const FavouritesProvider = ({ children }) => {
   const { addToast } = useToast();
   const [favourites, setFavourites] = useState(() => {
-    const stored = localStorage.getItem('cinekit_demo_favourites');
+    const stored = localStorage.getItem('camera_rental_house_demo_favourites');
     return stored ? JSON.parse(stored) : [];
   });
 
   const persist = (next) => {
     setFavourites(next);
-    localStorage.setItem('cinekit_demo_favourites', JSON.stringify(next));
+    localStorage.setItem('camera_rental_house_demo_favourites', JSON.stringify(next));
   };
 
   const value = useMemo(
