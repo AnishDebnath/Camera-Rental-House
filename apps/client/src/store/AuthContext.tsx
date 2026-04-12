@@ -3,26 +3,33 @@ import {
   useContext,
   useMemo,
   useState,
+  useEffect,
   type ReactNode,
 } from 'react';
-import { mockRentals } from '../data/mockProducts';
+import axiosInstance from '../api/axiosInstance';
 import { useToast } from './ToastContext';
-import {
-  clearDemoUserSession,
-  defaultDemoUser,
-  readDemoUserSession,
-  startDemoUserSession,
-  type DemoUser,
-  updateDemoUserSession,
-} from '../../../../packages/auth/useAuth';
+
+export interface User {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  avatarUrl?: string;
+  userQrBase64?: string;
+  aadhaarNo?: string;
+  voterNo?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+}
 
 type AuthContextValue = {
-  user: DemoUser | null;
+  user: User | null;
   isAuthenticated: boolean;
-  rentals: typeof mockRentals;
-  login: () => Promise<void>;
-  signup: () => Promise<void>;
-  updateProfile: (updates: Partial<DemoUser>) => Promise<void>;
+  rentals: any[];
+  login: (credentials: any) => Promise<void>;
+  signup: (formData: FormData) => Promise<void>;
+  updateProfile: (updates: Partial<User>) => Promise<void>;
   logout: () => void;
   refreshRentals: () => Promise<void>;
 };
@@ -31,32 +38,54 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { addToast } = useToast();
-  const [user, setUser] = useState(() => readDemoUserSession());
-  const [rentals] = useState(mockRentals);
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem('camera_rental_house_user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [rentals, setRentals] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('camera_rental_house_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('camera_rental_house_user');
+    }
+  }, [user]);
 
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
       rentals,
-      login: async () => {
-        setUser(startDemoUserSession());
-        addToast({ title: 'Welcome back', message: 'Demo session started.', tone: 'success' });
+      login: async (credentials: any) => {
+        const response = await axiosInstance.post('/auth/login', credentials);
+        setUser(response.data.user);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        addToast({ title: 'Welcome back', message: 'Logged in successfully.', tone: 'success' });
       },
-      signup: async () => {
-        addToast({ title: 'Account created', message: 'Demo account saved locally.', tone: 'success' });
+      signup: async (formData: FormData) => {
+        const response = await axiosInstance.post('/auth/signup', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        // We might want to auto-login here or redirect to login.
+        // The backend returns user + accessToken on signup.
+        setUser(response.data.user);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
       },
-      updateProfile: async (updates: Partial<DemoUser>) => {
-        const next = { ...(user ?? defaultDemoUser), ...updates };
-        setUser(updateDemoUserSession(next));
-        addToast({ title: 'Profile updated', message: 'Saved in demo mode.', tone: 'success' });
+      updateProfile: async (updates: Partial<User>) => {
+        // Mocking for now, could be an API call
+        setUser((prev) => (prev ? { ...prev, ...updates } : null));
+        addToast({ title: 'Profile updated', message: 'Your changes were saved.', tone: 'success' });
       },
       logout: () => {
-        clearDemoUserSession();
         setUser(null);
-        addToast({ title: 'Signed out', message: 'Demo state reset.', tone: 'info' });
+        localStorage.removeItem('accessToken');
+        addToast({ title: 'Signed out', message: 'You have been logged out.', tone: 'info' });
       },
-      refreshRentals: async () => {},
+      refreshRentals: async () => {
+        // Fetch real rentals here
+      },
     }),
     [addToast, rentals, user],
   );

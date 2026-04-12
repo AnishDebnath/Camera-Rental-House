@@ -3,6 +3,8 @@ import { type FormEvent, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import clsx from 'clsx';
+import { useAuth } from '../store/AuthContext';
+import { useToast } from '../store/ToastContext';
 
 type UploadKey = 'aadhaarDoc' | 'voterDoc' | 'selfie';
 
@@ -123,15 +125,41 @@ const Signup = () => {
     }
   };
 
+  const { signup } = useAuth();
+  const { addToast } = useToast();
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!validateStep(step)) return;
 
     setLoading(true);
-    await new Promise((resolve) => window.setTimeout(resolve, 1000));
-    setLoading(false);
-    const next = new URLSearchParams(location.search).get('next');
-    navigate(next?.startsWith('/') ? `/login?next=${encodeURIComponent(next)}` : '/login');
+    try {
+      const formData = new FormData();
+      
+      // Append form fields
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      // Append files
+      if (files.aadhaarDoc) formData.append('aadhaarDoc', files.aadhaarDoc.file);
+      if (files.voterDoc) formData.append('voterDoc', files.voterDoc.file);
+      if (files.selfie) formData.append('selfie', files.selfie.file);
+
+      await signup(formData);
+      
+      const next = new URLSearchParams(location.search).get('next');
+      navigate(next?.startsWith('/') ? next : '/account');
+    } catch (error: any) {
+      console.error('Signup Error:', error);
+      addToast({
+        title: 'Registration failed',
+        message: error.message || error.error || 'Something went wrong. Please check your connection.',
+        tone: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const ErrorMsg = ({ name, centered }: { name: string, centered?: boolean }) => errors[name] ? (

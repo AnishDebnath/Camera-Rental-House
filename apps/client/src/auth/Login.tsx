@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/LoadingButton';
 import clsx from 'clsx';
+import { useAuth } from '../store/AuthContext';
 import { findDemoAdminAccount, startDemoUserSession } from '../../../../packages/auth';
 import {
   resolveAdminAppUrl,
@@ -41,6 +42,8 @@ const Login = () => {
     return "";
   };
 
+  const { login } = useAuth();
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationError = validate();
@@ -50,40 +53,37 @@ const Login = () => {
     }
     setError('');
     setLoading(true);
-    const currentParams = new URLSearchParams(window.location.search);
-    const requestedNext = currentParams.get('next');
 
-    // Artificial delay for better UX
-    await new Promise(r => setTimeout(r, 800));
+    try {
+      const currentParams = new URLSearchParams(window.location.search);
+      const requestedNext = currentParams.get('next');
 
-    const matched = findDemoAdminAccount(form.identifier, form.password);
+      // 1. Check for Admin/Manager Demo Credentials
+      const matched = findDemoAdminAccount(form.identifier, form.password);
+      if (matched) {
+        const nextPath =
+          requestedNext && requestedNext.startsWith('/admin')
+            ? requestedNext
+            : matched.role === 'manager'
+              ? '/admin/rentals'
+              : '/admin';
+        const params = new URLSearchParams({
+          token: `demo-${matched.role}-token`,
+          role: matched.role,
+          next: nextPath,
+        });
+        window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
+        return;
+      }
 
-    if (matched) {
-      const nextPath =
-        requestedNext && requestedNext.startsWith('/admin')
-          ? requestedNext
-          : matched.role === 'manager'
-            ? '/admin/rentals'
-            : '/admin';
-      const params = new URLSearchParams({
-        token: `demo-${matched.role}-token`,
-        role: matched.role,
-        next: nextPath,
-      });
-      window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
-      return;
-    }
-
-    // For Demo: Only allow "demo@gmail.com" or "9876543210" with password "demo123" 
-    // to experience the error state
-    const isDemoUser = (form.identifier === "demo@gmail.com" || form.identifier === "9876543210") && form.password === "demo123";
-
-    if (isDemoUser || form.identifier === "admin") {
-      startDemoUserSession();
-      window.location.replace(`${clientAppUrl}${resolveClientNextPath(requestedNext)}`);
-    } else {
+      // 2. Real User Login
+      await login(form);
+      const nextPath = resolveClientNextPath(requestedNext);
+      navigate(nextPath);
+    } catch (error: any) {
+      setError(error.message || "Invalid credentials. Please check your email/phone and password.");
+    } finally {
       setLoading(false);
-      setError("Invalid email/phone or password. Please check your credentials.");
     }
   };
 
@@ -185,6 +185,19 @@ const Login = () => {
             </div>
 
             <div className="pt-1">
+              {error && (
+                <div className={clsx(
+                  "flex items-center gap-2 p-3 mb-4 rounded-xl border text-xs font-bold transition-all animate-in fade-in slide-in-from-top-2",
+                  error.includes('not found')
+                    ? "bg-amber-50 border-amber-200 text-amber-700"
+                    : "bg-red-50 border-red-200 text-red-600"
+                )}>
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <div className="flex flex-col gap-0.5 text-left">
+                    {error}
+                  </div>
+                </div>
+              )}
               <LoadingButton
                 loading={loading}
                 type="submit"
@@ -212,7 +225,10 @@ const Login = () => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-px bg-slate-200" />
             <p className="text-sm text-slate-500">
               New here?{' '}
-              <Link to="/signup" className="font-bold text-primary inline-flex items-center gap-1 hover:underline group/sign">
+              <Link to="/signup" className={clsx(
+                "font-bold transition-colors inline-flex items-center gap-1 hover:underline group/sign",
+                error?.includes('not found') ? "text-amber-600" : "text-primary"
+              )}>
                 Create Account
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/sign:translate-x-1" />
               </Link>

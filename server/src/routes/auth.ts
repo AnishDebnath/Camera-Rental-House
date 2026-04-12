@@ -5,7 +5,9 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import dotenv from 'dotenv';
 import supabase from '../db/supabase.js';
-import { uploadFile } from '../storage/r2.js';
+import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.js';
+import { uploadToSupabase } from '../storage/supabaseStorage.js';
+import { processImage } from '../utils/imageProcessor.js';
 import generateQrBase64 from '../utils/qrGenerator.js';
 
 dotenv.config();
@@ -58,8 +60,12 @@ const validateSignupPayload = (body: any, files: any) => {
     errors.push('Aadhaar number must be 12 digits.');
   }
 
-  if (String(body.password || '').length < 8) {
-    errors.push('Password must be at least 8 characters long.');
+  if (String(body.password || '').length < 6) {
+    errors.push('Password must be at least 6 characters long.');
+  }
+
+  if (!files?.selfie?.[0]) {
+    errors.push('Profile capture is required.');
   }
 
   if (!files?.aadhaarDoc?.[0]) {
@@ -78,10 +84,13 @@ router.post(
   upload.fields([
     { name: 'aadhaarDoc', maxCount: 1 },
     { name: 'voterDoc', maxCount: 1 },
+    { name: 'selfie', maxCount: 1 },
   ]),
   async (req: Request, res: Response) => {
     try {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      console.log('Signup request received for:', req.body.email);
+      
       const errors = validateSignupPayload(req.body, files);
       if (errors.length) {
         return res.status(400).json({ message: 'Validation failed.', errors });
@@ -109,20 +118,43 @@ router.post(
       const userId = crypto.randomUUID();
       const passwordHash = await bcrypt.hash(req.body.password, 12);
 
-      const aadhaarDocUrl = await uploadFile({
-        buffer: files.aadhaarDoc[0].buffer,
-        key: `documents/users/${userId}/aadhaar-${Date.now()}`,
-        mimetype: files.aadhaarDoc[0].mimetype,
-        bucketName: 'documents',
-      });
+      console.log('Processing images for userId:', userId);
 
-      const voterDocUrl = await uploadFile({
-        buffer: files.voterDoc[0].buffer,
-        key: `documents/users/${userId}/voter-${Date.now()}`,
-        mimetype: files.voterDoc[0].mimetype,
-        bucketName: 'documents',
-      });
+      // 1. Process and Upload Selfie to Cloudinary
+      let avatarUrl = null;
+      if (files.selfie?.[0]) {
+        console.log('Uploading profile picture to Cloudinary...');
+        const { buffer, mimetype } = await processImage(files.selfie[0].buffer, { maxWidth: 800, maxHeight: 800, quality: 85 });
+        avatarUrl = await uploadToCloudinary({
+          buffer,
+          key: `avatar-${userId}-${Date.now()}`,
+          mimetype,
+          folder: 'Camera Rental House/Profile Picture',
+        });
+        console.log('Profile picture uploaded successfully.');
+      }
 
+      // 2. Process and Upload Aadhaar to Supabase Storage
+      console.log('Uploading Aadhaar to Supabase Storage...');
+      const { buffer: aadhaarBuf, mimetype: aadhaarMim } = await processImage(files.aadhaarDoc[0].buffer, { maxWidth: 1500, quality: 90 });
+      const aadhaarDocUrl = await uploadToSupabase({
+        buffer: aadhaarBuf,
+        key: `users/${userId}/aadhaar-${Date.now()}.${aadhaarMim.split('/')[1]}`,
+        mimetype: aadhaarMim,
+      });
+      console.log('Aadhaar uploaded successfully.');
+
+      // 3. Process and Upload Voter Card to Supabase Storage
+      console.log('Uploading Voter Card to Supabase Storage...');
+      const { buffer: voterBuf, mimetype: voterMim } = await processImage(files.voterDoc[0].buffer, { maxWidth: 1500, quality: 90 });
+      const voterDocUrl = await uploadToSupabase({
+        buffer: voterBuf,
+        key: `users/${userId}/voter-${Date.now()}.${voterMim.split('/')[1]}`,
+        mimetype: voterMim,
+      });
+      console.log('Voter Card uploaded successfully.');
+
+      console.log('Inserting user into Supabase database...');
       const userQrBase64 = await generateQrBase64({ userId });
 
       const { data, error } = await supabase
@@ -137,12 +169,13 @@ router.post(
           aadhaar_doc_url: aadhaarDocUrl,
           voter_no: req.body.voterNo,
           voter_doc_url: voterDocUrl,
+          avatar_url: avatarUrl,
           facebook: req.body.facebook || null,
           instagram: req.body.instagram || null,
           youtube: req.body.youtube || null,
           user_qr_base64: userQrBase64,
         })
-        .select('id, full_name, phone, email, created_at')
+        .select('id, full_name, phone, email, avatar_url, user_qr_base64, created_at')
         .single();
 
       if (error) {
@@ -153,7 +186,14 @@ router.post(
 
       return res.status(201).json({
         message: 'Signup successful.',
-        user: data,
+        user: {
+          id: data.id,
+          fullName: data.full_name,
+          phone: data.phone,
+          email: data.email,
+          avatarUrl: data.avatar_url,
+          userQrBase64: data.user_qr_base64,
+        },
         accessToken: tokens.accessToken,
       });
     } catch (error: any) {
@@ -186,7 +226,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(404).json({ message: "User not found. Please sign up to create an account." });
     }
 
     if (user.is_blocked) {
@@ -195,7 +235,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'Incorrect password. Please try again.' });
     }
 
     const tokens = issueTokens(res, {
@@ -217,6 +257,7 @@ router.post('/login', async (req: Request, res: Response) => {
         facebook: user.facebook,
         instagram: user.instagram,
         youtube: user.youtube,
+        avatarUrl: user.avatar_url,
         userQrBase64: user.user_qr_base64,
       },
     });

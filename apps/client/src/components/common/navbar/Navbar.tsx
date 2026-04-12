@@ -57,7 +57,7 @@ const Navbar = () => {
             <Camera className="h-4.5 w-4.5" />
           </div>
           <div className="flex flex-col">
-            <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">Camera Rental House</p>
+            <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">C R H</p>
             <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80">Premium Rentals</p>
           </div>
         </Link>
@@ -130,8 +130,12 @@ const Navbar = () => {
           {isAuthenticated ? (
             <Popover className="relative">
               <Popover.Button className="flex items-center gap-2.5 rounded-full p-1 pr-3 border border-white/60 bg-white/40 backdrop-blur-md hover:bg-white/60 transition-all duration-200 focus:outline-none">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-primary-hover text-white font-bold text-sm shrink-0">
-                  {user?.fullName?.[0] || 'U'}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-primary-hover text-white font-bold text-sm shrink-0 overflow-hidden border border-white/40">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
+                  ) : (
+                    user?.fullName?.[0] || 'U'
+                  )}
                 </div>
                 <span className="text-sm font-semibold text-ink max-w-[80px] sm:max-w-[150px] lg:max-w-[200px] truncate">
                   <span className="opacity-60 font-medium">Hey, </span>{user?.fullName}
@@ -149,9 +153,20 @@ const Navbar = () => {
                 leaveTo="transform scale-95 opacity-0"
               >
                 <Popover.Panel className="absolute right-0 mt-2 w-56 origin-top-right z-[1001] divide-y divide-line rounded-2xl bg-white/95 backdrop-blur-xl p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
-                  <div className="px-3 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
-                    <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>
+                  <div className="flex items-center gap-3 px-3 py-3">
+                    <div className="h-10 w-10 rounded-xl overflow-hidden border border-line shrink-0">
+                      {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-bold">
+                          {user?.fullName?.[0] || 'U'}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
+                      <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>
+                    </div>
                   </div>
                   <div className="py-2 text-ink/80">
                     <Link to="/account" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">

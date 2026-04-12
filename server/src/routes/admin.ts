@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
 import supabase from '../db/supabase.js';
-import { deleteFile, getSignedUrl, uploadFile } from '../storage/r2.js';
+import { deleteFile, getSignedUrl, uploadFile } from '../storage/cloudinary.js';
 import generateUniqueCode from '../utils/codeGenerator.js';
 import generateQrBase64 from '../utils/qrGenerator.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
@@ -11,9 +11,12 @@ import roleMiddleware from '../middleware/roleMiddleware.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const extractR2Key = (url: string | null): string | null => {
+const extractPublicId = (url: string | null): string | null => {
   if (!url) return null;
-  return url.split(`${process.env.R2_PUBLIC_URL}/`)[1] || url;
+  const parts = url.split('/upload/');
+  if (parts.length < 2) return null;
+  const path = parts[1].replace(/^v\d+\//, '');
+  return path.split('.')[0];
 };
 
 router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: Response) => {
@@ -124,16 +127,12 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
     const [aadhaarSignedUrl, voterSignedUrl] = await Promise.all([
       data.aadhaar_doc_url
         ? getSignedUrl({
-            key: extractR2Key(data.aadhaar_doc_url) as string,
-            expiresIn: 3600,
-            bucketName: 'documents',
+            key: extractPublicId(data.aadhaar_doc_url) as string,
           })
         : null,
       data.voter_doc_url
         ? getSignedUrl({
-            key: extractR2Key(data.voter_doc_url) as string,
-            expiresIn: 3600,
-            bucketName: 'documents',
+            key: extractPublicId(data.voter_doc_url) as string,
           })
         : null,
     ]);
@@ -266,11 +265,12 @@ router.post('/products', roleMiddleware(['admin']), upload.array('images', 8), a
           .jpeg({ quality: 82 })
           .toBuffer();
 
-        const key = `products/${productId}/${Date.now()}-${index}.jpg`;
+        const key = `${productId}/${Date.now()}-${index}.jpg`;
         const imageUrl = await uploadFile({
           buffer,
           key,
           mimetype: 'image/jpeg',
+          folder: 'Camera Rental House/Products',
         });
 
         return {
@@ -335,7 +335,7 @@ router.put('/products/:id', roleMiddleware(['admin']), upload.array('images', 8)
 
       await Promise.all(
         (imagesToRemove || []).map((image: any) =>
-          deleteFile({ key: extractR2Key(image.image_url) as string }),
+          deleteFile({ key: extractPublicId(image.image_url) as string }),
         ),
       );
 
@@ -412,7 +412,7 @@ router.delete('/products/:id', roleMiddleware(['admin']), async (req: Request, r
     }
 
     await Promise.all(
-      (images || []).map((image: any) => deleteFile({ key: extractR2Key(image.image_url) as string })),
+      (images || []).map((image: any) => deleteFile({ key: extractPublicId(image.image_url) as string })),
     );
 
     const { error } = await supabase.from('products').delete().eq('id', req.params.id);
