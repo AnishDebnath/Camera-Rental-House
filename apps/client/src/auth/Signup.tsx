@@ -5,6 +5,7 @@ import LoadingButton from '../components/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
 import { useToast } from '../store/ToastContext';
+import axiosInstance from '../api/axiosInstance';
 
 type UploadKey = 'aadhaarDoc' | 'voterDoc' | 'selfie';
 
@@ -119,8 +120,48 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = (nextStep: number) => {
-    if (validateStep(step)) {
+  const handleNext = async (nextStep: number) => {
+    if (!validateStep(step)) return;
+
+    // Additional backend check for existing users at relevant steps
+    if (step === 0 || step === 1) {
+      setLoading(true);
+      try {
+        const payload: any = {};
+        if (step === 0) {
+          payload.email = form.email;
+          payload.phone = form.phone;
+        } else if (step === 1) {
+          payload.aadhaarNo = form.aadhaarNo;
+          payload.voterNo = form.voterNo;
+        }
+
+        const response = await axiosInstance.post('/auth/check-exists', payload);
+        if (response.data.exists === false) {
+          setStep(nextStep);
+        }
+      } catch (error: any) {
+        const fieldErrors = error.fieldErrors || error.response?.data?.fieldErrors;
+        const message = error.message || error.response?.data?.message || 'Verification failed';
+        const toastMessage = fieldErrors && Object.keys(fieldErrors).length > 0 ? 'This user is already registered.' : message;
+        addToast({ title: 'Registration Failed', message: toastMessage, tone: 'error' });
+        if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+          setErrors({ general: message, ...fieldErrors });
+        } else {
+          const lowercaseMsg = message.toLowerCase();
+
+          if (lowercaseMsg.includes('email')) setErrors(prev => ({ ...prev, email: message }));
+          else if (lowercaseMsg.includes('phone')) setErrors(prev => ({ ...prev, phone: message }));
+          else if (lowercaseMsg.includes('aadhaar')) setErrors(prev => ({ ...prev, aadhaarNo: message }));
+          else if (lowercaseMsg.includes('voter')) setErrors(prev => ({ ...prev, voterNo: message }));
+          else {
+            setErrors(prev => ({ ...prev, general: message }));
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    } else {
       setStep(nextStep);
     }
   };
@@ -133,9 +174,10 @@ const Signup = () => {
     if (!validateStep(step)) return;
 
     setLoading(true);
+    setErrors({});
     try {
       const formData = new FormData();
-      
+
       // Append form fields
       Object.entries(form).forEach(([key, value]) => {
         formData.append(key, value);
@@ -147,27 +189,60 @@ const Signup = () => {
       if (files.selfie) formData.append('selfie', files.selfie.file);
 
       await signup(formData);
-      
+
       const next = new URLSearchParams(location.search).get('next');
       navigate(next?.startsWith('/') ? next : '/account');
     } catch (error: any) {
       console.error('Signup Error:', error);
-      addToast({
-        title: 'Registration failed',
-        message: error.message || error.error || 'Something went wrong. Please check your connection.',
-        tone: 'error'
-      });
+      const fieldErrors = error.fieldErrors || error.response?.data?.fieldErrors;
+      const message = error.message || error.response?.data?.message || 'Something went wrong. Please check your connection.';
+      const toastMessage = fieldErrors && Object.keys(fieldErrors).length > 0 ? 'This user is already registered.' : message;
+      addToast({ title: 'Registration Failed', message: toastMessage, tone: 'error' });
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+        setErrors({ general: message, ...fieldErrors });
+        if (fieldErrors.email || fieldErrors.phone) setStep(0);
+        else if (fieldErrors.aadhaarNo || fieldErrors.voterNo) setStep(1);
+      } else {
+
+        // Map common backend errors to specific fields
+        if (message.includes('Email')) {
+          setErrors({ email: message });
+          setStep(0); // Jump to step 0 for email
+        } else if (message.includes('Phone number')) {
+          setErrors({ phone: message });
+          setStep(0); // Jump to step 0 for phone
+        } else if (message.includes('Aadhaar')) {
+          setErrors({ aadhaarNo: message });
+          setStep(1); // Jump to step 1 for Aadhaar
+        } else if (message.includes('Voter ID')) {
+          setErrors({ voterNo: message });
+          setStep(1); // Jump to step 1 for Voter ID
+        } else {
+          setErrors({ general: message });
+        }
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const ErrorMsg = ({ name, centered }: { name: string, centered?: boolean }) => errors[name] ? (
-    <div className={clsx("flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1", centered && "justify-center")}>
-      <AlertCircle className="h-3 w-3" />
-      {errors[name]}
-    </div>
-  ) : null;
+  const StepErrorMessage = () => {
+    const errorMessages = Object.values(errors);
+
+    if (errorMessages.length === 0) return null;
+
+    let displayMessage = errors.general || errorMessages[0];
+    if (displayMessage === "error") displayMessage = errors.general || "Please check the highlighted fields.";
+
+    return (
+      <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+        <div className="text-xs font-bold text-red-600 leading-tight">
+          {displayMessage}
+        </div>
+      </div>
+    );
+  };
 
   const titleForStep = ["Personal Info", "Identity Verification", "Social Connection", "Profile Picture"];
   const iconForStep = [User, ShieldCheck, Share2, Camera];
@@ -227,7 +302,7 @@ const Signup = () => {
                             val = val.replace(/\D/g, '').slice(0, 10);
                           }
                           setForm((curr) => ({ ...curr, [key]: val }));
-                          if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }));
+                          if (Object.keys(errors).length > 0) setErrors({});
                         }}
                         className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
                           errors[key] ? "border-red-400 focus:border-red-500" : "border-slate-200 focus:border-primary/50",
@@ -236,7 +311,6 @@ const Signup = () => {
                         placeholder={placeholder}
                       />
                     </div>
-                    <ErrorMsg name={key} />
                   </div>
                 ))}
 
@@ -249,7 +323,7 @@ const Signup = () => {
                         value={form.password}
                         onChange={(e) => {
                           setForm((curr) => ({ ...curr, password: e.target.value }));
-                          if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                          if (Object.keys(errors).length > 0) setErrors({});
                         }}
                         className={clsx("w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
                           errors.password ? "border-red-400" : "border-slate-200"
@@ -260,7 +334,6 @@ const Signup = () => {
                         {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                       </button>
                     </div>
-                    <ErrorMsg name="password" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><Lock className="h-3.5 w-3.5" />Confirm Password</label>
@@ -270,7 +343,7 @@ const Signup = () => {
                         value={form.confirmPassword}
                         onChange={(e) => {
                           setForm((curr) => ({ ...curr, confirmPassword: e.target.value }));
-                          if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+                          if (Object.keys(errors).length > 0) setErrors({});
                         }}
                         className={clsx("w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
                           errors.confirmPassword ? "border-red-400" : "border-slate-200"
@@ -281,12 +354,12 @@ const Signup = () => {
                         {showConfirmPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                       </button>
                     </div>
-                    <ErrorMsg name="confirmPassword" />
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <LoadingButton type="button" onClick={() => handleNext(1)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
+                  <StepErrorMessage />
+                  <LoadingButton type="button" loading={loading} onClick={() => handleNext(1)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Next Step</LoadingButton>
                 </div>
               </div>
             )}
@@ -301,14 +374,13 @@ const Signup = () => {
                       onChange={(e) => {
                         const val = e.target.value.replace(/\D/g, '').slice(0, 12);
                         setForm((curr) => ({ ...curr, aadhaarNo: val }));
-                        if (errors.aadhaarNo) setErrors(prev => ({ ...prev, aadhaarNo: '' }));
+                        if (Object.keys(errors).length > 0) setErrors({});
                       }}
                       className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
                         errors.aadhaarNo ? "border-red-400" : "border-slate-200"
                       )}
                       placeholder="12 digit Aadhaar number"
                     />
-                    <ErrorMsg name="aadhaarNo" />
                   </div>
                   <div className="space-y-3">
                     <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Aadhaar Card Photo</span>
@@ -320,7 +392,6 @@ const Signup = () => {
                         <Camera className="h-4 w-4" /> Take Photo
                       </button>
                     </div>
-                    <ErrorMsg name="aadhaarDoc" />
                     {files.aadhaarDoc && (
                       <div className="relative mt-2 rounded-2xl overflow-hidden aspect-[3/4] border border-slate-100 shadow-sm transition-all animate-in fade-in zoom-in duration-300">
                         <img src={files.aadhaarDoc.preview} className="w-full h-full object-cover" alt="Preview" />
@@ -340,14 +411,13 @@ const Signup = () => {
                       onChange={(e) => {
                         const val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 10);
                         setForm((curr) => ({ ...curr, voterNo: val }));
-                        if (errors.voterNo) setErrors(prev => ({ ...prev, voterNo: '' }));
+                        if (Object.keys(errors).length > 0) setErrors({});
                       }}
                       className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
                         errors.voterNo ? "border-red-400" : "border-slate-200"
                       )}
                       placeholder="10 digit Voter ID number"
                     />
-                    <ErrorMsg name="voterNo" />
                   </div>
                   <div className="space-y-3">
                     <span className="text-[13px] font-semibold text-slate-700 ml-1 flex items-center gap-2"><FileText className="h-3.5 w-3.5" />Voter Card Photo</span>
@@ -359,7 +429,6 @@ const Signup = () => {
                         <Camera className="h-4 w-4" /> Take Photo
                       </button>
                     </div>
-                    <ErrorMsg name="voterDoc" />
                     {files.voterDoc && (
                       <div className="relative mt-2 rounded-2xl overflow-hidden aspect-[3/4] border border-slate-100 shadow-sm transition-all animate-in fade-in zoom-in duration-300">
                         <img src={files.voterDoc.preview} className="w-full h-full object-cover" alt="Preview" />
@@ -372,7 +441,8 @@ const Signup = () => {
                 </div>
 
                 <div className="pt-4">
-                  <LoadingButton type="button" onClick={() => handleNext(2)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Almost Done</LoadingButton>
+                  <StepErrorMessage />
+                  <LoadingButton type="button" loading={loading} onClick={() => handleNext(2)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Almost Done</LoadingButton>
                 </div>
               </div>
             )}
@@ -386,18 +456,18 @@ const Signup = () => {
                       value={form[key]}
                       onChange={(e) => {
                         setForm((curr) => ({ ...curr, [key]: e.target.value }));
-                        if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }));
+                        if (Object.keys(errors).length > 0) setErrors({});
                       }}
                       className={clsx("w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 text-sm",
                         errors[key] ? "border-red-400" : "border-slate-200"
                       )}
                       placeholder={`Enter ${label.split(' ')[0]} URL`}
                     />
-                    <ErrorMsg name={key} />
                   </div>
                 ))}
                 <div className="pt-2">
-                  <LoadingButton type="button" onClick={() => handleNext(3)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Just One More</LoadingButton>
+                  <StepErrorMessage />
+                  <LoadingButton type="button" loading={loading} onClick={() => handleNext(3)} className="w-full h-11 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all">Just One More</LoadingButton>
                 </div>
               </div>
             )}
@@ -416,7 +486,6 @@ const Signup = () => {
                       )}
                     </div>
                   </div>
-                  <ErrorMsg name="selfie" centered />
                   <div className="flex flex-col gap-3">
                     {!files.selfie ? (
                       <button type="button" onClick={() => cameraRefSelfie.current?.click()} className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all hover:border-primary/30 active:scale-95">
@@ -432,6 +501,7 @@ const Signup = () => {
                   <input ref={cameraRefSelfie} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => handleFile('selfie', e.target.files?.[0])} />
                 </div>
                 <div className="pt-2">
+                  <StepErrorMessage />
                   <LoadingButton type="submit" loading={loading} className="w-full h-12 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-xl transition-all">Complete Registration</LoadingButton>
                 </div>
               </div>

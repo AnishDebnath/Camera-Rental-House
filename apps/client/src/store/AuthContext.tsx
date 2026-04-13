@@ -64,14 +64,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         addToast({ title: 'Welcome back', message: 'Logged in successfully.', tone: 'success' });
       },
       signup: async (formData: FormData) => {
-        const response = await axiosInstance.post('/auth/signup', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        // We might want to auto-login here or redirect to login.
-        // The backend returns user + accessToken on signup.
-        setUser(response.data.user);
-        localStorage.setItem('accessToken', response.data.accessToken);
-        addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
+        try {
+          const response = await axiosInstance.post('/auth/signup', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          setUser(response.data.user);
+          localStorage.setItem('accessToken', response.data.accessToken);
+          addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
+        } catch (error: any) {
+          throw error;
+        }
       },
       updateProfile: async (updates: Partial<User>) => {
         // Mocking for now, could be an API call

@@ -79,6 +79,67 @@ const validateSignupPayload = (body: any, files: any) => {
   return errors;
 };
 
+router.post('/check-exists', async (req: Request, res: Response) => {
+  try {
+    const { email, phone, aadhaarNo, voterNo } = req.body;
+    let query = supabase.from('users').select('email, phone, aadhaar_no, voter_no');
+
+    const conditions: string[] = [];
+    if (email) conditions.push(`email.eq.${email.toLowerCase()}`);
+    if (phone) conditions.push(`phone.eq.${phone.replace(/\D/g, '')}`);
+    if (aadhaarNo) conditions.push(`aadhaar_no.eq.${aadhaarNo.replace(/\D/g, '')}`);
+    if (voterNo) conditions.push(`voter_no.eq.${voterNo.trim().toUpperCase()}`);
+
+    if (conditions.length === 0) return res.json({ exists: false });
+
+    const { data: users, error } = await query.or(conditions.join(','));
+
+    if (error) throw error;
+
+    if (users && users.length > 0) {
+      const fieldErrors: Record<string, string> = {};
+      const fields: string[] = [];
+
+      for (const data of users) {
+        if (email && data.email === email.toLowerCase() && !fields.includes('Email')) {
+          fieldErrors.email = 'error';
+          fields.push('Email');
+        }
+        if (phone && data.phone === phone.replace(/\D/g, '') && !fields.includes('Phone Number')) {
+          fieldErrors.phone = 'error';
+          fields.push('Phone Number');
+        }
+        if (aadhaarNo && data.aadhaar_no === aadhaarNo.replace(/\D/g, '') && !fields.includes('Aadhaar Number')) {
+          fieldErrors.aadhaarNo = 'error';
+          fields.push('Aadhaar Number');
+        }
+        if (voterNo && data.voter_no === voterNo.trim().toUpperCase() && !fields.includes('Voter ID')) {
+          fieldErrors.voterNo = 'error';
+          fields.push('Voter ID');
+        }
+      }
+
+      let message = 'User is already registered.';
+      if (fields.length === 1) message = `This ${fields[0]} is already registered.`;
+      else if (fields.length === 2) message = `These ${fields[0]} and ${fields[1]} are already registered.`;
+      else if (fields.length > 2) {
+        const last = fields.pop();
+        message = `These ${fields.join(', ')}, and ${last} are already registered.`;
+      }
+
+      return res.status(409).json({
+        exists: true,
+        message,
+        fieldErrors
+      });
+    }
+
+    return res.json({ exists: false });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 router.post(
   '/signup',
   upload.fields([
@@ -90,29 +151,57 @@ router.post(
     try {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       console.log('Signup request received for:', req.body.email);
-      
+
       const errors = validateSignupPayload(req.body, files);
       if (errors.length) {
         return res.status(400).json({ message: 'Validation failed.', errors });
       }
 
       const phone = String(req.body.phone).replace(/\D/g, '');
+      const email = String(req.body.email).toLowerCase();
       const aadhaarNo = String(req.body.aadhaarNo).replace(/\D/g, '');
+      const voterNo = String(req.body.voterNo).trim().toUpperCase();
 
-      const { data: existingUser, error: existingError } = await supabase
+      // Check for existing user (Email, Phone, Aadhaar, or Voter ID)
+      const { data: existingUsers, error: checkError } = await supabase
         .from('users')
-        .select('id')
-        .or(`email.eq.${req.body.email},phone.eq.${phone}`)
-        .maybeSingle();
+        .select('id, email, phone, aadhaar_no, voter_no')
+        .or(`email.eq.${email},phone.eq.${phone},aadhaar_no.eq.${aadhaarNo},voter_no.eq.${voterNo}`);
 
-      if (existingError) {
-        throw existingError;
-      }
+      if (checkError) throw checkError;
 
-      if (existingUser) {
-        return res.status(409).json({
-          message: 'User already exists with this email or phone number.',
-        });
+      if (existingUsers && existingUsers.length > 0) {
+        const fieldErrors: Record<string, string> = {};
+        const fields: string[] = [];
+
+        for (const existingUser of existingUsers) {
+          if (existingUser.email === email && !fields.includes('Email')) {
+            fieldErrors.email = 'error';
+            fields.push('Email');
+          }
+          if (existingUser.phone === phone && !fields.includes('Phone number')) {
+            fieldErrors.phone = 'error';
+            fields.push('Phone number');
+          }
+          if (existingUser.aadhaar_no === aadhaarNo && !fields.includes('Aadhaar number')) {
+            fieldErrors.aadhaarNo = 'error';
+            fields.push('Aadhaar number');
+          }
+          if (existingUser.voter_no === voterNo && !fields.includes('Voter ID')) {
+            fieldErrors.voterNo = 'error';
+            fields.push('Voter ID');
+          }
+        }
+
+        let message = 'User is already registered. Please check your details.';
+        if (fields.length === 1) message = `${fields[0]} is already registered.`;
+        else if (fields.length === 2) message = `${fields[0]} and ${fields[1]} are already registered.`;
+        else if (fields.length > 2) {
+          const last = fields.pop();
+          message = `${fields.join(', ')}, and ${last} are already registered.`;
+        }
+
+        return res.status(409).json({ message, fieldErrors });
       }
 
       const userId = crypto.randomUUID();
@@ -279,7 +368,7 @@ router.post('/admin/login', async (req: Request, res: Response) => {
     username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD
       ? 'admin'
       : username === process.env.MANAGER_USERNAME &&
-          password === process.env.MANAGER_PASSWORD
+        password === process.env.MANAGER_PASSWORD
         ? 'manager'
         : null;
 
