@@ -8,7 +8,16 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    return Promise.reject(error.response?.data || { message: 'Network error occurred.' });
+    const data = error.response?.data;
+    const message = data?.message || error.message || 'Network error occurred.';
+    
+    // Create a standard error object so .message always works
+    const enhancedError = new Error(message);
+    (enhancedError as any).fieldErrors = data?.fieldErrors;
+    (enhancedError as any).response = error.response;
+    (enhancedError as any).exists = data?.exists;
+    
+    return Promise.reject(enhancedError);
   }
 );
 

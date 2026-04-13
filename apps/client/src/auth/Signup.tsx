@@ -141,6 +141,7 @@ const Signup = () => {
           setStep(nextStep);
         }
       } catch (error: any) {
+        console.error('Verification Error:', error);
         const fieldErrors = error.fieldErrors || error.response?.data?.fieldErrors;
         const message = error.message || error.response?.data?.message || 'Verification failed';
         const toastMessage = fieldErrors && Object.keys(fieldErrors).length > 0 ? 'This user is already registered.' : message;
