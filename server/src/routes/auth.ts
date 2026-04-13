@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import express, { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import dotenv from 'dotenv';
