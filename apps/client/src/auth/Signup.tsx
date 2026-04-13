@@ -189,9 +189,7 @@ const Signup = () => {
       if (files.selfie) formData.append('selfie', files.selfie.file);
 
       await signup(formData);
-
-      const next = new URLSearchParams(location.search).get('next');
-      navigate(next?.startsWith('/') ? next : '/account');
+      navigate('/');
     } catch (error: any) {
       console.error('Signup Error:', error);
       const fieldErrors = error.fieldErrors || error.response?.data?.fieldErrors;

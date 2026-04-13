@@ -9,6 +9,7 @@ import {
   resolveAdminAppUrl,
   resolveClientAppUrl,
 } from '../../../../packages/auth/appUrls';
+import { useToast } from '../store/ToastContext';
 
 const adminAppUrl = resolveAdminAppUrl(import.meta.env.VITE_ADMIN_APP_URL);
 const clientAppUrl = resolveClientAppUrl(import.meta.env.VITE_CLIENT_APP_URL);
@@ -22,7 +23,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { addToast } = useToast();
 
   const validate = () => {
     const val = form.identifier.trim();
@@ -48,10 +50,10 @@ const Login = () => {
     event.preventDefault();
     const validationError = validate();
     if (validationError) {
-      setError(validationError);
+      setErrors({ general: validationError, identifier: validationError.includes('Email') || validationError.includes('Phone') ? 'error' : '', password: validationError.includes('Password') ? 'error' : '' });
       return;
     }
-    setError('');
+    setErrors({});
     setLoading(true);
 
     try {
@@ -78,10 +80,11 @@ const Login = () => {
 
       // 2. Real User Login
       await login(form);
-      const nextPath = resolveClientNextPath(requestedNext);
-      navigate(nextPath);
+      navigate('/');
     } catch (error: any) {
-      setError(error.message || "Invalid credentials. Please check your email/phone and password.");
+      const message = error.message || "Invalid credentials. Please check your email/phone and password.";
+      setErrors({ general: message });
+      addToast({ title: 'Login Failed', message, tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -128,23 +131,17 @@ const Login = () => {
                   value={form.identifier}
                   onChange={(event) => {
                     setForm((current) => ({ ...current, identifier: event.target.value }));
-                    if (error) setError('');
+                    if (Object.keys(errors).length > 0) setErrors({});
                   }}
                   className={clsx(
                     "w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
-                    error && error.includes('phone') || error.includes('email') || error.includes('required') && !form.identifier
+                    errors.identifier || (errors.general && (errors.general.includes('Email') || errors.general.includes('Phone') || errors.general.includes('found')))
                       ? "border-red-400 focus:border-red-500"
                       : "border-slate-200 focus:border-primary/50"
                   )}
                   placeholder="Enter your email or phone number"
                 />
               </div>
-              {error && (error.includes('phone') || error.includes('email') || error.includes('required') && !form.identifier) && (
-                <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 px-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {error}
-                </div>
-              )}
             </div>
 
             <div className="space-y-1.5">
@@ -160,11 +157,13 @@ const Login = () => {
                   value={form.password}
                   onChange={(event) => {
                     setForm((current) => ({ ...current, password: event.target.value }));
-                    if (error && error.includes('Password')) setError('');
+                    if (Object.keys(errors).length > 0) setErrors({});
                   }}
                   className={clsx(
                     "w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
-                    error && error.includes('Password') ? "border-red-400 focus:border-red-500" : "border-slate-200 focus:border-primary/50"
+                    errors.password || (errors.general && errors.general.includes('Password'))
+                      ? "border-red-400 focus:border-red-500"
+                      : "border-slate-200 focus:border-primary/50"
                   )}
                   placeholder="Enter your password"
                 />
@@ -176,25 +175,14 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
-              {error && error.includes('Password') && (
-                <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 px-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {error}
-                </div>
-              )}
             </div>
 
-            <div className="pt-1">
-              {error && (
-                <div className={clsx(
-                  "flex items-center gap-2 p-3 mb-4 rounded-xl border text-xs font-bold transition-all animate-in fade-in slide-in-from-top-2",
-                  error.includes('not found')
-                    ? "bg-amber-50 border-amber-200 text-amber-700"
-                    : "bg-red-50 border-red-200 text-red-600"
-                )}>
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <div className="flex flex-col gap-0.5 text-left">
-                    {error}
+            <div className="pt-2">
+              {errors.general && (
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+                  <div className="text-xs font-bold text-red-600 leading-tight">
+                    {errors.general}
                   </div>
                 </div>
               )}
@@ -227,7 +215,7 @@ const Login = () => {
               New here?{' '}
               <Link to="/signup" className={clsx(
                 "font-bold transition-colors inline-flex items-center gap-1 hover:underline group/sign",
-                error?.includes('not found') ? "text-amber-600" : "text-primary"
+                errors.general?.includes('not found') ? "text-amber-600" : "text-primary"
               )}>
                 Create Account
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/sign:translate-x-1" />
