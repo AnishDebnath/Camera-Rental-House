@@ -127,13 +127,13 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
     const [aadhaarSignedUrl, voterSignedUrl] = await Promise.all([
       data.aadhaar_doc_url
         ? getSignedUrl({
-            key: extractPublicId(data.aadhaar_doc_url) as string,
-          })
+          key: extractPublicId(data.aadhaar_doc_url) as string,
+        })
         : null,
       data.voter_doc_url
         ? getSignedUrl({
-            key: extractPublicId(data.voter_doc_url) as string,
-          })
+          key: extractPublicId(data.voter_doc_url) as string,
+        })
         : null,
     ]);
 
