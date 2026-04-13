@@ -85,7 +85,7 @@ const Signup = () => {
       else if (form.password.length < 6) newErrors.password = "Minimum 6 characters";
 
       if (!form.confirmPassword) newErrors.confirmPassword = "Confirm password is required";
-      else if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords match failed";
+      else if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Password doesn't match";
     }
 
     if (currentStep === 1) {
