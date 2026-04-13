@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   }
 }

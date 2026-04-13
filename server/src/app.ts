@@ -41,7 +41,7 @@ app.use('/api/admin', authMiddleware, adminRoutes);
 
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('SERVER ERROR:', error);
-  return res.status(500).json({ 
+  return res.status(500).json({
     message: error?.message || 'Internal server error.',
     error: error // temporarily exposing error for debugging
   });

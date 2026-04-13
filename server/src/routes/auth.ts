@@ -4,11 +4,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import dotenv from 'dotenv';
-import supabase from '../db/supabase.js';
-import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.js';
-import { uploadToSupabase } from '../storage/supabaseStorage.js';
-import { processImage } from '../utils/imageProcessor.js';
-import generateQrBase64 from '../utils/qrGenerator.js';
+import supabase from '../db/supabase.ts';
+import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.ts';
+import { uploadToSupabase } from '../storage/supabaseStorage.ts';
+import { processImage } from '../utils/imageProcessor.ts';
+import generateQrBase64 from '../utils/qrGenerator.ts';
 
 dotenv.config();
 
