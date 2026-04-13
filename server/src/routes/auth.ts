@@ -244,7 +244,13 @@ router.post(
       console.log('Voter Card uploaded successfully.');
 
       console.log('Inserting user into Supabase database...');
-      const userQrBase64 = await generateQrBase64({ userId });
+      const userQrBase64 = await generateQrBase64({ 
+        userId, 
+        name: req.body.fullName,
+        phone,
+        email: req.body.email,
+        vId: voterNo // including voter ID as an extra check
+      });
 
       const { data, error } = await supabase
         .from('users')

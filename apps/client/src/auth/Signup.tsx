@@ -66,7 +66,7 @@ const Signup = () => {
         ...current,
         [key]: { file, preview: URL.createObjectURL(file) }
       }));
-      setErrors((prev) => ({ ...prev, [key]: '' }));
+      if (Object.keys(errors).length > 0) setErrors({});
     }
   };
 
@@ -396,8 +396,8 @@ const Signup = () => {
                         <button type="button" onClick={() => setFiles({ ...files, aadhaarDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm">✕</button>
                       </div>
                     )}
-                    <input ref={storageRefAadhaar} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile('aadhaarDoc', e.target.files?.[0])} />
-                    <input ref={cameraRefAadhaar} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile('aadhaarDoc', e.target.files?.[0])} />
+                    <input ref={storageRefAadhaar} type="file" accept="image/*" className="hidden" onChange={(e) => { handleFile('aadhaarDoc', e.target.files?.[0]); e.target.value = ''; }} />
+                    <input ref={cameraRefAadhaar} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { handleFile('aadhaarDoc', e.target.files?.[0]); e.target.value = ''; }} />
                   </div>
                 </div>
 
@@ -433,8 +433,8 @@ const Signup = () => {
                         <button type="button" onClick={() => setFiles({ ...files, voterDoc: null })} className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white backdrop-blur-md flex items-center justify-center text-sm">✕</button>
                       </div>
                     )}
-                    <input ref={storageRefVoter} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile('voterDoc', e.target.files?.[0])} />
-                    <input ref={cameraRefVoter} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile('voterDoc', e.target.files?.[0])} />
+                    <input ref={storageRefVoter} type="file" accept="image/*" className="hidden" onChange={(e) => { handleFile('voterDoc', e.target.files?.[0]); e.target.value = ''; }} />
+                    <input ref={cameraRefVoter} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { handleFile('voterDoc', e.target.files?.[0]); e.target.value = ''; }} />
                   </div>
                 </div>
 
@@ -496,7 +496,7 @@ const Signup = () => {
                       </div>
                     )}
                   </div>
-                  <input ref={cameraRefSelfie} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => handleFile('selfie', e.target.files?.[0])} />
+                  <input ref={cameraRefSelfie} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => { handleFile('selfie', e.target.files?.[0]); e.target.value = ''; }} />
                 </div>
                 <div className="pt-2">
                   <StepErrorMessage />
