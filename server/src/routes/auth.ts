@@ -288,6 +288,7 @@ router.post(
           email: data.email,
           avatarUrl: data.avatar_url,
           userQrBase64: data.user_qr_base64,
+          createdAt: data.created_at,
         },
         accessToken: tokens.accessToken,
       });
@@ -354,6 +355,7 @@ router.post('/login', async (req: Request, res: Response) => {
         youtube: user.youtube,
         avatarUrl: user.avatar_url,
         userQrBase64: user.user_qr_base64,
+        createdAt: user.created_at,
       },
     });
   } catch (error: any) {

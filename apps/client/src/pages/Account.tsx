@@ -18,6 +18,9 @@ import { useAuth } from '../store/AuthContext';
 import { useToast } from '../store/ToastContext';
 import formatDate from '../utils/formatDate';
 import { resolveAuthAppUrl } from '../../../../packages/auth/appUrls';
+import { useLenis } from '../context/LenisContext';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
@@ -32,6 +35,7 @@ type TabId = (typeof TABS)[number]['id'];
 const Account = () => {
   const { user, rentals, refreshRentals, updateProfile, logout } = useAuth();
   const { addToast } = useToast();
+  const lenis = useLenis();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState(user);
@@ -45,6 +49,16 @@ const Account = () => {
   useEffect(() => {
     setDraft(user);
   }, [user]);
+
+  // Handle scroll lock (Lenis) when QR modal is open
+  useEffect(() => {
+    if (showQrFullScreen) {
+      lenis?.stop();
+    } else {
+      lenis?.start();
+    }
+    return () => lenis?.start();
+  }, [showQrFullScreen, lenis]);
 
   if (!user) {
     return null;
@@ -70,6 +84,10 @@ const Account = () => {
     window.location.replace(`${authAppUrl}/login`);
   };
 
+  const memberSince = user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'Since Early 2024';
+
   return (
     <div className="page-animate app-shell space-y-6 pb-24 pt-4 md:space-y-8">
       {/* Refined Liquid Glass Profile Top Card */}
@@ -94,7 +112,7 @@ const Account = () => {
                 <h1 className="text-2xl font-bold tracking-tight text-ink">
                   {user.fullName}
                 </h1>
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm font-semibold text-muted sm:justify-start">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-semibold text-muted sm:justify-start">
                   <span className="flex items-center gap-1.5">
                     <Phone className="h-4 w-4 text-primary" />
                     +91 {user.phone}
@@ -395,41 +413,99 @@ const Account = () => {
         </section>
       )}
 
-      {/* QR Code Full Screen Modal */}
-      {showQrFullScreen && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
-          onClick={() => setShowQrFullScreen(false)}
+      {/* QR Code Full Screen Modal - Using Dialog for portal (covers navbar/bottomnav) */}
+      <Transition.Root show={showQrFullScreen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-[2000]"
+          onClose={setShowQrFullScreen}
         >
-          <div
-            className="relative p-6 bg-white rounded-[2.5rem] shadow-xl animate-in zoom-in duration-300 md:p-8 md:rounded-[3rem]"
-            onClick={(e) => e.stopPropagation()}
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+            onEntered={() => lenis?.stop()}
+            onExited={() => lenis?.start()}
           >
-            <button
-              onClick={() => setShowQrFullScreen(false)}
-              className="absolute -top-3 -right-3 h-10 w-10 flex items-center justify-center bg-white border border-line rounded-full text-ink shadow-md hover:bg-page transition-colors md:-top-4 md:-right-4"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <div className="space-y-4 text-center">
-              <div className="space-y-0.5">
-                <h2 className="text-lg md:text-xl font-bold text-ink">User Identity QR</h2>
-                <p className="text-xs md:text-sm font-medium text-muted">Scan at the rental counter</p>
-              </div>
-              <div className="p-4 border-4 border-primary/5 rounded-[2rem]">
-                <img
-                  src={user.userQrBase64}
-                  alt="Large QR"
-                  className="h-64 w-64 md:h-72 md:w-72 object-cover rounded-xl"
-                />
-              </div>
-              <p className="text-[10px] md:text-xs font-bold text-primary tracking-widest uppercase">
-                {user.fullName}
-              </p>
+            <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="relative w-full max-w-[400px] overflow-hidden bg-white rounded-[2.5rem] shadow-2xl transition-all md:rounded-[3rem]">
+                  {/* Top Close Button */}
+                  <button
+                    onClick={() => setShowQrFullScreen(false)}
+                    className="absolute top-6 right-6 z-10 h-10 w-10 flex items-center justify-center bg-slate-50 border border-line rounded-full text-ink shadow-sm hover:bg-white hover:scale-105 transition-all active:scale-95"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+
+                  {/* QR Card Content */}
+                  <div className="p-8 pt-12 space-y-8 text-center bg-gradient-to-b from-primary/5 to-transparent">
+                    {/* Header Info */}
+                    <div className="space-y-2">
+                      <Dialog.Title as="h2" className="text-2xl font-bold text-ink">
+                        {user.fullName}
+                      </Dialog.Title>
+                      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-semibold text-muted font-mono tracking-tight">
+                        <span className="flex items-center gap-1">
+                          <IdCard className="h-3.5 w-3.5 text-primary" />
+                          {user.id?.slice(0, 12).toUpperCase()}
+                        </span>
+                        <span className="h-1 w-1 rounded-full bg-muted/40" />
+                        <span className="flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                          {memberSince}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* QR Image with Border Effect */}
+                    <div className="relative group mx-auto w-fit">
+                      <div className="absolute -inset-4 bg-primary/5 rounded-[2.5rem] blur-2xl group-hover:bg-primary/10 transition-colors" />
+                      <div className="relative p-5 bg-white border border-line rounded-[2rem] shadow-sm">
+                        <img
+                          src={user.userQrBase64}
+                          alt="User QR Identity"
+                          className="h-64 w-64 md:h-72 md:w-72 object-cover rounded-xl"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Footer Instruction */}
+                    <div className="space-y-4">
+                      <div className="flex flex-col items-center gap-1">
+                        <QrCode className="h-6 w-6 text-primary mb-1" />
+                        <p className="text-sm font-bold text-ink">User Identity QR</p>
+                        <p className="text-xs font-medium text-muted">Show this at the counter for quick verification</p>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase text-success">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Verified Identity
+                      </div>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition.Root>
     </div>
   );
 };

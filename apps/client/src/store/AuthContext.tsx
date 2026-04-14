@@ -21,6 +21,7 @@ export interface User {
   facebook?: string;
   instagram?: string;
   youtube?: string;
+  createdAt?: string;
 }
 
 type AuthContextValue = {
@@ -68,7 +69,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const response = await axiosInstance.post('/auth/signup', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
           });
-          setUser(response.data.user);
+          const { user: data } = response.data;
+          setUser({
+            ...data,
+            avatarUrl: data.avatar_url,
+            userQrBase64: data.user_qr_base64,
+            createdAt: data.created_at,
+          });
           localStorage.setItem('accessToken', response.data.accessToken);
           addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
         } catch (error: any) {
