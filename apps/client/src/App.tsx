@@ -12,7 +12,7 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Favourites from './pages/Favourites';
-import Account from './pages/Account';
+import Account from './pages/account';
 import { useAuth } from './store/AuthContext';
 import PageTransition from './components/feature/PageTransition';
 
