@@ -85,8 +85,8 @@ const Account = () => {
   };
 
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : 'Since Early 2024';
+    ? `Since ${new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+    : 'Since July 2024';
 
   return (
     <div className="page-animate app-shell space-y-6 pb-24 pt-4 md:space-y-8">
@@ -457,20 +457,28 @@ const Account = () => {
                   {/* QR Card Content */}
                   <div className="p-8 pt-12 space-y-8 text-center bg-gradient-to-b from-primary/5 to-transparent">
                     {/* Header Info */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Dialog.Title as="h2" className="text-2xl font-bold text-ink">
                         {user.fullName}
                       </Dialog.Title>
-                      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-semibold text-muted font-mono tracking-tight">
-                        <span className="flex items-center gap-1">
-                          <IdCard className="h-3.5 w-3.5 text-primary" />
-                          {user.id?.slice(0, 12).toUpperCase()}
-                        </span>
-                        <span className="h-1 w-1 rounded-full bg-muted/40" />
-                        <span className="flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5 text-primary" />
-                          {memberSince}
-                        </span>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-3 text-sm font-bold text-ink">
+                          <span className="flex items-center gap-1.5 rounded-full bg-primary/5 px-2.5 py-1 text-primary">
+                            <IdCard className="h-3.5 w-3.5 text-primary" />
+                            ID: {user.id?.slice(0, 12).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs font-semibold text-muted font-mono tracking-tight">
+                          <span className="flex items-center gap-1.5">
+                            <Phone className="h-3.5 w-3.5 text-primary" />
+                            +91 {user.phone}
+                          </span>
+                          <span className="h-1 w-1 rounded-full bg-muted/40" />
+                          <span className="flex items-center gap-1.5">
+                            <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                            {memberSince}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
