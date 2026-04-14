@@ -270,7 +270,7 @@ router.post(
           youtube: req.body.youtube || null,
           user_qr_base64: userQrBase64,
         })
-        .select('id, full_name, phone, email, avatar_url, user_qr_base64, created_at')
+        .select('id, full_name, phone, email, avatar_url, user_qr_base64, aadhaar_no, aadhaar_doc_url, voter_no, voter_doc_url, created_at')
         .single();
 
       if (error) {
@@ -288,6 +288,10 @@ router.post(
           email: data.email,
           avatarUrl: data.avatar_url,
           userQrBase64: data.user_qr_base64,
+          aadhaarNo: data.aadhaar_no,
+          aadhaarDocUrl: data.aadhaar_doc_url,
+          voterNo: data.voter_no,
+          voterDocUrl: data.voter_doc_url,
           createdAt: data.created_at,
         },
         accessToken: tokens.accessToken,
@@ -349,7 +353,9 @@ router.post('/login', async (req: Request, res: Response) => {
         phone: user.phone,
         email: user.email,
         aadhaarNo: user.aadhaar_no,
+        aadhaarDocUrl: user.aadhaar_doc_url,
         voterNo: user.voter_no,
+        voterDocUrl: user.voter_doc_url,
         facebook: user.facebook,
         instagram: user.instagram,
         youtube: user.youtube,
@@ -418,6 +424,44 @@ router.post('/refresh', async (req: Request, res: Response) => {
     return res
       .status(401)
       .json({ message: 'Refresh token is invalid or expired.' });
+  }
+});
+
+import authMiddleware from '../middleware/authMiddleware.ts';
+
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as any).id;
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.json({
+      user: {
+        id: user.id,
+        fullName: user.full_name,
+        phone: user.phone,
+        email: user.email,
+        aadhaarNo: user.aadhaar_no,
+        aadhaarDocUrl: user.aadhaar_doc_url,
+        voterNo: user.voter_no,
+        voterDocUrl: user.voter_doc_url,
+        facebook: user.facebook,
+        instagram: user.instagram,
+        youtube: user.youtube,
+        avatarUrl: user.avatar_url,
+        userQrBase64: user.user_qr_base64,
+        createdAt: user.created_at,
+      },
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
   }
 });
 

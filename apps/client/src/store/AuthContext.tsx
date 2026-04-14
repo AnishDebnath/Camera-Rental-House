@@ -17,7 +17,9 @@ export interface User {
   avatarUrl?: string;
   userQrBase64?: string;
   aadhaarNo?: string;
+  aadhaarDocUrl?: string;
   voterNo?: string;
+  voterDocUrl?: string;
   facebook?: string;
   instagram?: string;
   youtube?: string;
@@ -33,6 +35,7 @@ type AuthContextValue = {
   updateProfile: (updates: Partial<User>) => Promise<void>;
   logout: () => void;
   refreshRentals: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -72,9 +75,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const { user: data } = response.data;
           setUser({
             ...data,
-            avatarUrl: data.avatar_url,
-            userQrBase64: data.user_qr_base64,
-            createdAt: data.created_at,
+            avatarUrl: data.avatarUrl,
+            userQrBase64: data.userQrBase64,
+            aadhaarDocUrl: data.aadhaarDocUrl,
+            voterDocUrl: data.voterDocUrl,
+            createdAt: data.createdAt,
           });
           localStorage.setItem('accessToken', response.data.accessToken);
           addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
@@ -94,6 +99,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
       refreshRentals: async () => {
         // Fetch real rentals here
+      },
+      refreshUser: async () => {
+        try {
+          const response = await axiosInstance.get('/auth/me');
+          setUser(response.data.user);
+        } catch (error) {
+          console.error('Failed to refresh user:', error);
+        }
       },
     }),
     [addToast, rentals, user],

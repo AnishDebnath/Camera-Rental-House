@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Tab {
   id: string;
@@ -21,13 +22,21 @@ const AccountTabs = ({ tabs, activeTab, onTabChange }: AccountTabsProps) => {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex min-w-[max-content] flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-xs md:text-sm font-bold transition-all duration-300 ${isActive
-              ? 'bg-primary text-white shadow-sm'
-              : 'text-muted hover:bg-white/60 hover:text-ink'
-              }`}
+            className={`relative flex min-w-[max-content] flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-xs md:text-sm font-bold transition-all duration-300 ${
+              isActive ? 'text-white' : 'text-muted hover:text-ink'
+            }`}
           >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
+            {isActive && (
+              <motion.div
+                layoutId="account-active-tab"
+                className="absolute inset-0 bg-primary shadow-sm rounded-full"
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+            </span>
           </button>
         );
       })}

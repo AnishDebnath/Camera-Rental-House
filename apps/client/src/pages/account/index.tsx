@@ -11,6 +11,7 @@ import AccountDetailsTab from './AccountDetailsTab';
 import ActiveRentalsTab from './ActiveRentalsTab';
 import RentalHistoryTab from './RentalHistoryTab';
 import QrModal from './QrModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
@@ -23,7 +24,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id'];
 
 const Account = () => {
-  const { user, rentals, refreshRentals, updateProfile, logout } = useAuth();
+  const { user, rentals, refreshRentals, refreshUser, updateProfile, logout } = useAuth();
   const { addToast } = useToast();
   const lenis = useLenis();
   
@@ -35,6 +36,7 @@ const Account = () => {
 
   useEffect(() => {
     refreshRentals();
+    refreshUser();
   }, []);
 
   useEffect(() => {
@@ -99,25 +101,35 @@ const Account = () => {
         onTabChange={setActiveTab} 
       />
 
-      <div className="tab-content">
-        {activeTab === 'details' && draft && (
-          <AccountDetailsTab
-            draft={draft}
-            editing={editing}
-            loading={loading}
-            onSetEditing={setEditing}
-            onDraftChange={(key, value) => setDraft((prev: any) => ({ ...prev, [key]: value }))}
-            onSave={handleSave}
-          />
-        )}
+      <div className="tab-content relative min-h-[400px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            {activeTab === 'details' && draft && (
+              <AccountDetailsTab
+                draft={draft}
+                editing={editing}
+                loading={loading}
+                onSetEditing={setEditing}
+                onDraftChange={(key, value) => setDraft((prev: any) => ({ ...prev, [key]: value }))}
+                onSave={handleSave}
+              />
+            )}
 
-        {activeTab === 'active' && (
-          <ActiveRentalsTab activeRentals={activeRentals} />
-        )}
+            {activeTab === 'active' && (
+              <ActiveRentalsTab activeRentals={activeRentals} />
+            )}
 
-        {activeTab === 'history' && (
-          <RentalHistoryTab pastRentals={pastRentals} />
-        )}
+            {activeTab === 'history' && (
+              <RentalHistoryTab pastRentals={pastRentals} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <QrModal
