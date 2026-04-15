@@ -3,13 +3,13 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
-import authRoutes from './routes/auth.ts';
-import productsRoutes from './routes/products.ts';
-import rentalsRoutes from './routes/rentals.ts';
-import adminRoutes from './routes/admin.ts';
-import manageRoutes from './routes/manage.ts';
-import authMiddleware from './middleware/authMiddleware.ts';
-import roleMiddleware from './middleware/roleMiddleware.ts';
+import authRoutes from './routes/auth.js';
+import productsRoutes from './routes/products.js';
+import rentalsRoutes from './routes/rentals.js';
+import adminRoutes from './routes/admin.js';
+import manageRoutes from './routes/manage.js';
+import authMiddleware from './middleware/authMiddleware.js';
+import roleMiddleware from './middleware/roleMiddleware.js';
 
 dotenv.config();
 

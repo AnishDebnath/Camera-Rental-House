@@ -4,11 +4,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import dotenv from 'dotenv';
-import supabase from '../db/supabase.ts';
-import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.ts';
-import { uploadToSupabase } from '../storage/supabaseStorage.ts';
-import { processImage } from '../utils/imageProcessor.ts';
-import generateQrBase64 from '../utils/qrGenerator.ts';
+import supabase from '../db/supabase.js';
+import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.js';
+import { uploadToSupabase } from '../storage/supabaseStorage.js';
+import { processImage } from '../utils/imageProcessor.js';
+import generateQrBase64 from '../utils/qrGenerator.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -429,8 +430,6 @@ router.post('/refresh', async (req: Request, res: Response) => {
       .json({ message: 'Refresh token is invalid or expired.' });
   }
 });
-
-import authMiddleware from '../middleware/authMiddleware.ts';
 
 router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   try {
