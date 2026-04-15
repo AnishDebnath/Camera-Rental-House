@@ -9,7 +9,10 @@ import generateQrBase64 from '../utils/qrGenerator.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
 
 const extractPublicId = (url: string | null): string | null => {
   if (!url) return null;

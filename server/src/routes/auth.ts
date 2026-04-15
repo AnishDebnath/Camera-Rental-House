@@ -14,7 +14,10 @@ import authMiddleware from '../middleware/authMiddleware.js';
 dotenv.config();
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
 
 const refreshCookieOptions: any = {
   httpOnly: true,
