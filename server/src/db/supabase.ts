@@ -3,22 +3,43 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const supabaseUrl: string = process.env.SUPABASE_URL || '';
-const supabaseServiceKey: string = process.env.SUPABASE_SERVICE_KEY || '';
+let supabaseClient: SupabaseClient | null = null;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase URL or Service Key is missing in environment variables.');
-}
+const getSupabaseEnv = () => {
+  const supabaseUrl = process.env.SUPABASE_URL?.trim();
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY?.trim();
 
-const supabase: SupabaseClient = createClient(
-  supabaseUrl,
-  supabaseServiceKey,
-  {
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Server configuration error: SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in the server environment.',
+    );
+  }
+
+  return { supabaseUrl, supabaseServiceKey };
+};
+
+export const getSupabase = (): SupabaseClient => {
+  if (supabaseClient) {
+    return supabaseClient;
+  }
+
+  const { supabaseUrl, supabaseServiceKey } = getSupabaseEnv();
+  supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
     },
+  });
+
+  return supabaseClient;
+};
+
+const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, property) {
+    const client = getSupabase() as Record<PropertyKey, unknown>;
+    const value = client[property];
+    return typeof value === 'function' ? (value as Function).bind(client) : value;
   },
-);
+});
 
 export default supabase;

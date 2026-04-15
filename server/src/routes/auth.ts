@@ -248,7 +248,7 @@ router.post(
         userId,
         name: req.body.fullName,
         phone,
-        email: req.body.email,
+        email,
         aId: aadhaarNo // including Aadhaar number as a unique identity marker
       });
 
@@ -258,11 +258,11 @@ router.post(
           id: userId,
           full_name: req.body.fullName,
           phone,
-          email: req.body.email,
+          email,
           password_hash: passwordHash,
           aadhaar_no: aadhaarNo,
           aadhaar_doc_url: aadhaarDocUrl,
-          voter_no: req.body.voterNo,
+          voter_no: voterNo,
           voter_doc_url: voterDocUrl,
           avatar_url: avatarUrl,
           facebook: req.body.facebook || null,
@@ -277,7 +277,7 @@ router.post(
         throw error;
       }
 
-      const tokens = issueTokens(res, { id: userId, email: req.body.email, role: 'user' });
+      const tokens = issueTokens(res, { id: userId, email, role: 'user' });
 
       return res.status(201).json({
         message: 'Signup successful.',
@@ -312,13 +312,16 @@ router.post('/login', async (req: Request, res: Response) => {
         .json({ message: 'Identifier and password are required.' });
     }
 
-    const normalizedPhone = String(identifier).replace(/\D/g, '');
-    const field = /^\d{10}$/.test(normalizedPhone) ? 'phone' : 'email';
+    const rawIdentifier = String(identifier).trim();
+    const normalizedPhone = rawIdentifier.replace(/\D/g, '');
+    const isPhoneIdentifier = /^\d{10}$/.test(normalizedPhone);
+    const field = isPhoneIdentifier ? 'phone' : 'email';
+    const value = isPhoneIdentifier ? normalizedPhone : rawIdentifier.toLowerCase();
 
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq(field, field === 'phone' ? normalizedPhone : identifier)
+      .eq(field, value)
       .maybeSingle();
 
     if (error) {
