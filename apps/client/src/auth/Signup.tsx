@@ -16,6 +16,11 @@ type UploadFile = {
 
 const compressImage = async (file: File, { maxWidth = 1200, quality = 0.7 } = {}): Promise<File> => {
   return new Promise((resolve, reject) => {
+    // If not an image, skip compression
+    if (!file.type.startsWith('image/')) {
+      return resolve(file);
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
@@ -40,22 +45,23 @@ const compressImage = async (file: File, { maxWidth = 1200, quality = 0.7 } = {}
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              const fileName = file.name ? file.name.replace(/\.[^/.]+$/, "") + ".jpg" : `image-${Date.now()}.jpg`;
+              const compressedFile = new File([blob], fileName, {
                 type: 'image/jpeg',
                 lastModified: Date.now(),
               });
               resolve(compressedFile);
             } else {
-              reject(new Error('Canvas to Blob failed'));
+              resolve(file); // Fallback to original
             }
           },
           'image/jpeg',
           quality
         );
       };
-      img.onerror = (err) => reject(err);
+      img.onerror = () => resolve(file); // Fallback
     };
-    reader.onerror = (err) => reject(err);
+    reader.onerror = () => resolve(file); // Fallback
   });
 };
 
@@ -107,25 +113,39 @@ const Signup = () => {
 
   const handleFile = async (key: UploadKey, file?: File) => {
     if (file) {
+      // 1. Show immediate preview for better UX
+      const initialPreview = URL.createObjectURL(file);
+      setFiles((current) => ({
+        ...current,
+        [key]: { file, preview: initialPreview }
+      }));
+      if (Object.keys(errors).length > 0) setErrors({});
+
+      // 2. Compress in the background
       try {
-        // Show immediate preview with original file (optional, but better UX)
-        // setFiles(...)
-        
-        // Compress the image
         const compressed = await compressImage(file);
         
-        setFiles((current) => ({
-          ...current,
-          [key]: { file: compressed, preview: URL.createObjectURL(compressed) }
-        }));
-        if (Object.keys(errors).length > 0) setErrors({});
+        // Only update if we actually got a different file (e.g. was compressed)
+        if (compressed !== file) {
+          const compressedPreview = URL.createObjectURL(compressed);
+          setFiles((current) => {
+            // Revoke the old preview URL to save memory
+            // But only if it's the one we just created
+            const old = current[key];
+            if (old && old.preview === initialPreview) {
+              // We'll revoke it in a bit to avoid sudden flicker if needed
+              // URL.revokeObjectURL(initialPreview); 
+            }
+            
+            return {
+              ...current,
+              [key]: { file: compressed, preview: compressedPreview }
+            };
+          });
+        }
       } catch (err) {
-        console.error('Compression error:', err);
-        // Fallback to original file if compression fails
-        setFiles((current) => ({
-          ...current,
-          [key]: { file, preview: URL.createObjectURL(file) }
-        }));
+        console.error('Compression background error:', err);
+        // Original file is already set, so we are fine
       }
     }
   };
