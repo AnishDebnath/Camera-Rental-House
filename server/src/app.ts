@@ -19,21 +19,56 @@ const app = express();
 // so the app works both on localhost and when accessed over the local network.
 const PRIVATE_IP_RE = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
 
+const getConfiguredOrigins = () =>
+  (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const isSameHostRequest = (req: Request, origin: string) => {
+  try {
+    const parsedOrigin = new URL(origin);
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const hostHeader = Array.isArray(forwardedHost)
+      ? forwardedHost[0]
+      : forwardedHost || req.headers.host;
+
+    if (!hostHeader) {
+      return false;
+    }
+
+    return parsedOrigin.host === hostHeader;
+  } catch {
+    return false;
+  }
+};
+
+const isAllowedOrigin = (req: Request, origin?: string) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (getConfiguredOrigins().includes(origin)) {
+    return true;
+  }
+
+  if (PRIVATE_IP_RE.test(origin)) {
+    return true;
+  }
+
+  return isSameHostRequest(req, origin);
+};
+
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server / Postman requests (no Origin header)
-      if (!origin) return callback(null, true);
-      // Allow explicitly listed origins from env
-      if (process.env.ALLOWED_ORIGINS) {
-        const list = process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim());
-        if (list.includes(origin)) return callback(null, true);
-      }
-      // Allow any private-network or localhost origin
-      if (PRIVATE_IP_RE.test(origin)) return callback(null, true);
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
-    },
-    credentials: true,
+  cors((req, callback) => {
+    const origin = req.header('origin');
+    const allowed = isAllowedOrigin(req, origin);
+
+    callback(null, {
+      origin: allowed ? origin || true : false,
+      credentials: true,
+      optionsSuccessStatus: 204,
+    });
   }),
 );
 app.use(express.json({ limit: '10mb' }));
