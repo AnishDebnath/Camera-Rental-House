@@ -470,6 +470,125 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+router.patch(
+  '/update-profile',
+  authMiddleware,
+  upload.fields([
+    { name: 'aadhaarDoc', maxCount: 1 },
+    { name: 'voterDoc', maxCount: 1 },
+    { name: 'selfie', maxCount: 1 },
+  ]),
+  async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).id;
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const body = req.body;
+
+      // 1. Fetch current user
+      const { data: user, error: fetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (fetchError || !user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+
+      const updates: any = {};
+
+      // Handle simple fields
+      if (body.fullName) updates.full_name = body.fullName;
+      if (body.phone) updates.phone = body.phone.replace(/\D/g, '');
+      if (body.email) updates.email = body.email.toLowerCase();
+      if (body.aadhaarNo) updates.aadhaar_no = body.aadhaarNo.replace(/\D/g, '');
+      if (body.voterNo) updates.voter_no = body.voterNo.trim().toUpperCase();
+      if (body.facebook !== undefined) updates.facebook = body.facebook || null;
+      if (body.instagram !== undefined) updates.instagram = body.instagram || null;
+      if (body.youtube !== undefined) updates.youtube = body.youtube || null;
+
+      // 2. Handle File Updates
+      
+      // Profile Picture
+      if (files.selfie?.[0]) {
+        console.log('Updating profile picture...');
+        const { buffer, mimetype } = await processImage(files.selfie[0].buffer, { maxWidth: 800, maxHeight: 800, quality: 85 });
+        updates.avatar_url = await uploadToCloudinary({
+          buffer,
+          key: `avatar-${userId}-${Date.now()}`,
+          mimetype,
+          folder: 'Camera Rental House/Profile Picture',
+        });
+      }
+
+      // Aadhaar Doc
+      if (files.aadhaarDoc?.[0]) {
+        console.log('Updating Aadhaar Doc...');
+        const { buffer, mimetype } = await processImage(files.aadhaarDoc[0].buffer, { maxWidth: 1500, quality: 90 });
+        updates.aadhaar_doc_url = await uploadToSupabase({
+          buffer,
+          key: `users/${userId}/aadhaar-${Date.now()}.${mimetype.split('/')[1]}`,
+          mimetype,
+        });
+      }
+
+      // Voter Doc
+      if (files.voterDoc?.[0]) {
+        console.log('Updating Voter Doc...');
+        const { buffer, mimetype } = await processImage(files.voterDoc[0].buffer, { maxWidth: 1500, quality: 90 });
+        updates.voter_doc_url = await uploadToSupabase({
+          buffer,
+          key: `users/${userId}/voter-${Date.now()}.${mimetype.split('/')[1]}`,
+          mimetype,
+        });
+      }
+
+      // 3. Regen QR if name/phone/email/aadhaar changed
+      if (updates.full_name || updates.phone || updates.email || updates.aadhaar_no) {
+        updates.user_qr_base64 = await generateQrBase64({
+          userId,
+          name: updates.full_name || user.full_name,
+          phone: updates.phone || user.phone,
+          email: updates.email || user.email,
+          aId: updates.aadhaar_no || user.aadhaar_no
+        });
+      }
+
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', userId)
+        .select('*')
+        .single();
+
+      if (updateError) throw updateError;
+
+      return res.json({
+        message: 'Profile updated successfully.',
+        user: {
+          id: updatedUser.id,
+          fullName: updatedUser.full_name,
+          phone: updatedUser.phone,
+          email: updatedUser.email,
+          aadhaarNo: updatedUser.aadhaar_no,
+          aadhaarDocUrl: updatedUser.aadhaar_doc_url,
+          voterNo: updatedUser.voter_no,
+          voterDocUrl: updatedUser.voter_doc_url,
+          facebook: updatedUser.facebook,
+          instagram: updatedUser.instagram,
+          youtube: updatedUser.youtube,
+          avatarUrl: updatedUser.avatar_url,
+          userQrBase64: updatedUser.user_qr_base64,
+          createdAt: updatedUser.created_at,
+        },
+      });
+    } catch (error: any) {
+      console.error('Update Profile Error:', error);
+      return res.status(500).json({ message: error.message || 'Unable to update profile.' });
+    }
+  }
+);
+
 router.post('/logout', async (_req: Request, res: Response) => {
   res.clearCookie('refreshToken', refreshCookieOptions);
   return res.json({ message: 'Logged out successfully.' });

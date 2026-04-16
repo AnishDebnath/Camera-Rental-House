@@ -14,56 +14,7 @@ type UploadFile = {
   preview: string;
 };
 
-const compressImage = async (file: File, { maxWidth = 1200, quality = 0.7 } = {}): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    // If not an image, skip compression
-    if (!file.type.startsWith('image/')) {
-      return resolve(file);
-    }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = (maxWidth / width) * height;
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const fileName = file.name ? file.name.replace(/\.[^/.]+$/, "") + ".jpg" : `image-${Date.now()}.jpg`;
-              const compressedFile = new File([blob], fileName, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            } else {
-              resolve(file); // Fallback to original
-            }
-          },
-          'image/jpeg',
-          quality
-        );
-      };
-      img.onerror = () => resolve(file); // Fallback
-    };
-    reader.onerror = () => resolve(file); // Fallback
-  });
-};
+import { compressImage } from '../utils/imageUtils';
 
 const signupFields = [
   { key: 'fullName', label: 'Full Name', placeholder: 'Enter your full name', icon: User },
@@ -84,6 +35,11 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [compressing, setCompressing] = useState<Record<UploadKey, boolean>>({
+    aadhaarDoc: false,
+    voterDoc: false,
+    selfie: false
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
@@ -122,6 +78,7 @@ const Signup = () => {
       if (Object.keys(errors).length > 0) setErrors({});
 
       // 2. Compress in the background
+      setCompressing(prev => ({ ...prev, [key]: true }));
       try {
         const compressed = await compressImage(file);
         
@@ -130,11 +87,9 @@ const Signup = () => {
           const compressedPreview = URL.createObjectURL(compressed);
           setFiles((current) => {
             // Revoke the old preview URL to save memory
-            // But only if it's the one we just created
             const old = current[key];
             if (old && old.preview === initialPreview) {
-              // We'll revoke it in a bit to avoid sudden flicker if needed
-              // URL.revokeObjectURL(initialPreview); 
+              URL.revokeObjectURL(initialPreview); 
             }
             
             return {
@@ -145,7 +100,8 @@ const Signup = () => {
         }
       } catch (err) {
         console.error('Compression background error:', err);
-        // Original file is already set, so we are fine
+      } finally {
+        setCompressing(prev => ({ ...prev, [key]: false }));
       }
     }
   };
@@ -243,6 +199,11 @@ const Signup = () => {
         setLoading(false);
       }
     } else {
+      const isStillCompressing = Object.values(compressing).some(val => val);
+      if (isStillCompressing) {
+        addToast({ title: 'Processing Image', message: 'Please wait, we are optimizing your photos for upload.', tone: 'info' });
+        return;
+      }
       setStep(nextStep);
     }
   };
@@ -253,6 +214,11 @@ const Signup = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!validateStep(step)) return;
+
+    if (Object.values(compressing).some(v => v)) {
+      addToast({ title: 'Processing Image', message: 'Still optimizing your photo. Please wait a second.', tone: 'info' });
+      return;
+    }
 
     setLoading(true);
     setErrors({});

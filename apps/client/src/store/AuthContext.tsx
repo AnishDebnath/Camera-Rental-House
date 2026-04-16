@@ -87,10 +87,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           throw error;
         }
       },
-      updateProfile: async (updates: Partial<User>) => {
-        // Mocking for now, could be an API call
-        setUser((prev) => (prev ? { ...prev, ...updates } : null));
-        addToast({ title: 'Profile updated', message: 'Your changes were saved.', tone: 'success' });
+      updateProfile: async (updates: any) => {
+        try {
+          const hasFiles = updates.aadhaarDoc instanceof File || updates.voterDoc instanceof File || updates.selfie instanceof File;
+          let payload: any = updates;
+
+          if (hasFiles) {
+            const formData = new FormData();
+            Object.entries(updates).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                formData.append(key, value as any);
+              }
+            });
+            payload = formData;
+          }
+
+          const response = await axiosInstance.patch('/auth/update-profile', payload, {
+            headers: hasFiles ? { 'Content-Type': 'multipart/form-data' } : undefined,
+          });
+
+          const { user: updatedUser } = response.data;
+          setUser(updatedUser);
+          addToast({ title: 'Profile updated', message: 'Your changes were saved successfully.', tone: 'success' });
+        } catch (error: any) {
+          console.error('Update Profile Error:', error);
+          throw error;
+        }
       },
       logout: () => {
         setUser(null);

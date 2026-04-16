@@ -1,6 +1,9 @@
-import { UserRound, Pencil, X, IdCard, ExternalLink, User as UserIcon, Phone, Mail, Facebook, Instagram, Youtube, Hash } from 'lucide-react';
+import { UserRound, Pencil, X, IdCard, ExternalLink, User as UserIcon, Phone, Mail, Facebook, Instagram, Youtube, Hash, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useRef, useState } from 'react';
 import LoadingButton from '../../components/LoadingButton';
 import { User } from '../../store/AuthContext';
+import { compressImage } from '../../utils/imageUtils';
+import { useToast } from '../../store/ToastContext';
 
 interface AccountDetailsTabProps {
   draft: User;
@@ -19,6 +22,14 @@ const AccountDetailsTab = ({
   onDraftChange, 
   onSave 
 }: AccountDetailsTabProps) => {
+  const { addToast } = useToast();
+  const aadhaarInputRef = useRef<HTMLInputElement>(null);
+  const voterInputRef = useRef<HTMLInputElement>(null);
+  
+  const [compressing, setCompressing] = useState<Record<string, boolean>>({
+    aadhaar: false,
+    voter: false
+  });
   const sections = [
     {
       title: 'Personal Information',
@@ -47,6 +58,37 @@ const AccountDetailsTab = ({
       ]
     }
   ] as const;
+
+  const handleFileChange = async (key: 'aadhaarDoc' | 'voterDoc', file: File | null) => {
+    if (!file) return;
+
+    const typeKey = key === 'aadhaarDoc' ? 'aadhaar' : 'voter';
+    setCompressing(prev => ({ ...prev, [typeKey]: true }));
+
+    try {
+      // 1. Show immediate preview (as base64 or blob URL)
+      const previewUrl = URL.createObjectURL(file);
+      onDraftChange(`${key}Url`, previewUrl); // Temporarily update URL for preview
+      
+      // 2. Compress the image
+      const compressed = await compressImage(file);
+      
+      // 3. Update the draft with the (compressed) file object
+      // The updateProfile function should handle FormData if it sees File objects
+      onDraftChange(key, compressed as any);
+      
+      // Update preview with compressed version
+      const compressedUrl = URL.createObjectURL(compressed);
+      onDraftChange(`${key}Url`, compressedUrl);
+
+      addToast({ title: 'Image Optimized', message: 'Ready to upload.', tone: 'success' });
+    } catch (err) {
+      console.error('File processing error:', err);
+      addToast({ title: 'Upload Failed', message: 'Could not process the image.', tone: 'error' });
+    } finally {
+      setCompressing(prev => ({ ...prev, [typeKey]: false }));
+    }
+  };
 
   return (
     <section className="animate-fade-up">
@@ -149,19 +191,37 @@ const AccountDetailsTab = ({
                                   />
                                 ) : (
                                   <div className="flex aspect-[1.6/1] w-full flex-col items-center justify-center gap-2 text-slate-300">
-                                    <IdCard className="h-6 w-6 opacity-40" />
+                                    <ImageIcon className="h-6 w-6 opacity-40" />
                                     <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">No File</span>
                                   </div>
                                 )}
                                 
                                 {editing && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-all group-hover/img:opacity-100">
-                                    <button className="flex text-[10px] uppercase tracking-widest font-bold text-ink shadow-sm items-center gap-1.5 bg-white hover:bg-slate-50 px-4 py-2 rounded-lg transition-colors">
-                                      <Pencil className="h-3 w-3" /> Update
-                                    </button>
+                                  <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all ${compressing[key === 'aadhaarNo' ? 'aadhaar' : 'voter'] ? 'opacity-100' : 'opacity-0 group-hover/img:opacity-100'}`}>
+                                    {compressing[key === 'aadhaarNo' ? 'aadhaar' : 'voter'] ? (
+                                      <div className="flex flex-col items-center gap-2 text-white">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest">Optimizing...</span>
+                                      </div>
+                                    ) : (
+                                      <button 
+                                        type="button"
+                                        onClick={() => (key === 'aadhaarNo' ? aadhaarInputRef : voterInputRef).current?.click()}
+                                        className="flex text-[10px] uppercase tracking-widest font-bold text-ink shadow-sm items-center gap-1.5 bg-white hover:bg-slate-50 px-4 py-2 rounded-lg transition-colors"
+                                      >
+                                        <Pencil className="h-3 w-3" /> Update Photo
+                                      </button>
+                                    )}
                                   </div>
                                 )}
                               </div>
+                              <input 
+                                ref={key === 'aadhaarNo' ? aadhaarInputRef : voterInputRef}
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={(e) => handleFileChange(key === 'aadhaarNo' ? 'aadhaarDoc' : 'voterDoc', e.target.files?.[0] || null)}
+                              />
                             </div>
                           </div>
                         </div>
@@ -208,11 +268,11 @@ const AccountDetailsTab = ({
         {editing && (
           <div className="flex pt-4 mt-2 border-t border-black/5">
             <LoadingButton
-              loading={loading}
+              loading={loading || Object.values(compressing).some(v => v)}
               onClick={onSave}
               className="!h-12 !min-h-0 w-full rounded-xl text-xs md:text-sm font-bold sm:w-fit sm:px-12 shadow-sm"
             >
-              Save Changes
+              {Object.values(compressing).some(v => v) ? 'Processing Images...' : 'Save Changes'}
             </LoadingButton>
           </div>
         )}
