@@ -7,9 +7,9 @@ import { useState, useEffect } from 'react';
 const tabs = [
   { label: 'Home', href: '/', Icon: House },
   { label: 'Explore', href: '/category', Icon: LayoutGrid },
-  { label: 'Favourite', href: '/favourites', Icon: Heart },
+  { label: 'Favs', href: '/favourites', Icon: Heart },
   { label: 'Cart', href: '/cart', Icon: ShoppingBag },
-  { label: 'Account', href: '/account', Icon: UserRound },
+  { label: 'Profile', href: '/account', Icon: UserRound },
 ];
 
 const BottomNav = () => {

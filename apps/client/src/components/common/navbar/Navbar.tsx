@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
+import { Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid, Camera, PackageSearch } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Popover, Transition } from '@headlessui/react';
 import { useAuth } from '../../../store/AuthContext';
@@ -153,34 +153,41 @@ const Navbar = () => {
                 leaveTo="transform scale-95 opacity-0"
               >
                 <Popover.Panel className="absolute right-0 mt-2 w-56 origin-top-right z-[1001] divide-y divide-line rounded-2xl bg-white/95 backdrop-blur-xl p-2 shadow-xl ring-1 ring-black/5 focus:outline-none">
-                  <div className="flex items-center gap-3 px-3 py-3">
-                    <div className="h-10 w-10 rounded-xl overflow-hidden border border-line shrink-0">
-                      {user?.avatarUrl ? (
-                        <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-bold">
-                          {user?.fullName?.[0] || 'U'}
+                  {({ close }) => (
+                    <>
+                      <div className="flex items-center gap-3 px-3 py-3">
+                        <div className="h-10 w-10 rounded-xl overflow-hidden border border-line shrink-0">
+                          {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-bold">
+                              {user?.fullName?.[0] || 'U'}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
-                      <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>
-                    </div>
-                  </div>
-                  <div className="py-2 text-ink/80">
-                    <Link to="/account" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
-                      <User className="h-4 w-4" /> My Profile
-                    </Link>
-                    <Link to="/account?tab=rentals" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
-                      <Package className="h-4 w-4" /> My Rentals
-                    </Link>
-                  </div>
-                  <div className="py-2">
-                    <button onClick={logout} className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger/5">
-                      <LogOut className="h-4 w-4" /> Log out
-                    </button>
-                  </div>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Account</p>
+                          <p className="mt-0.5 truncate text-sm font-bold text-ink">{user?.fullName}</p>
+                        </div>
+                      </div>
+                      <div className="py-2 text-ink/80">
+                        <Link to="/account?tab=details" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                          <User className="h-4 w-4" /> My Profile
+                        </Link>
+                        <Link to="/account?tab=active" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                          <Camera className="h-4 w-4" /> Active Rentals
+                        </Link>
+                        <Link to="/account?tab=history" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                          <PackageSearch className="h-4 w-4" /> Rental History
+                        </Link>
+                      </div>
+                      <div className="py-2">
+                        <button onClick={() => { logout(); close(); }} className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger/5">
+                          <LogOut className="h-4 w-4" /> Log out
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </Popover.Panel>
               </Transition>
             </Popover>

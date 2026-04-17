@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Camera, PackageSearch, UserRound } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '../../store/ToastContext';
@@ -27,12 +28,21 @@ const Account = () => {
   const { user, rentals, refreshRentals, refreshUser, updateProfile, logout } = useAuth();
   const { addToast } = useToast();
   const lenis = useLenis();
+  const location = useLocation();
 
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState(user);
   const [activeTab, setActiveTab] = useState<TabId>('details');
   const [showQrFullScreen, setShowQrFullScreen] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab') as TabId;
+    if (tabParam && ['details', 'active', 'history'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     refreshRentals();
