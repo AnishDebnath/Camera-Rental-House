@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { Camera, Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
+import { Search, ShoppingBag, User, ChevronDown, LogOut, Package, Heart, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Popover, Transition } from '@headlessui/react';
 import { useAuth } from '../../../store/AuthContext';
@@ -7,6 +7,8 @@ import { useCart } from '../../../store/CartContext';
 import { useFavourites } from '../../../store/FavouritesContext';
 import clsx from 'clsx';
 import { useTypewriter } from '../../../hooks/useTypewriter';
+
+import logo from '../../../assets/logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -52,14 +54,12 @@ const Navbar = () => {
 
       <div className="relative app-shell flex items-center justify-between gap-4 md:gap-8 z-10">
         {/* Left: Logo Section - Refined for professional weight */}
-        <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover text-white shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-            <Camera className="h-4.5 w-4.5" />
-          </div>
-          <div className="flex flex-col">
-            <p className="text-base sm:text-lg font-bold tracking-tight text-ink leading-none">C R H</p>
-            <p className="text-[9px] font-medium uppercase tracking-wider text-muted/80">Premium Rentals</p>
-          </div>
+        <Link to="/" className="flex items-center group shrink-0">
+          <img
+            src={logo}
+            alt="Camera Rental House"
+            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 origin-left"
+          />
         </Link>
 
         {/* Center: Search Bar (Desktop) with Typing Animation */}

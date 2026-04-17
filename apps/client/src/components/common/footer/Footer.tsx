@@ -1,5 +1,6 @@
-import { Camera, Facebook, Instagram, Mail, Phone, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Mail, Phone, Youtube } from 'lucide-react';
 import { useToast } from '../../../store/ToastContext';
+import logo from '../../../assets/logo.png';
 
 const Footer = () => {
   const { addToast } = useToast();
@@ -9,14 +10,12 @@ const Footer = () => {
       <div className="card-surface px-6 py-8">
         <div className="grid gap-6 md:grid-cols-[1.6fr_1fr_1fr]">
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-light text-primary">
-                <Camera className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-base font-bold">Camera Rental House</p>
-                <p className="text-xs text-muted">Professional camera rental house</p>
-              </div>
+            <div className="flex items-center">
+              <img
+                src={logo}
+                alt="Camera Rental House"
+                className="h-11 w-auto object-contain origin-left"
+              />
             </div>
             <p className="max-w-md text-sm text-muted">
               Modern rentals for production teams, creator studios, and event
