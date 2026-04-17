@@ -81,7 +81,7 @@ const Signup = () => {
       setCompressing(prev => ({ ...prev, [key]: true }));
       try {
         const compressed = await compressImage(file);
-        
+
         // Only update if we actually got a different file (e.g. was compressed)
         if (compressed !== file) {
           const compressedPreview = URL.createObjectURL(compressed);
@@ -89,9 +89,9 @@ const Signup = () => {
             // Revoke the old preview URL to save memory
             const old = current[key];
             if (old && old.preview === initialPreview) {
-              URL.revokeObjectURL(initialPreview); 
+              URL.revokeObjectURL(initialPreview);
             }
-            
+
             return {
               ...current,
               [key]: { file: compressed, preview: compressedPreview }
@@ -112,7 +112,7 @@ const Signup = () => {
     if (currentStep === 0) {
       if (!form.fullName) newErrors.fullName = "Full Name is required";
       if (!form.phone) newErrors.phone = "Phone Number is required";
-      else if (!/^\d{10}$/.test(form.phone)) newErrors.phone = "Must be 10 digits";
+      else if (!/^\d{10}$/.test(form.phone)) newErrors.phone = "Invalid phone number";
 
       if (!form.email) newErrors.email = "Email is required";
       else if (!/^[^\s@]+@gmail\.com$/.test(form.email)) newErrors.email = "Invalid email address";
@@ -126,7 +126,7 @@ const Signup = () => {
 
     if (currentStep === 1) {
       if (!form.aadhaarNo) newErrors.aadhaarNo = "Aadhaar Number is required";
-      else if (!/^\d{12}$/.test(form.aadhaarNo.replace(/-/g, ''))) newErrors.aadhaarNo = "Must be 12 digits";
+      else if (!/^\d{12}$/.test(form.aadhaarNo.replace(/-/g, ''))) newErrors.aadhaarNo = "Invalid Aadhaar number";
 
       if (!files.aadhaarDoc) newErrors.aadhaarDoc = "Upload Aadhaar photo";
 
@@ -141,7 +141,7 @@ const Signup = () => {
       else if (!/^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/.+/.test(form.facebook)) newErrors.facebook = "Invalid Facebook URL";
 
       if (!form.instagram) newErrors.instagram = "Instagram URL is required";
-      else if (!/^(https?:\/\/)?(www\.)?instagram\.com\/.+/.test(form.instagram) && !/^@?[a-zA-Z0-9._]+$/.test(form.instagram)) newErrors.instagram = "Invalid Instagram handle";
+      else if (!/^(https?:\/\/)?(www\.)?instagram\.com\/.+/.test(form.instagram) && !/^@?[a-zA-Z0-9._]+$/.test(form.instagram)) newErrors.instagram = "Invalid Instagram URL";
 
       if (form.youtube && !/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(form.youtube)) {
         newErrors.youtube = "Invalid YouTube URL";

@@ -77,7 +77,7 @@ const validateSignupPayload = (body: any, files: any) => {
   }
 
   if (!files?.voterDoc?.[0]) {
-    errors.push('Voter Card photocopy is required.');
+    errors.push('Voter ID photocopy is required.');
   }
 
   return errors;
