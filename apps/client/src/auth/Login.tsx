@@ -130,7 +130,9 @@ const Login = () => {
                 <input
                   value={form.identifier}
                   onChange={(event) => {
-                    setForm((current) => ({ ...current, identifier: event.target.value }));
+                    let val = event.target.value;
+                    if (/^\d+$/.test(val)) val = val.slice(0, 10);
+                    setForm((current) => ({ ...current, identifier: val }));
                     if (Object.keys(errors).length > 0) setErrors({});
                   }}
                   className={clsx(
