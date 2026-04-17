@@ -209,7 +209,7 @@ const Account = () => {
       const fieldErrors = data?.fieldErrors;
 
       addToast({ title: 'Error', message, tone: 'error' });
-      
+
       if (fieldErrors) {
         setErrors(fieldErrors);
       } else {
@@ -235,7 +235,7 @@ const Account = () => {
     : 'Since July 2024';
 
   return (
-    <div className="page-animate app-shell space-y-6 pb-24 pt-4 md:space-y-8">
+    <div className="page-animate app-shell space-y-6 pb-2 pt-2 md:space-y-8">
       <AccountHeader
         user={user}
         onSignOut={handleSignOut}
