@@ -1,4 +1,4 @@
-import { UserRound, Pencil, X, IdCard, ExternalLink, User as UserIcon, Phone, Mail, Facebook, Instagram, Youtube, Hash, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { UserRound, Pencil, X, IdCard, ExternalLink, User as UserIcon, Phone, Mail, Facebook, Instagram, Youtube, Hash, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
 import { useRef, useState } from 'react';
 import LoadingButton from '../../components/LoadingButton';
 import { User } from '../../store/AuthContext';
@@ -12,6 +12,7 @@ interface AccountDetailsTabProps {
   onSetEditing: (val: any) => void;
   onDraftChange: (key: string, value: string) => void;
   onSave: () => void;
+  errors?: Record<string, string>;
 }
 
 const AccountDetailsTab = ({ 
@@ -20,7 +21,8 @@ const AccountDetailsTab = ({
   loading, 
   onSetEditing, 
   onDraftChange, 
-  onSave 
+  onSave,
+  errors = {}
 }: AccountDetailsTabProps) => {
   const { addToast } = useToast();
   const aadhaarInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +90,22 @@ const AccountDetailsTab = ({
     } finally {
       setCompressing(prev => ({ ...prev, [typeKey]: false }));
     }
+  };
+  
+  const ErrorMessage = () => {
+    const errorValues = Object.values(errors);
+    if (errorValues.length === 0) return null;
+    
+    const displayMessage = errors.general || errorValues[0];
+
+    return (
+      <div className="mb-6 p-4 rounded-2xl bg-danger/5 border border-danger/10 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+        <AlertCircle className="h-5 w-5 text-danger shrink-0" />
+        <div className="text-xs font-bold text-danger leading-tight">
+          {displayMessage}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -165,19 +183,32 @@ const AccountDetailsTab = ({
                                 </label>
                               </div>
                               <div className={`h-11 overflow-hidden rounded-xl transition-all shadow-sm flex items-center px-4 border ${
-                                editing ? 'bg-white border-black/15 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10' : 'bg-white/40 border-black/5 opacity-90'
+                                editing 
+                                  ? (errors[key] ? 'bg-white border-danger/40 ring-2 ring-danger/5' : 'bg-white border-black/15 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10') 
+                                  : 'bg-white/40 border-black/5 opacity-90'
                               }`}>
                                 <input
                                   disabled={!editing}
                                   type="text"
                                   value={value}
-                                  onChange={(e) => onDraftChange(key, e.target.value)}
+                                  onChange={(e) => {
+                                    let val = e.target.value;
+                                    if (key === 'aadhaarNo') {
+                                      val = val.replace(/\D/g, '').slice(0, 12);
+                                    } else if (key === 'voterNo') {
+                                      val = val.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 10);
+                                    }
+                                    onDraftChange(key, val);
+                                  }}
                                   className={`w-full bg-transparent border-none p-0 text-sm font-semibold focus:ring-0 ${
                                      editing ? 'text-ink placeholder:text-muted/40' : 'text-ink/90 cursor-default'
                                   }`}
                                   placeholder={editing ? "Enter number" : "Not provided"}
                                 />
                               </div>
+                              {editing && errors[key] && (
+                                <p className="text-[10px] font-bold text-danger ml-1 mt-1">{errors[key]}</p>
+                              )}
                             </div>
                             
                             <div className="w-full">
@@ -242,19 +273,30 @@ const AccountDetailsTab = ({
                             </label>
                           </div>
                           <div className={`h-11 overflow-hidden rounded-xl transition-all shadow-sm flex items-center px-4 border ${
-                            editing ? 'bg-white border-black/15 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10' : 'bg-white/40 border-black/5 opacity-90'
+                            editing 
+                              ? (errors[key] ? 'bg-white border-danger/40 ring-2 ring-danger/5' : 'bg-white border-black/15 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10') 
+                              : 'bg-white/40 border-black/5 opacity-90'
                           }`}>
                             <input
                               disabled={!editing}
                               type={type}
                               value={value}
-                              onChange={(e) => onDraftChange(key, e.target.value)}
+                              onChange={(e) => {
+                                let val = e.target.value;
+                                if (key === 'phone') {
+                                  val = val.replace(/\D/g, '').slice(0, 10);
+                                }
+                                onDraftChange(key, val);
+                              }}
                               className={`w-full bg-transparent border-none p-0 text-sm font-semibold focus:ring-0 ${
                                  editing ? 'text-ink placeholder:text-muted/40' : 'text-ink/90 cursor-default'
                               }`}
                               placeholder={editing ? `Add ${label.toLowerCase()}` : 'Not provided'}
                             />
                           </div>
+                          {editing && errors[key] && (
+                            <p className="text-[10px] font-bold text-danger ml-1 mt-1">{errors[key]}</p>
+                          )}
                         </div>
                       );
                     })}
@@ -265,8 +307,10 @@ const AccountDetailsTab = ({
           ))}
         </div>
 
+        {editing && <div className="mt-6"><ErrorMessage /></div>}
+
         {editing && (
-          <div className="flex pt-4 mt-2 border-t border-black/5">
+          <div className="flex mt-4">
             <LoadingButton
               loading={loading || Object.values(compressing).some(v => v)}
               onClick={onSave}

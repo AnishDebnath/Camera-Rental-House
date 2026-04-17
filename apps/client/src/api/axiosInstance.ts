@@ -18,7 +18,27 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle 401 (Unauthorized) - Expired Token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const response = await axiosInstance.post('/auth/refresh');
+        const { accessToken } = response.data;
+        localStorage.setItem('accessToken', accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed (refresh token expired) -> logout
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('camera_rental_house_user');
+        // Optional: redirect to login if we can access navigate or window.location
+        // window.location.href = '/login'; 
+      }
+    }
+
     const data = error.response?.data;
     const message = data?.message || error.message || 'Network error occurred.';
     

@@ -22,9 +22,8 @@ const AccountTabs = ({ tabs, activeTab, onTabChange }: AccountTabsProps) => {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`relative flex min-w-[max-content] flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-xs md:text-sm font-bold transition-all duration-300 ${
-              isActive ? 'text-white' : 'text-muted hover:text-ink'
-            }`}
+            className={`relative flex min-w-[max-content] flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-xs md:text-sm font-bold transition-all duration-300 ${isActive ? 'text-white' : 'text-muted hover:text-ink'
+              }`}
           >
             {isActive && (
               <motion.div

@@ -14,7 +14,7 @@ import authMiddleware from '../middleware/authMiddleware.js';
 dotenv.config();
 
 const router = express.Router();
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
@@ -496,21 +496,91 @@ router.patch(
       }
 
       const updates: any = {};
+      const errors: string[] = [];
 
-      // Handle simple fields
+      // Validation & Formatting
       if (body.fullName) updates.full_name = body.fullName;
-      if (body.phone) updates.phone = body.phone.replace(/\D/g, '');
-      if (body.email) updates.email = body.email.toLowerCase();
-      if (body.aadhaarNo) updates.aadhaar_no = body.aadhaarNo.replace(/\D/g, '');
-      if (body.voterNo) updates.voter_no = body.voterNo.trim().toUpperCase();
+
+      if (body.phone) {
+        const phone = body.phone.replace(/\D/g, '');
+        if (!/^\d{10}$/.test(phone)) errors.push('Phone number must be 10 digits.');
+        updates.phone = phone;
+      }
+
+      if (body.email) {
+        const email = body.email.toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Invalid email format.');
+        updates.email = email;
+      }
+
+      if (body.aadhaarNo) {
+        const aadhaar = body.aadhaarNo.replace(/\D/g, '');
+        if (!/^\d{12}$/.test(aadhaar)) errors.push('Aadhaar number must be 12 digits.');
+        updates.aadhaar_no = aadhaar;
+      }
+
+      if (body.voterNo) {
+        const voter = body.voterNo.trim().toUpperCase();
+        if (voter.length < 5) errors.push('Voter ID is too short.');
+        updates.voter_no = voter;
+      }
+
+      if (errors.length > 0) {
+        return res.status(400).json({ message: 'Validation failed.', errors });
+      }
+
+      // Check for uniqueness
+      const conditions: string[] = [];
+      if (updates.email && updates.email !== user.email) conditions.push(`email.eq.${updates.email}`);
+      if (updates.phone && updates.phone !== user.phone) conditions.push(`phone.eq.${updates.phone}`);
+      if (updates.aadhaar_no && updates.aadhaar_no !== user.aadhaar_no) conditions.push(`aadhaar_no.eq.${updates.aadhaar_no}`);
+      if (updates.voter_no && updates.voter_no !== user.voter_no) conditions.push(`voter_no.eq.${updates.voter_no}`);
+
+      if (conditions.length > 0) {
+        const { data: existing, error: checkError } = await supabase
+          .from('users')
+          .select('email, phone, aadhaar_no, voter_no')
+          .neq('id', userId)
+          .or(conditions.join(','));
+
+        if (checkError) throw checkError;
+
+        if (existing && existing.length > 0) {
+          const conflictFields: string[] = [];
+          const fieldErrors: Record<string, string> = {};
+
+          if (existing.some(u => u.phone === updates.phone)) {
+            conflictFields.push('Phone Number');
+            fieldErrors.phone = 'Phone number already registered';
+          }
+          if (existing.some(u => u.email === updates.email)) {
+            conflictFields.push('Email');
+            fieldErrors.email = 'Email already registered';
+          }
+          if (existing.some(u => u.aadhaar_no === updates.aadhaar_no)) {
+            conflictFields.push('Aadhaar Number');
+            fieldErrors.aadhaarNo = 'Aadhaar number already registered';
+          }
+          if (existing.some(u => u.voter_no === updates.voter_no)) {
+            conflictFields.push('Voter ID');
+            fieldErrors.voterNo = 'Voter ID already registered';
+          }
+
+          return res.status(409).json({
+            message: `${conflictFields.join(' and ')} already registered.`,
+            fieldErrors
+          });
+        }
+      }
+
       if (body.facebook !== undefined) updates.facebook = body.facebook || null;
       if (body.instagram !== undefined) updates.instagram = body.instagram || null;
       if (body.youtube !== undefined) updates.youtube = body.youtube || null;
 
       // 2. Handle File Updates
-      
+
       // Profile Picture
-      if (files.selfie?.[0]) {
+      if (files?.selfie?.[0]) {
         console.log('Updating profile picture...');
         const { buffer, mimetype } = await processImage(files.selfie[0].buffer, { maxWidth: 800, maxHeight: 800, quality: 85 });
         updates.avatar_url = await uploadToCloudinary({
@@ -522,7 +592,7 @@ router.patch(
       }
 
       // Aadhaar Doc
-      if (files.aadhaarDoc?.[0]) {
+      if (files?.aadhaarDoc?.[0]) {
         console.log('Updating Aadhaar Doc...');
         const { buffer, mimetype } = await processImage(files.aadhaarDoc[0].buffer, { maxWidth: 1500, quality: 90 });
         updates.aadhaar_doc_url = await uploadToSupabase({
@@ -533,7 +603,7 @@ router.patch(
       }
 
       // Voter Doc
-      if (files.voterDoc?.[0]) {
+      if (files?.voterDoc?.[0]) {
         console.log('Updating Voter Doc...');
         const { buffer, mimetype } = await processImage(files.voterDoc[0].buffer, { maxWidth: 1500, quality: 90 });
         updates.voter_doc_url = await uploadToSupabase({
@@ -554,32 +624,56 @@ router.patch(
         });
       }
 
-      const { data: updatedUser, error: updateError } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', userId)
-        .select('*')
-        .single();
+      // 4. Update Database if there are changes
+      if (Object.keys(updates).length > 0) {
+        const { data: updatedUser, error: updateError } = await supabase
+          .from('users')
+          .update(updates)
+          .eq('id', userId)
+          .select('*')
+          .single();
 
-      if (updateError) throw updateError;
+        if (updateError) throw updateError;
 
+        return res.json({
+          message: 'Profile updated successfully.',
+          user: {
+            id: updatedUser.id,
+            fullName: updatedUser.full_name,
+            phone: updatedUser.phone,
+            email: updatedUser.email,
+            aadhaarNo: updatedUser.aadhaar_no,
+            aadhaarDocUrl: updatedUser.aadhaar_doc_url,
+            voterNo: updatedUser.voter_no,
+            voterDocUrl: updatedUser.voter_doc_url,
+            facebook: updatedUser.facebook,
+            instagram: updatedUser.instagram,
+            youtube: updatedUser.youtube,
+            avatarUrl: updatedUser.avatar_url,
+            userQrBase64: updatedUser.user_qr_base64,
+            createdAt: updatedUser.created_at,
+          },
+        });
+      }
+
+      // No changes detected
       return res.json({
-        message: 'Profile updated successfully.',
+        message: 'No changes detected.',
         user: {
-          id: updatedUser.id,
-          fullName: updatedUser.full_name,
-          phone: updatedUser.phone,
-          email: updatedUser.email,
-          aadhaarNo: updatedUser.aadhaar_no,
-          aadhaarDocUrl: updatedUser.aadhaar_doc_url,
-          voterNo: updatedUser.voter_no,
-          voterDocUrl: updatedUser.voter_doc_url,
-          facebook: updatedUser.facebook,
-          instagram: updatedUser.instagram,
-          youtube: updatedUser.youtube,
-          avatarUrl: updatedUser.avatar_url,
-          userQrBase64: updatedUser.user_qr_base64,
-          createdAt: updatedUser.created_at,
+          id: user.id,
+          fullName: user.full_name,
+          phone: user.phone,
+          email: user.email,
+          aadhaarNo: user.aadhaar_no,
+          aadhaarDocUrl: user.aadhaar_doc_url,
+          voterNo: user.voter_no,
+          voterDocUrl: user.voter_doc_url,
+          facebook: user.facebook,
+          instagram: user.instagram,
+          youtube: user.youtube,
+          avatarUrl: user.avatar_url,
+          userQrBase64: user.user_qr_base64,
+          createdAt: user.created_at,
         },
       });
     } catch (error: any) {

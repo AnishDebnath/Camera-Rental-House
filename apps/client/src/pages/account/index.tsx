@@ -35,6 +35,7 @@ const Account = () => {
   const [draft, setDraft] = useState(user);
   const [activeTab, setActiveTab] = useState<TabId>('details');
   const [showQrFullScreen, setShowQrFullScreen] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -159,15 +160,66 @@ const Account = () => {
     rental.rental_items.every((item) => item.status === 'returned'),
   );
 
+  const validateDraft = () => {
+    const newErrors: Record<string, string> = {};
+    if (!draft.fullName) newErrors.fullName = "Full Name is required";
+
+    if (!draft.phone) newErrors.phone = "Phone Number is required";
+    else if (!/^\d{10}$/.test(draft.phone.replace(/\D/g, ''))) newErrors.phone = "Invalid phone number";
+
+    if (!draft.email) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)) newErrors.email = "Invalid email address";
+
+    if (!draft.aadhaarNo) newErrors.aadhaarNo = "Aadhaar Number is required";
+    else if (!/^\d{12}$/.test(draft.aadhaarNo.replace(/\D/g, ''))) newErrors.aadhaarNo = "Invalid aadhaar number";
+
+    if (!draft.voterNo) newErrors.voterNo = "Voter ID is required";
+    else if (draft.voterNo.length < 10) newErrors.voterNo = "Invalid Voter ID";
+
+    if (!draft.facebook) newErrors.facebook = "Facebook URL is required";
+    else if (!/^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/.+/.test(draft.facebook)) newErrors.facebook = "Invalid Facebook URL";
+
+    if (!draft.instagram) newErrors.instagram = "Instagram URL is required";
+    else if (!/^(https?:\/\/)?(www\.)?instagram\.com\/.+/.test(draft.instagram) && !/^@?[a-zA-Z0-9._]+$/.test(draft.instagram)) newErrors.instagram = "Invalid Instagram URL";
+
+    if (draft.youtube && !/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(draft.youtube)) {
+      newErrors.youtube = "Invalid YouTube URL";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
     if (!draft) return;
+    if (!validateDraft()) {
+      addToast({ title: 'Validation Failed', message: 'Please fix the highlighted errors.', tone: 'error' });
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
     try {
       await updateProfile(draft);
-      addToast('Profile updated successfully', 'success');
       setEditing(false);
-    } catch (error) {
-      addToast('Failed to update profile', 'error');
+    } catch (error: any) {
+      console.error('Update Profile Error:', error);
+      const data = error.response?.data;
+      const message = data?.message || error.message || 'Failed to update profile';
+      const fieldErrors = data?.fieldErrors;
+
+      addToast({ title: 'Error', message, tone: 'error' });
+      
+      if (fieldErrors) {
+        setErrors(fieldErrors);
+      } else {
+        const lowercaseMsg = message.toLowerCase();
+        if (lowercaseMsg.includes('email')) setErrors(prev => ({ ...prev, email: message }));
+        else if (lowercaseMsg.includes('phone')) setErrors(prev => ({ ...prev, phone: message }));
+        else if (lowercaseMsg.includes('aadhaar')) setErrors(prev => ({ ...prev, aadhaarNo: message }));
+        else if (lowercaseMsg.includes('voter')) setErrors(prev => ({ ...prev, voterNo: message }));
+        else setErrors(prev => ({ ...prev, general: message }));
+      }
     } finally {
       setLoading(false);
     }
@@ -210,9 +262,18 @@ const Account = () => {
                 draft={draft}
                 editing={editing}
                 loading={loading}
-                onSetEditing={setEditing}
-                onDraftChange={(key, value) => setDraft((prev: any) => ({ ...prev, [key]: value }))}
+                onSetEditing={(val) => {
+                  const nextValue = typeof val === 'function' ? val(editing) : val;
+                  if (!nextValue) setDraft(user);
+                  setErrors({}); // Clear errors on toggle
+                  setEditing(nextValue);
+                }}
+                onDraftChange={(key, value) => {
+                  setDraft((prev: any) => ({ ...prev, [key]: value }));
+                  if (Object.keys(errors).length > 0) setErrors({});
+                }}
                 onSave={handleSave}
+                errors={errors}
               />
             )}
 

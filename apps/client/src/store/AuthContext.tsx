@@ -89,12 +89,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
       updateProfile: async (updates: any) => {
         try {
-          const hasFiles = updates.aadhaarDoc instanceof File || updates.voterDoc instanceof File || updates.selfie instanceof File;
-          let payload: any = updates;
+          const finalUpdates = { ...updates };
+          // Remove internal/read-only fields that shouldn't be sent back to server
+          delete (finalUpdates as any).aadhaarDocUrl;
+          delete (finalUpdates as any).voterDocUrl;
+          delete (finalUpdates as any).avatarUrl;
+          delete (finalUpdates as any).userQrBase64;
+          delete (finalUpdates as any).createdAt;
+          delete (finalUpdates as any).id;
+
+          const hasFiles = finalUpdates.aadhaarDoc instanceof File || finalUpdates.voterDoc instanceof File || finalUpdates.selfie instanceof File;
+          let payload: any = finalUpdates;
 
           if (hasFiles) {
             const formData = new FormData();
-            Object.entries(updates).forEach(([key, value]) => {
+            Object.entries(finalUpdates).forEach(([key, value]) => {
               if (value !== undefined && value !== null) {
                 formData.append(key, value as any);
               }
@@ -102,9 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             payload = formData;
           }
 
-          const response = await axiosInstance.patch('/auth/update-profile', payload, {
-            headers: hasFiles ? { 'Content-Type': 'multipart/form-data' } : undefined,
-          });
+          const response = await axiosInstance.patch('/auth/update-profile', payload);
 
           const { user: updatedUser } = response.data;
           setUser(updatedUser);
