@@ -109,35 +109,35 @@ const AccountDetailsTab = ({
   };
 
   return (
-    <section className="animate-fade-up">
-      <div className="rounded-[2.5rem] border border-white bg-white/50 p-5 backdrop-blur-2xl md:p-8 shadow-sm">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-black/5 pb-6 relative z-10">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-ink md:text-2xl">
-              Profile Settings
-            </h2>
-            <p className="text-xs font-medium text-muted/80 md:text-sm">
-              Manage your personal information and verified documents.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onSetEditing((c: any) => !c)}
-            className={`flex h-[2.75rem] items-center justify-center rounded-xl px-6 text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 shadow-sm ${
-              editing 
-                ? 'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20' 
-                : 'bg-white text-ink hover:text-primary hover:shadow-md border border-white/60'
-            }`}
-          >
-            {editing ? (
-              <><X className="mr-2 h-4 w-4" /> Cancel Edit</>
-            ) : (
-              <><Pencil className="mr-2 h-3.5 w-3.5" /> Edit Profile</>
-            )}
-          </button>
+    <section className="animate-fade-up space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3 px-4">
+        <div>
+          <h2 className="text-lg md:text-xl font-bold text-ink">Account Details</h2>
+          <p className="mt-0.5 text-xs md:text-sm font-medium text-muted">
+            Manage your personal information and verified documents.
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => onSetEditing((c: any) => !c)}
+          className={`flex h-[2.25rem] md:h-[2.5rem] w-fit items-center justify-center rounded-xl px-4 md:px-5 text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 shadow-sm ${
+            editing 
+              ? 'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20' 
+              : 'bg-white text-ink hover:text-primary hover:shadow-md border border-white/60'
+          }`}
+        >
+          {editing ? (
+            <><X className="mr-1.5 h-3.5 w-3.5 md:h-4 md:w-4" /> Cancel</>
+          ) : (
+            <><Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit Profile</>
+          )}
+        </button>
+      </div>
 
-        <div className="flex flex-col gap-12 pt-4">
+      <div className="rounded-[2.5rem] border border-white bg-white/50 p-5 backdrop-blur-2xl md:p-8 shadow-sm">
+        <ErrorMessage />
+        
+        <div className="flex flex-col gap-12 pt-2 md:pt-4">
           {sections.map((section, index) => (
             <div 
               key={section.title} 
