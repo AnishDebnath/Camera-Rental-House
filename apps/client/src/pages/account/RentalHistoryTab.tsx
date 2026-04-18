@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, Calendar, ChevronDown, ChevronUp, PackageCheck, Info } from 'lucide-react';
+import { Camera, Calendar, ChevronDown, ChevronUp, PackageCheck, Info, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatDate from '../../utils/formatDate';
 
@@ -16,7 +16,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
 
   return (
     <section className="animate-fade-up space-y-4 md:space-y-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3 px-4">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-ink">Rental History</h2>
           <p className="mt-0.5 text-xs md:text-sm font-medium text-muted">
@@ -41,7 +41,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-3 lg:grid-cols-2 md:gap-4">
           {pastRentals.map((rental) => {
             const isExpanded = expandedId === rental.id;
             const duration = Math.ceil((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) || 1;
@@ -49,93 +49,63 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
             return (
               <article
                 key={rental.id}
-                className={`group card-surface flex flex-col rounded-[2rem] border-2 border-white/60 bg-white/40 p-5 backdrop-blur-xl transition-all duration-500 hover:border-primary/20 md:p-6 ${isExpanded ? 'ring-2 ring-primary/10 shadow-xl' : 'hover:shadow-lg'
-                  }`}
+                className={`group card-surface flex flex-col rounded-[2rem] border border-white/60 bg-white/40 p-4 backdrop-blur-xl transition-all duration-300 md:p-5 ${isExpanded ? 'border-line/40 shadow-lg bg-white/60' : 'hover:shadow-md'}`}
               >
-                {/* Header section - always visible */}
+                {/* Header section - clicking anywhere toggles */}
                 <div
-                  className="flex cursor-pointer flex-col gap-5 md:flex-row md:items-start md:justify-between"
+                  className="flex cursor-pointer flex-col select-none"
                   onClick={() => toggleExpand(rental.id)}
                 >
-                  <div className="flex flex-1 items-start gap-4">
-                    {/* Avatars section */}
-                    <div className="hidden sm:flex -space-x-4 overflow-hidden mt-1">
-                      {rental.rental_items.slice(0, 3).map((item: any, idx: number) => (
-                        <div
-                          key={idx}
-                          className="h-14 w-14 overflow-hidden rounded-2xl border-2 border-white bg-white/50 shadow-sm transition-transform duration-300 group-hover:-translate-y-1"
-                        >
-                          {item.products?.product_images?.[0]?.url ? (
-                            <img
-                              src={item.products.product_images[0].url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                              <Camera className="h-4 w-4 text-muted" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      {rental.rental_items.length > 3 && (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white bg-primary-light text-xs font-bold text-primary shadow-sm">
-                          +{rental.rental_items.length - 3}
-                        </div>
-                      )}
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
+                      <span className={`h-1.5 w-1.5 rounded-full ${rental.status === 'failed' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Order #{rental.id.slice(0, 8)}</span>
                     </div>
-
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-primary">
-                          Order #{rental.id.slice(0, 8)}
-                        </p>
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[8px] md:text-[10px] font-bold text-primary uppercase">
-                          {duration} Days
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-primary" />
-                          <span className="text-base md:text-lg font-bold text-ink leading-none">
-                            {formatDate(rental.pickup_date)}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-medium text-muted lowercase">to</span>
-                        <span className="text-base md:text-lg font-bold text-ink leading-none">
-                          {formatDate(rental.event_date)}
-                        </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${rental.status === 'failed' ? 'text-red-500' : 'text-success'}`}>
+                        {rental.status === 'failed' ? 'Failed' : 'Completed'}
+                      </span>
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/50 border border-white">
+                        <ChevronDown className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Summary Details in Card Header */}
-                  <div className="flex flex-wrap items-center gap-4 border-t border-line/20 pt-4 md:flex-row md:items-center md:border-t-0 md:pt-0">
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:flex sm:items-center sm:gap-8">
-                      <div className="space-y-0.5">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Total Items</p>
-                        <p className="text-sm font-bold text-ink">{rental.rental_items.length} Units</p>
+                  <div className="flex flex-col gap-2.5 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 space-y-1">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Pickup</p>
+                        <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.pickup_date)}</p>
                       </div>
-                      <div className="space-y-0.5">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Total Amount</p>
-                        <p className="text-sm font-black text-primary">₹{rental.total_amount?.toLocaleString()}</p>
+                      <div className="flex-shrink-0 text-slate-300 flex items-center justify-center h-8 w-8 rounded-full bg-white/50 border border-white shadow-sm">
+                        <ArrowRight className="h-4 w-4 text-slate-400" />
                       </div>
-                      <div className="space-y-0.5 sm:text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Status</p>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-success">
-                          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                          Completed
-                        </span>
+                      <div className="flex-1 space-y-1 text-right">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Return</p>
+                        <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.event_date)}</p>
                       </div>
                     </div>
-                    <div className="ml-auto md:ml-2">
-                      {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-primary" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted group-hover:text-primary transition-colors" />
-                      )}
+
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <Calendar className="h-3 w-3 text-slate-400" />
+                      <span className="text-[10px] font-semibold text-slate-500">
+                        Duration: {duration} Days
+                      </span>
                     </div>
+                  </div>
+
+                  {/* Summary Totals Card */}
+                  <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2.5 border border-white backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Total Units</p>
+                      <p className="text-[11px] font-bold text-ink">{rental.rental_items.length} Items</p>
+                    </div>
+                    {rental.total_amount && (
+                      <div className="space-y-0.5 text-right">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
+                        <p className="text-[13px] md:text-sm font-black tracking-tight text-primary">₹{rental.total_amount.toLocaleString()}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -146,28 +116,27 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
+                      transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-6 space-y-4 border-t border-line/40 pt-6">
+                      <div className="mt-4 space-y-4 border-t border-slate-200/80 pt-4">
                         {/* Rented Gears List */}
                         <div className="flex items-center justify-between">
-                          <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-ink">
-                            <Info className="h-3.5 w-3.5 text-primary" />
-                            Item Details & Pricing
+                          <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink">
+                            <Info className="h-3 w-3 text-primary" />
+                            Item Details
                           </h4>
-                          {/* <span className="text-[10px] font-bold text-muted">Breakdown for {duration} days</span> */}
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-2 sm:grid-cols-2">
                           {rental.rental_items.map((item: any, idx: number) => {
                             const itemTotal = (item.price_per_day || 0) * duration;
                             return (
                               <div
                                 key={idx}
-                                className="flex items-center gap-3 rounded-2xl border border-line/20 bg-white/20 p-4 transition-all hover:bg-white/40"
+                                className="flex items-center gap-3 rounded-2xl border border-line/20 bg-white/20 p-3 transition-colors hover:bg-white/40"
                               >
-                                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white shadow-sm">
+                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
                                   {item.products?.product_images?.[0]?.url ? (
                                     <img
                                       src={item.products.product_images[0].url}
@@ -176,7 +145,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                     />
                                   ) : (
                                     <div className="flex h-full w-full items-center justify-center bg-gray-50">
-                                      <Camera className="h-5 w-5 text-muted" />
+                                      <Camera className="h-4 w-4 text-muted" />
                                     </div>
                                   )}
                                 </div>
@@ -188,15 +157,40 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                     <p className="shrink-0 text-xs font-black text-primary">₹{itemTotal.toLocaleString()}</p>
                                   </div>
                                   <div className="mt-1 flex items-center justify-between">
-                                    <p className="text-[10px] font-semibold text-muted">
+                                    <p className="text-[10px] font-medium text-muted">
                                       {item.products?.brand || 'Premium Equipment'}
                                     </p>
-                                    <p className="text-[9px] font-bold text-muted italic">₹{item.price_per_day}/day × {duration}</p>
+                                    <p className="text-[9px] font-bold text-slate-400 italic">₹{item.price_per_day}/d × {duration}</p>
                                   </div>
                                 </div>
                               </div>
                             );
                           })}
+                        </div>
+
+                        {/* Handover Grid */}
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80 mt-4">
+                          <div className="rounded-2xl bg-slate-50/80 p-3 border border-slate-100 transition-colors">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Released By</p>
+                              </div>
+                              <p className="text-xs font-bold text-slate-800">{rental.released_by || 'Demo Admin'}</p>
+                              <p className="text-[10px] font-medium text-slate-400">{rental.released_at ? formatDate(rental.released_at) : formatDate(rental.pickup_date)}</p>
+                            </div>
+                          </div>
+
+                          <div className="rounded-2xl bg-slate-50/80 p-3 border border-slate-100 transition-colors">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Received By</p>
+                              </div>
+                              <p className="text-xs font-bold text-slate-800">{rental.received_by || 'Demo Admin'}</p>
+                              <p className="text-[10px] font-medium text-slate-400">{rental.received_at ? formatDate(rental.received_at) : formatDate(rental.event_date)}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </motion.div>

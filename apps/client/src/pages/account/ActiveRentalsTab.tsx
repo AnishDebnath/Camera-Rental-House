@@ -8,7 +8,7 @@ interface ActiveRentalsTabProps {
 const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
   return (
     <section className="animate-fade-up space-y-4 md:space-y-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3 px-4">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-ink">Active Rentals</h2>
           <p className="mt-0.5 text-xs md:text-sm font-medium text-muted">
