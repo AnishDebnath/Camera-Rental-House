@@ -11,7 +11,7 @@ import Category from './pages/category';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import Favourites from './pages/Favourites';
+import Favourites from './pages/favourites';
 import Account from './pages/account';
 import { useAuth } from './store/AuthContext';
 import PageTransition from './components/feature/PageTransition';
