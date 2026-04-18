@@ -8,8 +8,8 @@ const Favourites = () => {
   const { favourites } = useFavourites();
 
   return (
-    <div className="min-h-screen">
-      <div className="page-animate app-shell pt-2 pb-0">
+    <div className="page-animate space-y-10 md:space-y-12">
+      <div className="app-shell pt-2 pb-0">
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -34,10 +34,7 @@ const Favourites = () => {
           )}
         </section>
       </div>
-
-      <div className="mt-12 md:mt-18">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };
