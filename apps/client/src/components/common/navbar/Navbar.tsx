@@ -171,14 +171,14 @@ const Navbar = () => {
                         </div>
                       </div>
                       <div className="py-2 text-ink/80">
-                        <Link to="/account?tab=details" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
-                          <User className="h-4 w-4" /> My Profile
-                        </Link>
                         <Link to="/account?tab=active" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
                           <Camera className="h-4 w-4" /> Active Rentals
                         </Link>
                         <Link to="/account?tab=history" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
                           <PackageSearch className="h-4 w-4" /> Rental History
+                        </Link>
+                        <Link to="/account?tab=details" onClick={() => close()} className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-page hover:text-primary">
+                          <User className="h-4 w-4" /> My Profile
                         </Link>
                       </div>
                       <div className="py-2">
