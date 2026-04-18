@@ -17,9 +17,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
 const TABS = [
-  { id: 'details', label: 'Account Details', icon: UserRound },
   { id: 'active', label: 'Active Rentals', icon: Camera },
   { id: 'history', label: 'Rental History', icon: PackageSearch },
+  { id: 'details', label: 'Account Details', icon: UserRound },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
