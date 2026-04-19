@@ -83,37 +83,37 @@ const Category = () => {
   };
 
   return (
-    <div className="page-animate space-y-10 md:space-y-12">
-      <div className="min-h-screen">
-        <CategoryHeader
-          pullDistance={pullDistance}
-          search={search}
-          setSearch={setSearch}
+    <div className="min-h-screen">
+      <CategoryHeader
+        pullDistance={pullDistance}
+        search={search}
+        setSearch={setSearch}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        activeCategory={activeCategory}
+        activeBrand={activeBrand}
+        onSelectFilter={handleFilterSelect}
+      />
+      <div className="app-shell mt-4 md:mt-6">
+        <CategoryProducts
+          loading={loading}
+          filteredProducts={filteredProducts}
+          itemsToShow={itemsToShow}
+          setItemsToShow={setItemsToShow}
+        />
+      </div>
+      {!isDesktop && (
+        <MobileFilters
           showFilters={showFilters}
           setShowFilters={setShowFilters}
           activeCategory={activeCategory}
           activeBrand={activeBrand}
           onSelectFilter={handleFilterSelect}
         />
-        <div className="app-shell mt-6">
-          <CategoryProducts
-            loading={loading}
-            filteredProducts={filteredProducts}
-            itemsToShow={itemsToShow}
-            setItemsToShow={setItemsToShow}
-          />
-        </div>
-        {!isDesktop && (
-          <MobileFilters
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            activeCategory={activeCategory}
-            activeBrand={activeBrand}
-            onSelectFilter={handleFilterSelect}
-          />
-        )}
+      )}
+      <div className="mt-12 md:mt-18">
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 };

@@ -14,7 +14,7 @@ const SearchBar = ({ value, onChange, onFilterClick }) => {
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholderText}
-          className="w-full h-12 pl-12 pr-4 rounded-2xl border border-white/60 bg-white/40 ring-1 ring-black/[0.03] backdrop-blur-md text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-4 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
+          className="w-full h-12 pl-12 pr-4 rounded-2xl border border-white/60 bg-white/40 ring-1 ring-black/[0.03] backdrop-blur-md text-sm font-medium transition-all focus:bg-white focus:border-primary/40 focus:ring-primary/10 hover:border-primary/20 outline-none truncate placeholder:text-muted/60"
         />
       </div>
       <button
