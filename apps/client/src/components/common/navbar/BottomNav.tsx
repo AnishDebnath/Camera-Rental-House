@@ -1,6 +1,7 @@
 import { LayoutGrid, Heart, House, ShoppingBag, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../../store/CartContext';
+import { useFavourites } from '../../../store/FavouritesContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -15,6 +16,7 @@ const tabs = [
 const BottomNav = () => {
   const { pathname } = useLocation();
   const { items } = useCart();
+  const { favourites } = useFavourites();
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ const BottomNav = () => {
 
         {tabs.map(({ label, href, Icon }) => {
           const active = pathname === href;
+          const count = href === '/cart' ? items.length : href === '/favourites' ? favourites.length : 0;
 
           return (
             <Link
@@ -71,7 +74,14 @@ const BottomNav = () => {
                     transition={{ type: 'spring', duration: 0.6, bounce: 0.35 }}
                     className="flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-primary to-primary-hover px-5 shadow-[0_10px_20px_rgba(255,107,0,0.25)] border border-white/20"
                   >
-                    <Icon className="h-5 w-5 text-white drop-shadow-sm" />
+                    <div className="relative">
+                      <Icon className="h-5 w-5 text-white drop-shadow-sm" />
+                      {count > 0 && (
+                        <span className="absolute -right-2.5 -top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-primary leading-none shadow-sm">
+                          {count}
+                        </span>
+                      )}
+                    </div>
                     <motion.span
                       initial={{ width: 0, opacity: 0 }}
                       animate={{ width: 'auto', opacity: 1 }}
@@ -84,8 +94,10 @@ const BottomNav = () => {
                 ) : (
                   <div className="relative flex h-12 w-12 items-center justify-center text-ink/40 transition-all duration-300 hover:text-primary active:scale-90">
                     <Icon className="h-5.5 w-5.5" />
-                    {href === '/cart' && items.length > 0 && (
-                      <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-primary border-[1.5px] border-white shadow-sm" />
+                    {count > 0 && (
+                      <span className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white leading-none shadow-md">
+                        {count}
+                      </span>
                     )}
                   </div>
                 )}
