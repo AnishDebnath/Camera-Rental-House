@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCheck, Heart, Info, QrCode, ShoppingBag } from 'lucide-react';
+import { CheckCheck, Heart, ShoppingBag, ShieldCheck, Sparkles, Box } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ImageCarousel from '../components/ImageCarousel';
 import { mockProducts } from '../data/mockProducts';
@@ -46,107 +46,109 @@ const ProductDetail = () => {
   const inCart = items.some((item) => item.id === product.id);
 
   return (
-    <div className="page-animate app-shell space-y-4 pb-40 pt-2">
-      {/* Page Header Area - Matches other page start positions */}
-      {/* <div>
-        <button 
-          type="button" 
-          onClick={() => navigate(-1)} 
-          className="inline-flex items-center gap-2.5 group group"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white shadow-sm transition-all active:scale-90 group-hover:border-primary/50">
-            <ArrowLeft className="h-5 w-5 text-ink/70 transition-transform group-hover:-translate-x-1" />
+    <div className="page-animate app-shell pb-40 pt-2 lg:pt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-start">
+
+        {/* Left Column: Image Gallery */}
+        <div className="space-y-6">
+          <ImageCarousel images={product.images} />
+        </div>
+
+        {/* Right Column: Information (Sticky on Desktop) */}
+        <div className="lg:sticky lg:top-28 space-y-5 mt-8 lg:mt-0">
+
+          {/* Row 1: Gear & Brand Tags */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
+                <img src={CATEGORY_ICONS[product.category] || cameraIcon} alt="" className="h-full w-full object-contain" />
+              </div>
+              <span className="text-xs font-bold text-ink">{product.category}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
+                <img src={BRAND_ICONS[product.brand] || sonyIcon} alt="" className="h-full w-full object-contain" />
+              </div>
+              <span className="text-xs font-bold text-ink">{product.brand}</span>
+            </div>
           </div>
-          <span className="text-sm font-bold text-muted transition-colors group-hover:text-ink">Back to Collection</span>
-        </button>
-      </div> */}
 
-      {/* Hero Carousel */}
-      <ImageCarousel images={product.images} />
+          {/* Row 2: Product Name */}
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black leading-tight text-ink md:text-3xl xl:text-4xl tracking-tight">
+              {product.name}
+            </h1>
+          </div>
 
-      {/* Product Info Section */}
-      <section className="space-y-8 px-1">
-        {/* Status, Gear & Brand Tags */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Stock Status Badge */}
-          <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 bg-card/50 transition-all ${product.available_quantity > 0 ? 'border-success/30' : 'border-danger/30'
-            }`}>
-            <div className={`h-2 w-2 rounded-full ${product.available_quantity > 0 ? 'bg-success animate-pulse' : 'bg-danger'
-              }`} />
-            <span className={`text-xs font-bold uppercase tracking-wider ${product.available_quantity > 0 ? 'text-success' : 'text-danger'
+          {/* Row 3: Product ID */}
+          <div className="flex">
+            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1 border border-line/50">
+              <span className="text-[9px] font-bold text-muted uppercase tracking-widest mr-1 text-ink/40">Product Code:</span>
+              <span className="text-xs font-black text-ink">{product.product_code || `#${product.id.padStart(4, '0')}`}</span>
+            </div>
+          </div>
+
+          {/* Row 4: Price */}
+          <div className="space-y-1">
+            <div className="flex items-end gap-2">
+              <p className="text-2xl font-black text-primary md:text-3xl">
+                {formatCurrency(product.price_per_day)}
+              </p>
+              <span className="mb-0.5 text-[10px] font-bold text-muted uppercase tracking-widest">/ Day Rental</span>
+            </div>
+          </div>
+
+          {/* Row 5: Availability */}
+          <div className="flex">
+            <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 bg-card/30 transition-all ${product.available_quantity > 0 ? 'border-success/30 bg-success/5' : 'border-danger/30 bg-danger/5'
               }`}>
-              {product.available_quantity > 0 ? 'In Stock' : 'Out of Stock'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2.5 rounded-2xl border border-line bg-card/50 p-1.5 pr-4 transition-all hover:border-primary/30">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm border border-line/50 p-1.5">
-              <img src={CATEGORY_ICONS[product.category] || cameraIcon} alt="" className="h-full w-full object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-medium text-muted uppercase tracking-wider">Gear Type</span>
-              <span className="text-sm font-bold text-ink">{product.category}</span>
+              <div className={`h-2 w-2 rounded-full ${product.available_quantity > 0 ? 'bg-success animate-pulse' : 'bg-danger'
+                }`} />
+              <span className={`text-[10px] font-black uppercase tracking-widest ${product.available_quantity > 0 ? 'text-success' : 'text-danger'
+                }`}>
+                {product.available_quantity > 0 ? 'Available' : 'Out of Stock'}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-2xl border border-line bg-card/50 p-1.5 pr-4 transition-all hover:border-primary/30">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm border border-line/50 p-1.5">
-              <img src={BRAND_ICONS[product.brand] || sonyIcon} alt="" className="h-full w-full object-contain" />
+          {/* Row 6: Description */}
+          <div className="max-w-4xl space-y-3 border-t border-line pt-8">
+            <div className="flex items-center gap-2 text-ink">
+              <div className="h-1 w-6 bg-primary rounded-full" />
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Detailed Overview</h3>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-medium text-muted uppercase tracking-wider">Brand</span>
-              <span className="text-sm font-bold text-ink">{product.brand}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Title & Price */}
-        <div className="space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="text-2xl font-bold leading-tight text-ink md:text-4xl">{product.name}</h2>
-            <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-xl border border-line bg-white/50">
-              <QrCode className="h-5 w-5 text-muted" />
-            </div>
-          </div>
-
-          <div className="flex items-end gap-3 border-b border-line pb-6">
-            <p className="text-3xl font-black text-primary md:text-4xl">
-              {formatCurrency(product.price_per_day)}
-            </p>
-            <span className="mb-1 text-sm font-semibold text-muted uppercase tracking-wider">/ Day</span>
-            <div className="ml-auto flex items-center gap-2 rounded-lg bg-page px-3 py-1.5 text-[10px] font-bold text-muted uppercase border border-line/50">
-              ID: <span className="text-ink">{product.product_code || `#${product.id.padStart(4, '0')}`}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-ink">
-            <Info className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-bold uppercase tracking-wider">Description</h3>
-          </div>
-          <p className="text-base leading-relaxed text-muted/90 md:text-lg">
-            {product.description}
-          </p>
-        </div>
-
-        {/* Features / Details Placeholder */}
-        <div className="grid grid-cols-2 gap-4 rounded-[32px] border border-line bg-card/30 p-6">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Availability</p>
-            <p className={`text-sm font-bold ${product.available_quantity > 0 ? 'text-success' : 'text-danger'}`}>
-              {product.available_quantity > 0 ? 'Now Available' : 'Currently Rented'}
+            <p className="text-sm leading-relaxed text-muted/90 md:text-base font-medium">
+              {product.description}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Condition</p>
-            <p className="text-sm font-bold text-ink">Excellent (Mint)</p>
+
+          {/* Specs / Attributes Grid */}
+          <div className="grid grid-cols-2 gap-3 py-6">
+            <div className="flex items-center gap-3 rounded-2xl border border-line/40 bg-white/40 p-3.5 shadow-sm backdrop-blur-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
+                <Sparkles className="h-4.5 w-4.5" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted">Condition</p>
+                <p className="text-xs font-black text-ink uppercase">Excellent</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-line/40 bg-white/40 p-3.5 shadow-sm backdrop-blur-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-success/5 text-success">
+                <ShieldCheck className="h-4.5 w-4.5" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted">Trust</p>
+                <p className="text-xs font-black text-ink uppercase">Verified Gear</p>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Action Bar */}
       <div className="fixed inset-x-0 bottom-6 z-40 px-4 md:bottom-8">
         <div className="mx-auto flex max-w-4xl gap-3 rounded-[32px] border border-white/20 bg-ink/90 p-3 shadow-2xl backdrop-blur-xl transition-all hover:bg-ink">
           <button
@@ -170,27 +172,27 @@ const ProductDetail = () => {
             {inCart ? (
               <>
                 <CheckCheck className="h-5 w-5" />
-                <span>In Your Rent Cart</span>
+                <span>Added to Rent Cart</span>
               </>
             ) : (
               <>
                 <ShoppingBag className="h-5 w-5" />
-                <span>Add to Rent</span>
+                <span>Confirm Rental</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Quick Cart Link */}
-      <div className="mx-1 overflow-hidden rounded-[32px] bg-primary/5 border border-primary/10 p-6 flex items-center justify-between">
+      {/* Footer Nav Link Area */}
+      <div className="mx-1 overflow-hidden rounded-[40px] bg-primary/5 border border-primary/10 p-8 flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-bold text-ink">Ready to checkout?</p>
-          <p className="text-xs text-muted">View your selected gear and confirm dates.</p>
+          <p className="text-lg font-black text-ink">Plan your production.</p>
+          <p className="text-sm text-muted">Proceed to cart to finalize dates and insurance.</p>
         </div>
         <Link
           to="/cart"
-          className="flex h-11 items-center justify-center rounded-2xl bg-white px-5 text-sm font-bold text-primary shadow-sm border border-line hover:border-primary/50 transition-all active:scale-95"
+          className="flex h-12 items-center justify-center rounded-2xl bg-white px-8 text-sm font-bold text-primary shadow-sm border border-line hover:border-primary/50 transition-all active:scale-95"
         >
           Review Cart
         </Link>
@@ -198,6 +200,5 @@ const ProductDetail = () => {
     </div>
   );
 };
-
 
 export default ProductDetail;
