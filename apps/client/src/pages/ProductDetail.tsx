@@ -55,7 +55,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Right Column: Information (Sticky on Desktop) */}
-        <div className="lg:sticky lg:top-28 space-y-5 mt-8 lg:mt-0">
+        <div className="lg:sticky lg:top-28 space-y-3.5 mt-6 lg:mt-0 px-4 md:px-0">
 
           {/* Row 1: Gear & Brand Tags */}
           <div className="flex flex-wrap items-center gap-2">
@@ -95,7 +95,7 @@ const ProductDetail = () => {
               <p className="text-2xl font-black text-primary md:text-3xl">
                 {formatCurrency(product.price_per_day)}
               </p>
-              <span className="mb-0.5 text-[10px] font-bold text-muted uppercase tracking-widest">/ Day Rental</span>
+              <span className="mb-1 text-[10px] font-bold text-muted uppercase tracking-widest">/ Per day</span>
             </div>
           </div>
 
@@ -113,7 +113,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Row 6: Description */}
-          <div className="max-w-4xl space-y-3 border-t border-line pt-8">
+          <div className="max-w-4xl space-y-3 border-t border-black/10 pt-5">
             <div className="flex items-center gap-2 text-ink">
               <div className="h-1 w-6 bg-primary rounded-full" />
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Detailed Overview</h3>
@@ -124,7 +124,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Specs / Attributes Grid */}
-          <div className="grid grid-cols-2 gap-3 py-6">
+          <div className="grid grid-cols-2 gap-3 py-2">
             <div className="flex items-center gap-3 rounded-2xl border border-line/40 bg-white/40 p-3.5 shadow-sm backdrop-blur-sm">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
                 <Sparkles className="h-4.5 w-4.5" />
