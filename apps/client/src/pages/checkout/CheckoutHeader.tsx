@@ -18,19 +18,19 @@ const CheckoutHeader = ({ steps, currentStep, onStepClick }: CheckoutHeaderProps
       <div className="flex flex-col gap-5">
         <h1 className="text-2xl font-bold text-ink tracking-tight px-4">Checkout</h1>
 
-        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar pb-2 px-2">
+        <div className="flex w-full items-center justify-between overflow-x-auto hide-scrollbar px-2">
           {steps.map((s, i) => (
             <div key={s.id} className="flex items-center shrink-0">
               <button
                 onClick={() => onStepClick(i)}
                 disabled={i > currentStep}
                 className={`
-                  flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-all duration-300
+                  flex items-center transition-all duration-500 rounded-2xl py-2.5
                   ${i === currentStep
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-white px-5 gap-3 shadow-lg shadow-primary/20'
                     : i < currentStep
-                      ? 'bg-success/10 text-success hover:bg-success/15'
-                      : 'text-muted/70'
+                      ? 'bg-success/10 text-success hover:bg-success/15 px-3 border border-success/10'
+                      : 'bg-white/50 text-muted/70 px-3 border border-line/40'
                   }
                 `}
               >
@@ -40,11 +40,16 @@ const CheckoutHeader = ({ steps, currentStep, onStepClick }: CheckoutHeaderProps
                 `}>
                   {i < currentStep ? <CheckCheck className="h-3.5 w-3.5" /> : <s.Icon className="h-3.5 w-3.5" />}
                 </div>
-                <span className="text-xs font-bold whitespace-nowrap">{s.label}</span>
+
+                {i === currentStep && (
+                  <span className="text-xs font-bold whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                    {s.label}
+                  </span>
+                )}
               </button>
 
               {i < steps.length - 1 && (
-                <div className="mx-4 text-muted/90">
+                <div className="mx-2 text-muted/90">
                   <ChevronRight className="h-4 w-4" />
                 </div>
               )}
