@@ -104,7 +104,7 @@ const Navbar = () => {
           {/* Favourites & Cart Icons (xl+ only) */}
           <Link
             to="/favourites"
-            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
+            className="group relative hidden lg:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
           >
             <Heart className="h-5 w-5 text-ink group-hover:text-primary transition-colors" />
             {favourites.length > 0 && (
@@ -116,7 +116,7 @@ const Navbar = () => {
 
           <Link
             to="/cart"
-            className="group relative hidden xl:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
+            className="group relative hidden lg:flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/40 transition-colors"
           >
             <ShoppingBag className="h-5 w-5 text-ink group-hover:text-primary transition-colors" />
             {items.length > 0 && (

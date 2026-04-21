@@ -122,7 +122,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
           </div>
           <div className="space-y-0.5">
             <p className="text-[9px] font-bold uppercase tracking-widest text-muted">Trust</p>
-            <p className="text-xs font-black text-ink uppercase">Verified Gear</p>
+            <p className="text-xs font-black text-ink uppercase">Verified</p>
           </div>
         </div>
       </div>
