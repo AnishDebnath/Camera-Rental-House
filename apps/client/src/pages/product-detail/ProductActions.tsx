@@ -28,8 +28,8 @@ const ProductActions = ({
             type="button"
             onClick={() => toggleFavourite(product)}
             className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border transition-all active:scale-95 ${isFavourite(product.id)
-                ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
-                : 'border-white/60 bg-white/40 text-ink hover:border-primary/40 hover:text-primary shadow-sm'
+              ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
+              : 'border-white/60 bg-white/40 text-ink hover:border-primary/40 hover:text-primary shadow-sm'
               }`}
           >
             <Heart className={`h-5 w-5 ${isFavourite(product.id) ? 'fill-white' : ''}`} />
@@ -40,14 +40,14 @@ const ProductActions = ({
             onClick={handleCartAction}
             disabled={product.available_quantity === 0}
             className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full px-8 font-black text-white transition-all active:scale-[0.98] ${product.available_quantity === 0
-                ? 'bg-muted/30 cursor-not-allowed opacity-50'
-                : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20'
+              ? 'bg-muted/30 cursor-not-allowed opacity-50'
+              : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20'
               }`}
           >
             {inCart ? (
               <>
                 <CheckCheck className="h-4.5 w-4.5" />
-                <span className="uppercase tracking-[0.1em] text-[10px]">Added to Cart</span>
+                <span className="uppercase tracking-[0.1em] text-[10px]">Added in Cart</span>
               </>
             ) : (
               <>
@@ -72,8 +72,8 @@ const ProductActions = ({
               type="button"
               onClick={() => toggleFavourite(product)}
               className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border transition-all active:scale-95 ${isFavourite(product.id)
-                  ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30'
-                  : 'bg-white/40 border-white/60 text-ink hover:bg-white/60 shadow-sm'
+                ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30'
+                : 'bg-white/40 border-white/60 text-ink hover:bg-white/60 shadow-sm'
                 }`}
             >
               <Heart className={`h-5 w-5 ${isFavourite(product.id) ? 'fill-white' : ''}`} />
@@ -91,7 +91,7 @@ const ProductActions = ({
               {inCart ? (
                 <>
                   <CheckCheck className="h-4.5 w-4.5" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.1em]">Added to Cart</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em]">Added in Cart</span>
                 </>
               ) : (
                 <>

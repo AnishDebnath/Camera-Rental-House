@@ -19,5 +19,9 @@
     "build:admin": "npm --workspace apps/admin run build",
     "build:server": "npm --workspace server run build",
     "start:server": "npm --workspace server run start"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.38.0"
   }
 }

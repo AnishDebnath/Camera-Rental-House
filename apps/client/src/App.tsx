@@ -10,7 +10,7 @@ import Home from './pages/home';
 import Category from './pages/category';
 import ProductDetail from './pages/product-detail';
 import Cart from './pages/cart';
-import Checkout from './pages/Checkout';
+import Checkout from './pages/checkout';
 import Favourites from './pages/favourites';
 import Account from './pages/account';
 import { useAuth } from './store/AuthContext';
