@@ -73,7 +73,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="page-animate app-shell space-y-8 pb-24 pt-2">
+    <div className="page-animate app-shell space-y-8 pt-2">
       <CheckoutHeader
         steps={STEPS}
         currentStep={step}
