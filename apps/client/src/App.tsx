@@ -8,7 +8,7 @@ import BottomNav from './components/common/navbar/BottomNav';
 import ToastViewport from './components/Toast';
 import Home from './pages/home';
 import Category from './pages/category';
-import ProductDetail from './pages/ProductDetail';
+import ProductDetail from './pages/product-detail';
 import Cart from './pages/cart';
 import Checkout from './pages/Checkout';
 import Favourites from './pages/favourites';
