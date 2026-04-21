@@ -31,6 +31,8 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 function App() {
   const location = useLocation();
   const authPage = ['/login', '/signup'].includes(location.pathname);
+  const isProductPage = location.pathname.startsWith('/product/');
+  const showBottomNav = !authPage && !isProductPage;
 
   return (
     <div className="relative min-h-screen text-ink">
@@ -58,7 +60,7 @@ function App() {
           </Routes>
         </AnimatePresence>
       </main>
-      {!authPage ? <BottomNav /> : null}
+      {showBottomNav ? <BottomNav /> : null}
       <ToastViewport />
     </div>
   );
