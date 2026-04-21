@@ -18,7 +18,7 @@ const CheckoutHeader = ({ steps, currentStep, onStepClick }: CheckoutHeaderProps
       <div className="flex flex-col gap-5">
         <h1 className="text-2xl font-bold text-ink tracking-tight px-4">Checkout</h1>
 
-        <div className="flex w-full items-center justify-between overflow-x-auto hide-scrollbar px-2">
+        <div className="flex w-full md:w-fit items-center justify-between md:justify-start md:gap-2 overflow-x-auto hide-scrollbar px-2">
           {steps.map((s, i) => (
             <div key={s.id} className="flex items-center shrink-0">
               <button
