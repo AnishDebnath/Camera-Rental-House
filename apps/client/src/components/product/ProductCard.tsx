@@ -58,8 +58,8 @@ const ProductCard = ({ product }) => {
             <span className="text-base font-extrabold tracking-tight text-primary md:text-lg leading-none">
               {formatCurrency(product.price_per_day)}
             </span>
-            <span className="text-[9px] font-bold tracking-wider text-slate-400 uppercase">
-              / per day
+            <span className="text-[10px] font-bold tracking-wider text-slate-400">
+              / Per Day
             </span>
           </div>
 

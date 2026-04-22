@@ -39,7 +39,7 @@ const Cart = () => {
                         <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 line-clamp-1">{item.category || 'Premium Equipment'}</p>
                         <p className="mt-1 flex items-baseline text-base md:text-lg font-extrabold tracking-tight text-primary">
                           {formatCurrency(item.price_per_day)}
-                          <span className="ml-1 text-[9px] font-bold text-slate-400 tracking-wider uppercase">/ per day</span>
+                          <span className="ml-1 text-[10px] font-bold text-slate-400 tracking-wider">/ Per Day</span>
                         </p>
                       </div>
                     </Link>
