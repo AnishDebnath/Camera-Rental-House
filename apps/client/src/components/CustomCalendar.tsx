@@ -29,7 +29,7 @@ const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarPro
     return (
       <div className="flex items-center justify-between px-2 pb-6">
         <div className="flex flex-col">
-          <h3 className="text-base font-bold text-ink tracking-tight">{format(currentMonth, 'MMMM yyyy')}</h3>
+          <h3 className="text-sm font-bold text-ink uppercase tracking-widest">{format(currentMonth, 'MMMM yyyy')}</h3>
         </div>
         <div className="flex gap-2">
           <button

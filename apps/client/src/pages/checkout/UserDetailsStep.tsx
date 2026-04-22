@@ -47,7 +47,7 @@ const UserDetailsStep = ({ user, onNext }: UserDetailsStepProps) => {
           <div className="flex items-center gap-4">
             <div className="h-12 w-1 bg-primary rounded-full" />
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-ink">Personal Profile</h2>
+              <h2 className="text-xl font-bold tracking-tight text-ink">Personal Profile</h2>
               <p className="text-xs text-muted font-medium">Verify your registered identification details.</p>
             </div>
           </div>
