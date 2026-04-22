@@ -99,7 +99,7 @@ const RentalPeriodStep = ({ pickupDate, dropDate, onDateClick, onPrev, onNext }:
             onClick={onNext}
             className="!rounded-2xl !h-14"
           >
-            Confirm Order Summary
+            Confirm Order
           </LoadingButton>
         </div>
       </div>
