@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react';
-import { 
-  format, 
-  addMonths, 
-  subMonths, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  isSameMonth, 
-  isSameDay, 
-  addDays, 
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  isSameMonth,
+  isSameDay,
+  addDays,
   isWithinInterval,
   isBefore,
   startOfDay
@@ -27,21 +27,20 @@ const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarPro
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between px-2 pb-4">
+      <div className="flex items-center justify-between px-2 pb-6">
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-ink">{format(currentMonth, 'MMMM yyyy')}</span>
-          <span className="text-[10px] font-medium text-muted uppercase tracking-wider">Select Rental Period</span>
+          <h3 className="text-base font-bold text-ink tracking-tight">{format(currentMonth, 'MMMM yyyy')}</h3>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-line hover:bg-page transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-line hover:border-primary/30 hover:text-primary transition-all duration-300"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-line hover:bg-page transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-line hover:border-primary/30 hover:text-primary transition-all duration-300"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -51,11 +50,11 @@ const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarPro
   };
 
   const renderDays = () => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return (
-      <div className="grid grid-cols-7 mb-2">
-        {days.map((day) => (
-          <div key={day} className="text-center text-[10px] font-black text-muted uppercase">
+      <div className="grid grid-cols-7 mb-4 border-b border-line/10 pb-2">
+        {days.map((day, idx) => (
+          <div key={`${day}-${idx}`} className="text-center text-[10px] font-bold text-muted uppercase tracking-widest opacity-40">
             {day}
           </div>
         ))}
@@ -72,72 +71,93 @@ const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarPro
     const rows = [];
     let days = [];
     let day = startDate;
-    let formattedDate = "";
-
     const today = startOfDay(new Date());
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        formattedDate = format(day, "d");
+        const formattedDate = format(day, "d");
         const cloneDay = day;
-        
-        const isSelected = (pickupDate && isSameDay(day, pickupDate)) || (dropDate && isSameDay(day, dropDate));
+
+        const isPickup = pickupDate && isSameDay(day, pickupDate);
+        const isDrop = dropDate && isSameDay(day, dropDate);
+        const isSelected = isPickup || isDrop;
         const isInRange = pickupDate && dropDate && isWithinInterval(day, { start: pickupDate, end: dropDate });
         const isDisabled = isBefore(day, today);
         const isCurrentMonth = isSameMonth(day, monthStart);
 
+        const isToday = isSameDay(day, today);
+
         days.push(
           <div
             key={day.toString()}
-            className={`relative flex h-10 items-center justify-center text-sm font-bold transition-all cursor-pointer rounded-xl
-              ${!isCurrentMonth ? 'text-line opacity-20' : 'text-ink'}
-              ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/30 z-10' : ''}
+            className={`relative flex h-11 md:h-12 items-center justify-center text-sm font-semibold transition-all cursor-pointer
+              ${!isCurrentMonth ? 'text-muted/20' : 'text-ink'}
+              ${isSelected ? 'bg-primary text-white z-10' : ''}
+              ${isPickup ? 'rounded-2xl' : ''}
+              ${isDrop ? 'rounded-2xl' : ''}
+              ${isSelected && !isPickup && !isDrop ? 'rounded-none' : ''}
+              ${isSelected && isPickup && isDrop ? 'rounded-2xl' : ''}
               ${isInRange && !isSelected ? 'bg-primary/10 text-primary' : ''}
-              ${isDisabled ? 'cursor-not-allowed opacity-10' : 'hover:bg-page'}
+              ${isDisabled ? 'cursor-not-allowed opacity-10' : 'hover:scale-105 active:scale-95'}
+              ${!isSelected && !isDisabled ? 'hover:bg-page rounded-xl' : ''}
+              ${isToday && !isSelected ? 'ring-2 ring-primary/20' : ''}
             `}
             onClick={() => !isDisabled && onDateClick(cloneDay)}
           >
             <span className="relative z-10">{formattedDate}</span>
-            {isInRange && !isSelected && (
-               <div className="absolute inset-0 bg-primary/5 rounded-none" />
+            {isToday && !isSelected && (
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+            )}
+            {isInRange && (
+              <div className={`absolute inset-0 bg-primary/5 -z-0 ${isPickup ? 'rounded-l-2xl' : isDrop ? 'rounded-r-2xl' : ''}`} />
             )}
           </div>
         );
         day = addDays(day, 1);
       }
       rows.push(
-        <div className="grid grid-cols-7 gap-1" key={day.toString()}>
+        <div className="grid grid-cols-7 gap-0.5" key={day.toString()}>
           {days}
         </div>
       );
       days = [];
     }
-    return <div className="space-y-1">{rows}</div>;
+    return <div className="space-y-0.5">{rows}</div>;
   };
 
   return (
-    <div className="p-4 rounded-3xl bg-white/50 backdrop-blur-md border border-white/60 shadow-inner">
+    <div className="p-6 rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white shadow-xl shadow-black/5 w-full">
       {renderHeader()}
       {renderDays()}
       {renderCells()}
-      
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <p className="text-[10px] font-black text-muted uppercase tracking-wider">Pickup</p>
-          <div className="flex h-12 items-center rounded-2xl bg-white/60 backdrop-blur-md border border-white/60 shadow-sm px-3 gap-3 transition-colors hover:bg-white/80">
-             <CalendarIcon className="h-4 w-4 text-primary" />
-             <span className="text-xs font-bold text-ink">
-               {pickupDate ? format(pickupDate, 'MMM dd, yyyy') : 'Select date'}
-             </span>
+
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1 opacity-60">Pickup Date</p>
+          <div className="flex h-14 items-center rounded-2xl bg-white border border-line/40 shadow-sm px-4 gap-4 transition-all duration-300 hover:border-primary/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary">
+              <CalendarIcon className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-tight leading-none mb-1">Select Start</span>
+              <span className="text-sm font-bold text-ink">
+                {pickupDate ? format(pickupDate, 'MMM dd, yyyy') : 'Pick a date'}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-[10px] font-black text-muted uppercase tracking-wider">Drop</p>
-          <div className="flex h-12 items-center rounded-2xl bg-white/60 backdrop-blur-md border border-white/60 shadow-sm px-3 gap-3 transition-colors hover:bg-white/80">
-             <CalendarIcon className="h-4 w-4 text-primary" />
-             <span className="text-xs font-bold text-ink">
-               {dropDate ? format(dropDate, 'MMM dd, yyyy') : 'Select date'}
-             </span>
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1 opacity-60">Return Date</p>
+          <div className="flex h-14 items-center rounded-2xl bg-white border border-line/40 shadow-sm px-4 gap-4 transition-all duration-300 hover:border-primary/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary">
+              <CalendarIcon className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-tight leading-none mb-1">Select End</span>
+              <span className="text-sm font-bold text-ink">
+                {dropDate ? format(dropDate, 'MMM dd, yyyy') : 'Pick a date'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
