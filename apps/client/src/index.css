@@ -1,16 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   color-scheme: light;
 }
 
 html {
-  overflow-x: hidden;
-  overflow-y: scroll !important;
-  scroll-behavior: initial !important;
   scrollbar-gutter: stable;
+  overflow-x: hidden;
+  scroll-behavior: initial;
 }
 
 html.lenis,
@@ -38,7 +37,6 @@ body {
   @apply font-sans text-ink antialiased bg-page selection:bg-primary/20 selection:text-primary-dark;
   padding-right: 0 !important;
   margin: 0;
-  width: 100% !important;
   overflow-x: hidden;
   position: relative;
 }
