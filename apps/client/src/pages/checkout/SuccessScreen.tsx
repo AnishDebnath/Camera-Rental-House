@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCheck, ShieldCheck } from 'lucide-react';
+import { CheckCheck, Calendar, RefreshCw, CreditCard, ChevronRight, Home, ReceiptText } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import formatCurrency from '../../utils/formatCurrency';
@@ -12,63 +12,114 @@ interface SuccessScreenProps {
 
 const SuccessScreen = ({ pickupDate, dropDate, totalCost }: SuccessScreenProps) => {
   return (
-    <div className="page-animate app-shell flex min-h-[80vh] items-center justify-center p-4">
+    <div className="page-animate app-shell pt-2 pb-10 flex flex-col items-center px-4">
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/40 backdrop-blur-xl transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-lg w-full p-10 text-center"
+        className="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/40 backdrop-blur-3xl transition-all duration-500 shadow-2xl shadow-black/5 max-w-lg w-full p-6 md:p-10 text-center"
       >
-        {/* Animated Background Rings */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        {/* Decorative Background Elements */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-success/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="relative mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-success/10 text-success border border-success/20 overflow-hidden">
+        {/* Hero Success Icon */}
+        <div className="relative mx-auto mb-6 h-16 w-16">
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.2 }}
+            className="flex h-full w-full items-center justify-center rounded-full bg-success/10 text-success border border-success/20 relative z-10"
           >
-            <CheckCheck className="h-12 w-12" />
+            <CheckCheck className="h-8 w-8" />
           </motion.div>
+
           <motion.div
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 3 }}
-            className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none"
+            animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full bg-success/10 z-0"
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-ink mb-2">Rent Confirmed!</h1>
-        <p className="text-xs text-muted mb-8 leading-relaxed font-medium">
-          Your high-end gear has been reserved. <br />
-          Booking ID: <span className="font-bold text-primary tracking-wider uppercase">RH-{Math.floor(Math.random() * 10000)}</span>
-        </p>
+        <div className="space-y-2 mb-8">
+          <h1 className="text-2xl font-bold text-ink tracking-tight">Booking Confirmed!</h1>
+          <p className="text-sm font-medium text-muted/80 max-w-xs mx-auto leading-relaxed">
+            Your premium gear is now reserved. We've sent a confirmation and receipt to your email.
+          </p>
+        </div>
 
-        <div className="space-y-4 rounded-[2rem] bg-white/50 backdrop-blur-md border border-white/60 shadow-sm p-6 text-left relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <ShieldCheck className="h-20 w-20" />
+        {/* Booking ID Badge */}
+        <div className="inline-block px-5 py-2.5 rounded-2xl bg-white border border-line/10 shadow-sm mb-8 transition-all hover:border-primary/20">
+          <p className="text-xs font-bold uppercase tracking-[0.2em]">
+            <span className="text-muted/60">Booking ID:</span>
+            <span className="text-primary ml-2">RH-{Math.floor(Math.random() * 100000)}</span>
+          </p>
+        </div>
+
+        {/* Summary Card */}
+        <div className="w-full rounded-2xl bg-white/60 border border-white shadow-xl shadow-black/5 overflow-hidden text-left mb-8">
+          <div className="p-4 grid grid-cols-2 gap-3">
+            {/* Pickup */}
+            <div className="bg-white/80 p-4 rounded-2xl border border-line/5 shadow-sm space-y-2 transition-all hover:bg-white/95">
+              <div className="flex items-center gap-2 text-primary/70">
+                <Calendar className="h-3.5 w-3.5" />
+                <p className="text-[10px] font-black uppercase tracking-wider">Pickup Date</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-ink leading-none">
+                  {pickupDate ? format(pickupDate, 'MMM dd, yyyy') : 'N/A'}
+                </p>
+                <p className="text-[10px] font-medium text-muted/60 mt-1.5 whitespace-nowrap">10:00 AM onwards</p>
+              </div>
+            </div>
+
+            {/* Return */}
+            <div className="bg-white/80 p-4 rounded-2xl border border-line/5 shadow-sm space-y-2 transition-all hover:bg-white/95">
+              <div className="flex items-center gap-2 text-primary/70">
+                <RefreshCw className="h-3.5 w-3.5" />
+                <p className="text-[10px] font-black uppercase tracking-wider">Return Date</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-ink leading-none">
+                  {dropDate ? format(dropDate, 'MMM dd, yyyy') : 'N/A'}
+                </p>
+                <p className="text-[10px] font-medium text-muted/60 mt-1.5 whitespace-nowrap">By 12:00 PM</p>
+              </div>
+            </div>
+          </div>
+          {/* Divider */}
+          <div className="px-4">
+            <div className="w-full border-t-2 border-dashed border-line/80" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-1">Pickup Date</p>
-              <p className="text-sm font-bold text-ink">{pickupDate ? format(pickupDate, 'MMM dd, yyyy') : 'N/A'}</p>
+          <div className="bg-white/40 p-4 md:p-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <p className="text-[10px] font-bold text-muted uppercase tracking-widest">Total Amount</p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-1">Return Date</p>
-              <p className="text-sm font-bold text-ink">{dropDate ? format(dropDate, 'MMM dd, yyyy') : 'N/A'}</p>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-line/50">
-            <div className="flex justify-between items-end">
-              <p className="text-[10px] font-bold text-muted uppercase tracking-widest">Total Amount Paid</p>
-              <p className="text-xl font-bold text-primary">{formatCurrency(totalCost)}</p>
-            </div>
+            <p className="text-[1.5rem] font-bold text-ink tracking-tighter">
+              {formatCurrency(totalCost)}
+            </p>
           </div>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-4">
-          <Link to="/account?tab=active" className="secondary-button !rounded-2xl">Manage Order</Link>
-          <Link to="/" className="primary-button !rounded-2xl">Return Home</Link>
+        {/* Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            to="/account?tab=active"
+            className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white border border-line/10 text-sm font-bold text-ink transition-all hover:bg-page hover:border-primary/20 group"
+          >
+            <ReceiptText className="h-5 w-5 text-muted group-hover:text-primary transition-colors" />
+            Manage Order
+          </Link>
+          <Link
+            to="/"
+            className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-white text-sm font-bold transition-all hover:bg-primary-dark shadow-xl shadow-primary/10 group"
+          >
+            <Home className="h-5 w-5" />
+            Return Home
+          </Link>
         </div>
       </motion.div>
     </div>

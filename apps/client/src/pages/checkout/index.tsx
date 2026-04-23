@@ -29,6 +29,8 @@ const Checkout = () => {
   const [pickupDate, setPickupDate] = useState<Date | null>(null);
   const [dropDate, setDropDate] = useState<Date | null>(null);
 
+  const [finalTotal, setFinalTotal] = useState<number>(0);
+
   const totalDays = useMemo(() => {
     if (!pickupDate || !dropDate) return 1;
     const diff = differenceInDays(dropDate, pickupDate) + 1;
@@ -53,6 +55,9 @@ const Checkout = () => {
 
   const handleConfirm = async () => {
     setLoading(true);
+    // Capture the final total before clearing the cart
+    setFinalTotal(totalCost);
+    
     // Simulate API call
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
     clearCart();
@@ -67,7 +72,7 @@ const Checkout = () => {
       <SuccessScreen
         pickupDate={pickupDate}
         dropDate={dropDate}
-        totalCost={totalCost}
+        totalCost={finalTotal}
       />
     );
   }
