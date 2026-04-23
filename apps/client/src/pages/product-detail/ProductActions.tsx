@@ -39,12 +39,19 @@ const ProductActions = ({
             type="button"
             onClick={handleCartAction}
             disabled={product.available_quantity === 0}
-            className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full px-8 font-black text-white transition-all active:scale-[0.98] ${product.available_quantity === 0
-              ? 'bg-muted/30 cursor-not-allowed opacity-50'
-              : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20'
+            className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98] ${product.available_quantity === 0
+              ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
+              : inCart
+                ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
+                : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20 font-black text-white'
               }`}
           >
-            {inCart ? (
+            {product.available_quantity === 0 ? (
+              <>
+                <ShoppingBag className="h-4.5 w-4.5" />
+                <span className="uppercase tracking-[0.1em] text-[10px]">Out of Stock</span>
+              </>
+            ) : inCart ? (
               <>
                 <CheckCheck className="h-4.5 w-4.5" />
                 <span className="uppercase tracking-[0.1em] text-[10px]">Added in Cart</span>
@@ -83,12 +90,19 @@ const ProductActions = ({
               type="button"
               onClick={handleCartAction}
               disabled={product.available_quantity === 0}
-              className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full px-6 font-black text-white transition-all active:scale-[0.98] ${product.available_quantity === 0
-                ? 'bg-muted/30 cursor-not-allowed opacity-50'
-                : 'bg-primary shadow-md shadow-primary/30 hover:bg-primary-hover'
+              className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98] ${product.available_quantity === 0
+                ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
+                : inCart
+                  ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
+                  : 'bg-primary shadow-md shadow-primary/30 hover:bg-primary-hover font-black text-white'
                 }`}
             >
-              {inCart ? (
+              {product.available_quantity === 0 ? (
+                <>
+                  <ShoppingBag className="h-4.5 w-4.5" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em]">Out of Stock</span>
+                </>
+              ) : inCart ? (
                 <>
                   <CheckCheck className="h-4.5 w-4.5" />
                   <span className="text-[10px] font-black uppercase tracking-[0.1em]">Added in Cart</span>

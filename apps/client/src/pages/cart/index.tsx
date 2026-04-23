@@ -8,6 +8,7 @@ import Footer from '../../components/common/footer/Footer';
 const Cart = () => {
   const navigate = useNavigate();
   const { items, subtotal, removeFromCart } = useCart();
+  const hasOutOfStock = items.some((item) => item.available_quantity === 0);
 
   return (
     <div className="page-animate space-y-10 md:space-y-12">
@@ -35,7 +36,14 @@ const Cart = () => {
                         <img src={item.images?.[0]?.image_url} alt={item.name} className="h-full w-full object-cover" />
                       </div>
                       <div className="flex-1 space-y-0.5 md:space-y-1">
-                        <h3 className="text-xs md:text-sm font-bold text-ink leading-tight line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xs md:text-sm font-bold text-ink leading-tight line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
+                          {item.available_quantity === 0 && (
+                            <span className="shrink-0 text-[8px] font-black text-danger bg-danger/10 px-2 py-0.5 rounded-full uppercase tracking-wider border border-danger/20">
+                              Out of Stock
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 line-clamp-1">{item.category || 'Premium Equipment'}</p>
                         <p className="mt-1 flex items-baseline text-base md:text-lg font-extrabold tracking-tight text-primary">
                           {formatCurrency(item.price_per_day)}
@@ -89,10 +97,15 @@ const Cart = () => {
                       <button
                         type="button"
                         onClick={() => navigate('/checkout')}
-                        className="primary-button group flex-[1.5] py-4 shadow-xl shadow-primary/20 ring-1 ring-white/20"
+                        disabled={hasOutOfStock}
+                        className={`primary-button group flex-[1.5] py-4 shadow-xl ring-1 ring-white/20 transition-all ${
+                          hasOutOfStock 
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none ring-0' 
+                            : 'shadow-primary/20'
+                        }`}
                       >
-                        Proceed to Rent
-                        <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        {hasOutOfStock ? 'Remove Out of Stock Items' : 'Proceed to Rent'}
+                        {!hasOutOfStock && <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />}
                       </button>
                     </div>
                   </div>
