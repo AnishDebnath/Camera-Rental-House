@@ -93,35 +93,39 @@ const CategoryHeader = ({
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 0 }} />
       {isFixed && <div style={{ height: barHeight }} aria-hidden="true" />}
 
+      {/* Desktop Backdrop Animation - Moved outside to blur whole background */}
+      <div
+        className={clsx(
+          "hidden lg:block fixed inset-0 bg-black/40 backdrop-blur-lg pointer-events-none z-[190] transition-opacity duration-500",
+          showFilters ? "opacity-100" : "opacity-0"
+        )}
+        aria-hidden="true"
+      />
+
       <div
         ref={barRef}
         className={clsx(
           'w-full z-[200] transition-all duration-500',
           isFixed
-            ? 'fixed top-0 left-0 right-0 bg-white/30 backdrop-blur-[40px] border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)] py-3'
+            ? showFilters 
+              ? 'fixed top-0 left-0 right-0 py-3' 
+              : 'fixed top-0 left-0 right-0 bg-white/30 backdrop-blur-[40px] border-b border-white/60 shadow-[0_10px_40px_rgba(31,_38,_135,_0.05)] py-3'
             : 'relative bg-transparent pb-2'
         )}
       >
         <div
           className={clsx(
             'absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none transition-opacity duration-500',
-            isFixed ? 'opacity-100' : 'opacity-0'
+            isFixed && !showFilters ? 'opacity-100' : 'opacity-0'
           )}
-        />
-
-        {/* Desktop Backdrop Animation */}
-        <div
-          className={clsx(
-            "hidden lg:block fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-none z-[-1] transition-opacity duration-500",
-            showFilters ? "opacity-100" : "opacity-0"
-          )}
-          aria-hidden="true"
         />
 
         <div ref={filterPanelRef} className="relative app-shell">
+
           <SearchBar
             value={search}
             onChange={setSearch}
+            isFilterOpen={showFilters}
             onFilterClick={() => {
               setShowFilters(!showFilters);
             }}
