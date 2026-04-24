@@ -231,8 +231,8 @@ const Account = () => {
   };
 
   const memberSince = user.createdAt
-    ? `Since ${new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
-    : 'Since July 2024';
+    ? new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
 
   return (
     <div className="page-animate app-shell space-y-6 pb-2 pt-2 md:space-y-8">

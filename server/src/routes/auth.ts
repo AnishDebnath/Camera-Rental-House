@@ -9,6 +9,7 @@ import { uploadFile as uploadToCloudinary } from '../storage/cloudinary.js';
 import { uploadToSupabase } from '../storage/supabaseStorage.js';
 import { processImage } from '../utils/imageProcessor.js';
 import generateQrBase64 from '../utils/qrGenerator.js';
+import generateMemberId from '../utils/memberIdGenerator.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 dotenv.config();
@@ -248,18 +249,18 @@ router.post(
       console.log('Voter Card uploaded successfully.');
 
       console.log('Inserting user into Supabase database...');
-      const userQrBase64 = await generateQrBase64({
-        userId,
-        name: req.body.fullName,
-        phone,
-        email,
-        aId: aadhaarNo // including Aadhaar number as a unique identity marker
-      });
+
+      // Generate a unique, permanent member ID for this user
+      const memberId = await generateMemberId();
+
+      // QR encodes only the stable memberId — never changes after creation
+      const userQrBase64 = await generateQrBase64({ memberId });
 
       const { data, error } = await supabase
         .from('users')
         .insert({
           id: userId,
+          member_id: memberId,
           full_name: req.body.fullName,
           phone,
           email,
@@ -274,7 +275,7 @@ router.post(
           youtube: req.body.youtube || null,
           user_qr_base64: userQrBase64,
         })
-        .select('id, full_name, phone, email, avatar_url, user_qr_base64, aadhaar_no, aadhaar_doc_url, voter_no, voter_doc_url, created_at')
+        .select('id, member_id, full_name, phone, email, avatar_url, user_qr_base64, aadhaar_no, aadhaar_doc_url, voter_no, voter_doc_url, created_at')
         .single();
 
       if (error) {
@@ -287,6 +288,7 @@ router.post(
         message: 'Signup successful.',
         user: {
           id: data.id,
+          memberId: data.member_id,
           fullName: data.full_name,
           phone: data.phone,
           email: data.email,
@@ -356,6 +358,7 @@ router.post('/login', async (req: Request, res: Response) => {
       accessToken: tokens.accessToken,
       user: {
         id: user.id,
+        memberId: user.member_id,
         fullName: user.full_name,
         phone: user.phone,
         email: user.email,
@@ -450,6 +453,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
     return res.json({
       user: {
         id: user.id,
+        memberId: user.member_id,
         fullName: user.full_name,
         phone: user.phone,
         email: user.email,
@@ -613,16 +617,7 @@ router.patch(
         });
       }
 
-      // 3. Regen QR if name/phone/email/aadhaar changed
-      if (updates.full_name || updates.phone || updates.email || updates.aadhaar_no) {
-        updates.user_qr_base64 = await generateQrBase64({
-          userId,
-          name: updates.full_name || user.full_name,
-          phone: updates.phone || user.phone,
-          email: updates.email || user.email,
-          aId: updates.aadhaar_no || user.aadhaar_no
-        });
-      }
+      // NOTE: user_qr_base64 and member_id are immutable — never regenerated after signup.
 
       // 4. Update Database if there are changes
       if (Object.keys(updates).length > 0) {
@@ -639,6 +634,7 @@ router.patch(
           message: 'Profile updated successfully.',
           user: {
             id: updatedUser.id,
+            memberId: updatedUser.member_id,
             fullName: updatedUser.full_name,
             phone: updatedUser.phone,
             email: updatedUser.email,
@@ -661,6 +657,7 @@ router.patch(
         message: 'No changes detected.',
         user: {
           id: user.id,
+          memberId: user.member_id,
           fullName: user.full_name,
           phone: user.phone,
           email: user.email,

@@ -11,6 +11,7 @@ import { useToast } from './ToastContext';
 
 export interface User {
   id: string;
+  memberId?: string;
   fullName: string;
   phone: string;
   email: string;
@@ -97,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           delete (finalUpdates as any).userQrBase64;
           delete (finalUpdates as any).createdAt;
           delete (finalUpdates as any).id;
+          delete (finalUpdates as any).memberId;
 
           const hasFiles = finalUpdates.aadhaarDoc instanceof File || finalUpdates.voterDoc instanceof File || finalUpdates.selfie instanceof File;
           let payload: any = finalUpdates;

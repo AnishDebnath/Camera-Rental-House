@@ -37,8 +37,8 @@ const AccountHeader = ({ user, onSignOut, onOpenQr }: AccountHeaderProps) => {
                 </span>
                 <span className="hidden h-1 w-1 rounded-full bg-muted/40 sm:block" />
                 <span className="flex items-center gap-1.5 font-mono tracking-wider">
-                  <IdCard className="h-4 w-4 text-primary" />ID:
-                  {user.id?.slice(0, 8).toUpperCase() || 'USER'}
+                  <IdCard className="h-4 w-4 text-primary" />
+                  {user.memberId || 'CRH-XXXXXX'}
                 </span>
               </div>
             </div>

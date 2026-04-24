@@ -62,9 +62,9 @@ const QrModal = ({ show, onClose, user, memberSince, lenis }: QrModalProps) => {
                     </Dialog.Title>
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex items-center gap-3 text-sm font-bold text-ink">
-                        <span className="flex items-center gap-1.5 rounded-full bg-primary/5 px-2.5 py-1 text-primary">
+                        <span className="flex items-center gap-1.5 rounded-full bg-primary/5 px-2.5 py-1 text-primary font-mono tracking-wider">
                           <IdCard className="h-3.5 w-3.5 text-primary" />
-                          ID: {user.id?.slice(0, 12).toUpperCase()}
+                          {user.memberId || 'CRH-XXXXXX'}
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs font-semibold text-muted font-mono tracking-tight">
