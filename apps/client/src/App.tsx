@@ -15,6 +15,7 @@ import Favourites from './pages/favourites';
 import Account from './pages/account';
 import { useAuth } from './store/AuthContext';
 import PageTransition from './components/feature/PageTransition';
+import ScrollToTop from './components/feature/ScrollToTop';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -46,6 +47,7 @@ function App() {
       </div>
       {!authPage ? <Navbar /> : null}
       <main className={authPage ? '' : 'pb-10 pt-20 md:pt-24'}>
+        <ScrollToTop />
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<PageTransition><Home /></PageTransition>} />
