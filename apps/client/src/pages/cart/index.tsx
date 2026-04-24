@@ -1,6 +1,6 @@
 import { ShoppingBag, Trash2, ArrowRight, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import EmptyState from '../../components/EmptyState';
+import EmptyState from '../../components/ui/EmptyState';
 import { useCart } from '../../store/CartContext';
 import formatCurrency from '../../utils/formatCurrency';
 import Footer from '../../components/common/footer/Footer';

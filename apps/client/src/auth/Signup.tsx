@@ -1,7 +1,7 @@
 import { ArrowLeft, Eye, EyeOff, Upload, User, Phone, Mail, Lock, Camera, ArrowRight, ShieldCheck, Share2, IdCard, Facebook, Instagram, Youtube, FileText, Image, AlertCircle } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import LoadingButton from '../components/LoadingButton';
+import LoadingButton from '../components/ui/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
 import { useToast } from '../store/ToastContext';

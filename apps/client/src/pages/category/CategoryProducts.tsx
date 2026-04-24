@@ -1,7 +1,7 @@
 import { SearchX } from 'lucide-react';
 import ProductCard from '../../components/product/ProductCard';
 import SkeletonCard from '../../components/product/SkeletonCard';
-import EmptyState from '../../components/EmptyState';
+import EmptyState from '../../components/ui/EmptyState';
 
 interface CategoryProductsProps {
   loading: boolean;

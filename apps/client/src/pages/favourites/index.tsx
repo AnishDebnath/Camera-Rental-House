@@ -1,5 +1,5 @@
 import { Heart } from 'lucide-react';
-import EmptyState from '../../components/EmptyState';
+import EmptyState from '../../components/ui/EmptyState';
 import ProductCard from '../../components/product/ProductCard';
 import { useFavourites } from '../../store/FavouritesContext';
 import Footer from '../../components/common/footer/Footer';

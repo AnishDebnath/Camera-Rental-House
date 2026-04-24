@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ShoppingBag, CreditCard, ChevronLeft } from 'lucide-react';
 import formatCurrency from '../../utils/formatCurrency';
-import LoadingButton from '../../components/LoadingButton';
+import LoadingButton from '../../components/ui/LoadingButton';
 
 interface OrderSummaryStepProps {
   items: any[];

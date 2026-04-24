@@ -1,7 +1,7 @@
 import { Camera, Eye, EyeOff, Lock, User, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import LoadingButton from '../components/LoadingButton';
+import LoadingButton from '../components/ui/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
 import { findDemoAdminAccount, startDemoUserSession } from '../../../../packages/auth';

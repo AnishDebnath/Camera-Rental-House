@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Info, Clock, RefreshCw, ShieldCheck } from 'lucide-react';
-import CustomCalendar from '../../components/CustomCalendar';
-import LoadingButton from '../../components/LoadingButton';
+import CustomCalendar from '../../components/ui/CustomCalendar';
+import LoadingButton from '../../components/ui/LoadingButton';
 
 interface RentalPeriodStepProps {
   pickupDate: Date | null;

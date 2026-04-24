@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { User as UserIcon, Phone, Mail, CreditCard, ShieldCheck, Facebook, Instagram, Youtube, ExternalLink, Info, Image as ImageIcon } from 'lucide-react';
-import LoadingButton from '../../components/LoadingButton';
+import LoadingButton from '../../components/ui/LoadingButton';
 import { Link } from 'react-router-dom';
 
 interface UserDetailsStepProps {

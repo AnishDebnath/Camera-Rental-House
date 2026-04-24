@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
-import { useToast } from '../store/ToastContext';
+import { useToast } from '../../store/ToastContext';
 
 const ToastViewport = () => {
   const { toasts, removeToast } = useToast();
