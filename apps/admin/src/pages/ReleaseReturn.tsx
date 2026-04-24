@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import QRScanner from '../components/QRScanner';
-import { getDemoRole } from '../../../../packages/auth';
+import { getAuthRole } from '../../../../packages/auth';
 
 const ReleaseReturn = () => {
-  const role = getDemoRole();
+  const role = getAuthRole();
+  const isStaff = role === 'staff';
   const [code, setCode] = useState('');
   const [result, setResult] = useState<any>(null);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
@@ -14,18 +15,18 @@ const ReleaseReturn = () => {
     <div className="admin-shell space-y-6 py-6">
       <section
         className={`rounded-[28px] border px-5 py-5 ${
-          role === 'manager'
-            ? 'border-amber-200 bg-amber-50'
+          isStaff
+            ? 'border-teal-200 bg-teal-50'
             : 'border-primary/10 bg-primary-light'
         }`}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tertiary">
-          {role === 'manager' ? 'Manager Counter Mode' : 'Admin Supervision Mode'}
+          {isStaff ? 'Staff Counter Station' : 'Admin Oversight Station'}
         </p>
         <p className="mt-2 text-sm text-muted">
-          {role === 'manager'
-            ? 'This demo highlights the day-of release and return station.'
-            : 'This demo lets admins preview the same station with oversight context.'}
+          {isStaff
+            ? 'Use this station for day-of gear release and return workflows.'
+            : 'Admins can use this station to monitor or manually process handoffs.'}
         </p>
       </section>
 
@@ -51,7 +52,7 @@ const ReleaseReturn = () => {
             setResult({
               product: 'Sony FX3 Cinema Camera',
               status: code === 'CAM-4X9K' ? 'released' : 'pending_pickup',
-              user: 'Alex Director',
+              user: 'John Doe',
               phone: '9876543210',
             });
           }}
@@ -69,7 +70,7 @@ const ReleaseReturn = () => {
           setResult({
             product: 'Sony FX3 Cinema Camera',
             status: 'pending_pickup',
-            user: 'Alex Director',
+            user: 'John Doe',
             phone: '9876543210',
           });
         }}
@@ -89,8 +90,8 @@ const ReleaseReturn = () => {
             onClick={() =>
               setActionMessage(
                 result.status === 'released'
-                  ? 'Demo return completed successfully.'
-                  : 'Demo release completed successfully.',
+                  ? 'Return completed successfully.'
+                  : 'Release completed successfully.',
               )
             }
             className="primary-button w-full"
@@ -110,7 +111,7 @@ const ReleaseReturn = () => {
         description="Scan the user QR and verify documents before handoff."
         onMockScan={() =>
           setVerifiedUser({
-            name: 'Alex Director',
+            name: 'John Doe',
             badge: 'Verified',
           })
         }

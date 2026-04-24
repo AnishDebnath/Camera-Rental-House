@@ -1,18 +1,18 @@
 import { Camera, LogOut, Menu } from 'lucide-react';
-import { clearDemoAdminSession, getDemoRole } from '../../../../packages/auth';
+import { clearAdminSession, getAuthRole } from '../../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../../packages/auth/appUrls';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
 const AdminNavbar = ({ onOpenSidebar }) => {
-  const role = getDemoRole();
-  const isManager = role === 'manager';
+  const role = getAuthRole();
+  const isStaff = role === 'staff';
 
   return (
     <header
       className={`sticky top-0 z-40 border-b backdrop-blur ${
-        isManager
-          ? 'border-amber-200 bg-amber-50/95'
+        isStaff
+          ? 'border-teal-200 bg-teal-50/95'
           : 'border-line/80 bg-white/90'
       }`}
     >
@@ -28,8 +28,8 @@ const AdminNavbar = ({ onOpenSidebar }) => {
           <div className="flex items-center gap-3">
             <div
               className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
-                isManager
-                  ? 'bg-amber-100 text-amber-700'
+                isStaff
+                  ? 'bg-teal-100 text-teal-700'
                   : 'bg-primary-light text-primary'
               }`}
             >
@@ -37,10 +37,10 @@ const AdminNavbar = ({ onOpenSidebar }) => {
             </div>
             <div>
               <p className="text-base font-bold text-ink">
-                {isManager ? 'Camera Rental House Counter' : 'Camera Rental House Admin'}
+                {isStaff ? 'Camera Rental House Counter' : 'Camera Rental House Admin'}
               </p>
               <p className="text-xs text-muted capitalize">
-                {isManager ? 'manager counter mode' : 'admin control mode'}
+                {isStaff ? 'staff counter mode' : 'admin control mode'}
               </p>
             </div>
           </div>
@@ -49,10 +49,10 @@ const AdminNavbar = ({ onOpenSidebar }) => {
         <button
           type="button"
           onClick={() => {
-            clearDemoAdminSession();
+            clearAdminSession();
             window.location.replace(`${authAppUrl}/login`);
           }}
-          className={isManager ? 'pill-button border border-amber-200 bg-white text-amber-700' : 'secondary-button'}
+          className={isStaff ? 'pill-button border border-teal-200 bg-white text-teal-700' : 'secondary-button'}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Logout

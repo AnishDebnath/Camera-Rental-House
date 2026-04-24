@@ -1,30 +1,30 @@
 import { useState } from 'react';
 import { adminRentals } from '../data/mockAdmin';
-import { getDemoRole } from '../../../../packages/auth';
+import { getAuthRole } from '../../../../packages/auth';
 
 const tabs = ['upcoming', 'active', 'past'];
 
 const Rentals = () => {
-  const role = getDemoRole();
-  const isManager = role === 'manager';
+  const role = getAuthRole();
+  const isStaff = role === 'staff';
   const [activeTab, setActiveTab] = useState('upcoming');
 
   return (
     <div className="admin-shell space-y-6 py-6">
       <section
         className={`rounded-[28px] border px-5 py-5 ${
-          isManager
-            ? 'border-amber-200 bg-amber-50'
+          isStaff
+            ? 'border-teal-200 bg-teal-50'
             : 'border-primary/10 bg-primary-light'
         }`}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tertiary">
-          {isManager ? 'Manager Rentals View' : 'Admin Rentals View'}
+          {isStaff ? 'Staff Rentals View' : 'Admin Rentals View'}
         </p>
         <p className="mt-2 text-sm text-muted">
-          {isManager
-            ? 'Focused on active counter operations and handoff timing.'
-            : 'Focused on oversight across upcoming, active, and completed orders.'}
+          {isStaff
+            ? 'Access active counter operations and handoff schedules.'
+            : 'Monitor oversight across upcoming, active, and completed orders.'}
         </p>
       </section>
 
@@ -41,8 +41,8 @@ const Rentals = () => {
             onClick={() => setActiveTab(tab)}
             className={`border-b-2 px-1 pb-3 text-sm font-semibold capitalize ${
               activeTab === tab
-                ? isManager
-                  ? 'border-amber-500 text-amber-700'
+                ? isStaff
+                  ? 'border-teal-500 text-teal-700'
                   : 'border-primary text-primary'
                 : 'border-transparent text-muted'
             }`}

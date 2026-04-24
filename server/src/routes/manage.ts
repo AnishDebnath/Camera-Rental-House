@@ -57,9 +57,17 @@ router.post('/release', async (req: Request, res: Response) => {
       });
     }
 
+    const staffId = (req.user as any)?.id || null;
+    const staffName = (req.user as any)?.fullName || (req.user as any)?.username || null;
+
     const { data, error } = await supabase
       .from('rental_items')
-      .update({ status: 'released' })
+      .update({
+        status: 'released',
+        released_by_staff_id: staffId,
+        released_by_staff_name: staffName,
+        released_at: new Date().toISOString(),
+      })
       .eq('id', item.id)
       .select('*, rentals(*, users(*)), products(*)')
       .single();
@@ -73,6 +81,7 @@ router.post('/release', async (req: Request, res: Response) => {
       message: 'Product released successfully.',
       rentalItem,
       user: rentalItem.rentals.users,
+      releasedBy: staffName,
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to release product.' });

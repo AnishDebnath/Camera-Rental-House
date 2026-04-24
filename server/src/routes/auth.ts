@@ -313,38 +313,78 @@ router.post('/login', async (req: Request, res: Response) => {
     const { identifier, password } = req.body;
 
     if (!identifier || !password) {
-      return res
-        .status(400)
-        .json({ message: 'Identifier and password are required.' });
+      return res.status(400).json({ message: 'Identifier and password are required.' });
     }
 
     const rawIdentifier = String(identifier).trim();
+    const cleanIdentifier = rawIdentifier.toLowerCase();
+
+    // 1. Try to find in staff_accounts (by username or phone)
+    const normalizedPhoneIdentifier = rawIdentifier.replace(/\D/g, '');
+    const isPotentialPhone = /^\d{10}$/.test(normalizedPhoneIdentifier);
+
+    let staffQuery = supabase.from('staff_accounts').select('*');
+    if (isPotentialPhone) {
+      staffQuery = staffQuery.or(`username.eq.${cleanIdentifier},phone.eq.${normalizedPhoneIdentifier}`);
+    } else {
+      staffQuery = staffQuery.eq('username', cleanIdentifier);
+    }
+
+    const { data: staff, error: staffError } = await staffQuery.maybeSingle();
+
+    if (staff && staff.is_active) {
+      const isValid = await bcrypt.compare(password, staff.password_hash);
+      if (isValid) {
+        // Stamp last login
+        await supabase
+          .from('staff_accounts')
+          .update({ last_login_at: new Date().toISOString() })
+          .eq('id', staff.id);
+
+        const tokens = issueTokens(res, {
+          id: staff.id,
+          username: staff.username,
+          fullName: staff.full_name,
+          role: staff.role,
+        });
+
+        return res.json({
+          message: 'Staff login successful.',
+          user: {
+            id: staff.id,
+            fullName: staff.full_name,
+            username: staff.username,
+            role: staff.role,
+          },
+          accessToken: tokens.accessToken,
+          redirectTo: '/admin', // Frontend handles sub-routes like /admin/rentals for staff
+        });
+      }
+    }
+
+    // 2. Try to find in users (by phone or email)
     const normalizedPhone = rawIdentifier.replace(/\D/g, '');
     const isPhoneIdentifier = /^\d{10}$/.test(normalizedPhone);
     const field = isPhoneIdentifier ? 'phone' : 'email';
-    const value = isPhoneIdentifier ? normalizedPhone : rawIdentifier.toLowerCase();
+    const value = isPhoneIdentifier ? normalizedPhone : cleanIdentifier;
 
-    const { data: user, error } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq(field, value)
       .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
-
     if (!user) {
-      return res.status(404).json({ message: "User not found. Please sign up to create an account." });
+      return res.status(401).json({ message: 'Invalid credentials. User not found.' });
     }
 
     if (user.is_blocked) {
       return res.status(403).json({ message: 'This account has been blocked.' });
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);
-    if (!isValid) {
-      return res.status(401).json({ message: 'Incorrect password. Please try again.' });
+    const isValidUser = await bcrypt.compare(password, user.password_hash);
+    if (!isValidUser) {
+      return res.status(401).json({ message: 'Invalid credentials. Incorrect password.' });
     }
 
     const tokens = issueTokens(res, {
@@ -362,56 +402,143 @@ router.post('/login', async (req: Request, res: Response) => {
         fullName: user.full_name,
         phone: user.phone,
         email: user.email,
-        aadhaarNo: user.aadhaar_no,
-        aadhaarDocUrl: user.aadhaar_doc_url,
-        voterNo: user.voter_no,
-        voterDocUrl: user.voter_doc_url,
-        facebook: user.facebook,
-        instagram: user.instagram,
-        youtube: user.youtube,
+        role: 'user',
         avatarUrl: user.avatar_url,
         userQrBase64: user.user_qr_base64,
         createdAt: user.created_at,
       },
+      redirectTo: '/',
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to log in.' });
   }
 });
 
-router.post('/admin/login', async (req: Request, res: Response) => {
-  const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: 'Username and password are required.' });
+
+// --- Staff Management Routes (admin only) ---
+
+router.get('/admin/staff', async (req: Request, res: Response) => {
+  try {
+    const requesterRole = (req.user as any)?.role;
+    if (requesterRole !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required.' });
+    }
+
+    const { data, error } = await supabase
+      .from('staff_accounts')
+      .select('id, username, phone, full_name, role, is_active, created_at, last_login_at')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
   }
-
-  const matchedRole =
-    username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD
-      ? 'admin'
-      : username === process.env.MANAGER_USERNAME &&
-        password === process.env.MANAGER_PASSWORD
-        ? 'manager'
-        : null;
-
-  if (!matchedRole) {
-    return res.status(401).json({ message: 'Invalid admin credentials.' });
-  }
-
-  const tokens = issueTokens(res, {
-    id: `${matchedRole}-${username}`,
-    username,
-    role: matchedRole,
-  });
-
-  return res.json({
-    message: 'Admin login successful.',
-    accessToken: tokens.accessToken,
-    role: matchedRole,
-  });
 });
+
+router.post('/admin/staff', async (req: Request, res: Response) => {
+  try {
+    const requesterRole = (req.user as any)?.role;
+    if (requesterRole !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required.' });
+    }
+
+    const { username, password, phone, fullName, role } = req.body;
+
+    if (!username || !password || !fullName || !role) {
+      return res.status(400).json({ message: 'username, password, fullName and role are required.' });
+    }
+
+    if (!['admin', 'staff'].includes(role)) {
+      return res.status(400).json({ message: 'Role must be admin or staff.' });
+    }
+
+    const cleanUsername = username.trim().toLowerCase();
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : null;
+
+    const { data: existing } = await supabase
+      .from('staff_accounts')
+      .select('id')
+      .or(`username.eq.${cleanUsername}${cleanPhone ? `,phone.eq.${cleanPhone}` : ''}`)
+      .maybeSingle();
+
+    if (existing) {
+      return res.status(409).json({ message: 'Username or Phone already taken.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const { data, error } = await supabase
+      .from('staff_accounts')
+      .insert({
+        username: cleanUsername,
+        phone: cleanPhone,
+        password_hash: passwordHash,
+        full_name: fullName,
+        role,
+        is_active: true,
+      })
+      .select('id, username, phone, full_name, role, is_active, created_at')
+      .single();
+
+    if (error) throw error;
+    return res.status(201).json(data);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch('/admin/staff/:id', async (req: Request, res: Response) => {
+  try {
+    const requesterRole = (req.user as any)?.role;
+    if (requesterRole !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required.' });
+    }
+
+    const updates: any = {};
+    if (req.body.fullName) updates.full_name = req.body.fullName;
+    if (req.body.role && ['admin', 'staff'].includes(req.body.role)) updates.role = req.body.role;
+    if (typeof req.body.isActive === 'boolean') updates.is_active = req.body.isActive;
+    if (req.body.password) updates.password_hash = await bcrypt.hash(req.body.password, 12);
+
+    const { data, error } = await supabase
+      .from('staff_accounts')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select('id, username, full_name, role, is_active, created_at')
+      .single();
+
+    if (error) throw error;
+    return res.json(data);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/admin/staff/:id', async (req: Request, res: Response) => {
+  try {
+    const requesterRole = (req.user as any)?.role;
+    if (requesterRole !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required.' });
+    }
+    const requesterId = (req.user as any)?.id;
+    if (requesterId === req.params.id) {
+      return res.status(400).json({ message: 'You cannot delete your own account.' });
+    }
+
+    const { error } = await supabase
+      .from('staff_accounts')
+      .update({ is_active: false })
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    return res.json({ message: 'Staff account deactivated.' });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 
 router.post('/refresh', async (req: Request, res: Response) => {
   try {

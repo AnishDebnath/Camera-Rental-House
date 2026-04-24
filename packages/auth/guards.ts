@@ -1,14 +1,14 @@
-import { ADMIN_ROLE_STORAGE_KEY, ADMIN_TOKEN_STORAGE_KEY, DEMO_USER_STORAGE_KEY } from './tokens';
-import { isDemoRole, type DemoRole } from './roles';
+import { ADMIN_ROLE_STORAGE_KEY, ADMIN_TOKEN_STORAGE_KEY } from './tokens';
+import { isValidRole, type AppRole } from './roles';
 
-export const getDemoRole = (): DemoRole => {
+export const getAuthRole = (): AppRole => {
   const storedRole =
     typeof localStorage === 'undefined' ? null : localStorage.getItem(ADMIN_ROLE_STORAGE_KEY);
 
-  return isDemoRole(storedRole) ? storedRole : 'admin';
+  return isValidRole(storedRole) ? storedRole : 'admin';
 };
 
-export const hasDemoAdminSession = () => {
+export const hasAdminSession = () => {
   if (typeof localStorage === 'undefined') {
     return false;
   }
@@ -16,15 +16,15 @@ export const hasDemoAdminSession = () => {
   return Boolean(localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY));
 };
 
-export const hasDemoUserSession = () => {
+export const hasUserSession = () => {
   if (typeof localStorage === 'undefined') {
     return false;
   }
 
-  return Boolean(localStorage.getItem(DEMO_USER_STORAGE_KEY));
+  return Boolean(localStorage.getItem('camera_rental_house_user'));
 };
 
-export const clearDemoAdminSession = () => {
+export const clearAdminSession = () => {
   localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
   localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
 };

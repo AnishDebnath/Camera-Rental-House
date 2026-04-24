@@ -1,26 +1,56 @@
-import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 const root = process.cwd();
-const clientDist = resolve(root, 'apps', 'client', 'dist');
-const adminDist = resolve(root, 'apps', 'admin', 'dist');
-const bundledAdminDist = resolve(clientDist, 'admin');
 
-const run = (command) => {
-  execSync(command, {
-    cwd: root,
-    stdio: 'inherit',
-  });
-};
+try {
+  console.log('🚀 Starting Vercel Build Process...');
 
-run('npm run build:client');
-run('npm run build:admin');
+  // 1. Build the Main Client (Store)
+  console.log('\n--- Building Client (Store) ---');
+  execSync('npm run build:client', { stdio: 'inherit' });
 
-if (!existsSync(clientDist) || !existsSync(adminDist)) {
-  throw new Error('Expected apps/client/dist and apps/admin/dist to exist after the build.');
+  // 2. Build the Admin Panel
+  console.log('\n--- Building Admin Panel ---');
+  execSync('npm run build:admin', { stdio: 'inherit' });
+
+  // 3. Prepare the deployment structure
+  // Vercel expects everything in apps/client/dist based on vercel.json
+  const clientDist = path.join(root, 'apps/client/dist');
+  const adminDist = path.join(root, 'apps/admin/dist');
+  const targetAdminFolder = path.join(clientDist, 'admin');
+
+  console.log('\n--- Merging Admin into Client Dist ---');
+  
+  if (fs.existsSync(targetAdminFolder)) {
+    fs.rmSync(targetAdminFolder, { recursive: true, force: true });
+  }
+
+  // Create the /admin folder inside client dist
+  fs.mkdirSync(targetAdminFolder, { recursive: true });
+
+  // Copy admin dist contents to client dist /admin
+  copyRecursiveSync(adminDist, targetAdminFolder);
+
+  console.log('\n✅ Build completed successfully!');
+} catch (error) {
+  console.error('\n❌ Build failed:', error);
+  process.exit(1);
 }
 
-rmSync(bundledAdminDist, { recursive: true, force: true });
-mkdirSync(bundledAdminDist, { recursive: true });
-cpSync(adminDist, bundledAdminDist, { recursive: true });
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
+    fs.readdirSync(src).forEach((childItemName) => {
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}

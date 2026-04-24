@@ -31,7 +31,7 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   rentals: any[];
-  login: (credentials: any) => Promise<void>;
+  login: (credentials: any) => Promise<any>;
   signup: (formData: FormData) => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
   logout: () => void;
@@ -67,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(response.data.user);
         localStorage.setItem('accessToken', response.data.accessToken);
         addToast({ title: 'Welcome back', message: 'Logged in successfully.', tone: 'success' });
+        return response.data;
       },
       signup: async (formData: FormData) => {
         try {

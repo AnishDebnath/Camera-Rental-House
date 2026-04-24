@@ -176,7 +176,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                 <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Released By</p>
                               </div>
-                              <p className="text-xs font-bold text-slate-800">{rental.released_by || 'Demo Admin'}</p>
+                              <p className="text-xs font-bold text-slate-800">{rental.released_by || 'Staff Member'}</p>
                               <p className="text-[10px] font-medium text-slate-400">{rental.released_at ? formatDate(rental.released_at) : formatDate(rental.pickup_date)}</p>
                             </div>
                           </div>
@@ -187,7 +187,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Received By</p>
                               </div>
-                              <p className="text-xs font-bold text-slate-800">{rental.received_by || 'Demo Admin'}</p>
+                              <p className="text-xs font-bold text-slate-800">{rental.received_by || 'Staff Member'}</p>
                               <p className="text-[10px] font-medium text-slate-400">{rental.received_at ? formatDate(rental.received_at) : formatDate(rental.event_date)}</p>
                             </div>
                           </div>

@@ -86,7 +86,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/rentals', authMiddleware, roleMiddleware(['user']), rentalsRoutes);
-app.use('/api/manage', authMiddleware, roleMiddleware(['admin', 'manager']), manageRoutes);
+app.use('/api/manage', authMiddleware, roleMiddleware(['admin', 'manager', 'staff']), manageRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
 
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -1,9 +1,11 @@
-import type { DemoRole } from './roles';
+import type { AppRole } from './roles';
 
-export const ROLE_PERMISSIONS: Record<DemoRole, readonly string[]> = {
+export const ROLE_PERMISSIONS: Record<string, readonly string[]> = {
   admin: ['dashboard:read', 'products:write', 'users:read', 'rentals:read', 'release:write'],
-  manager: ['rentals:read', 'release:write'],
+  staff: ['rentals:read', 'release:write'],
 };
 
-export const hasPermission = (role: DemoRole, permission: string) =>
-  ROLE_PERMISSIONS[role].includes(permission);
+export const hasPermission = (role: string, permission: string) => {
+  const permissions = ROLE_PERMISSIONS[role] || [];
+  return permissions.includes(permission);
+};

@@ -30,12 +30,12 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   addToast({
-                    title: 'Demo contact',
-                    message: 'Phone action would dial the rental house.',
+                    title: 'Contact Support',
+                    message: 'Calling support at +91 98765 43210...',
                     tone: 'info',
                   })
                 }
-                className="inline-flex items-center gap-2"
+                className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               >
                 <Phone className="h-4 w-4 text-primary" /> +91 98765 43210
               </button>
@@ -43,12 +43,12 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   addToast({
-                    title: 'Demo contact',
-                    message: 'Email action would open your mail app.',
+                    title: 'Email Support',
+                    message: 'Opening email client for hello@camerarentalhouse.in...',
                     tone: 'info',
                   })
                 }
-                className="inline-flex items-center gap-2"
+                className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               >
                 <Mail className="h-4 w-4 text-primary" /> hello@camerarentalhouse.in
               </button>
@@ -67,12 +67,12 @@ const Footer = () => {
                   type="button"
                   onClick={() =>
                     addToast({
-                      title: 'Demo social action',
-                      message: `${name} would open from the live website.`,
+                      title: `Visit ${name}`,
+                      message: `Redirecting to our ${name} page...`,
                       tone: 'info',
                     })
                   }
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-page text-primary"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-page text-primary transition-all hover:scale-110 hover:shadow-md"
                 >
                   <Icon className="h-5 w-5" />
                 </button>
@@ -81,7 +81,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 border-t border-line pt-4 text-xs text-tertiary">
-          2026 Camera Rental House.
+          © 2026 Camera Rental House. All rights reserved.
         </div>
       </div>
     </footer>

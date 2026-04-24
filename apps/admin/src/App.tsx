@@ -12,14 +12,14 @@ import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
 import {
   ADMIN_TOKEN_STORAGE_KEY,
-  isDemoRole,
-  saveDemoAdminToken,
+  isValidRole,
+  saveAuthSession,
 } from '../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../packages/auth/appUrls';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
-const ProtectedRoute = ({ children, allowManager = false }) => {
+const ProtectedRoute = ({ children, allowedRoles = ['admin'] }: { children: any; allowedRoles?: string[] }) => {
   const location = useLocation();
   const token = localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
   const role = localStorage.getItem('camera_rental_house_admin_role');
@@ -28,7 +28,11 @@ const ProtectedRoute = ({ children, allowManager = false }) => {
     const next = `${location.pathname}${location.search}`;
     return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
-  if (!allowManager && role === 'manager') return <Navigate to="/rentals" replace />;
+
+  if (!allowedRoles.includes(role as string)) {
+    // Staff can only access rentals and release
+    return <Navigate to="/rentals" replace />;
+  }
 
   return <>{children}</>;
 };
@@ -45,11 +49,11 @@ const AuthRedirect = () => {
     const role = params.get('role');
     const next = params.get('next');
 
-    if (token && isDemoRole(role)) {
-      saveDemoAdminToken(token, role);
-      navigate(next?.startsWith('/') ? next : role === 'manager' ? '/rentals' : '/', {
-        replace: true,
-      });
+    if (token && isValidRole(role)) {
+      saveAuthSession(token, role);
+      // staff goes to /rentals, admin goes to /
+      const defaultPath = role === 'staff' ? '/rentals' : '/';
+      navigate(next?.startsWith('/') ? next : defaultPath, { replace: true });
       return;
     }
 
@@ -130,7 +134,7 @@ function App() {
           <Route
             path="/rentals"
             element={
-              <ProtectedRoute allowManager>
+              <ProtectedRoute allowedRoles={['admin', 'staff']}>
                 <Rentals />
               </ProtectedRoute>
             }
@@ -138,7 +142,7 @@ function App() {
           <Route
             path="/release"
             element={
-              <ProtectedRoute allowManager>
+              <ProtectedRoute allowedRoles={['admin', 'staff']}>
                 <ReleaseReturn />
               </ProtectedRoute>
             }

@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import LoadingButton from '../components/ui/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
-import { findDemoAdminAccount, startDemoUserSession } from '../../../../packages/auth';
 import {
   resolveAdminAppUrl,
   resolveClientAppUrl,
@@ -60,27 +59,30 @@ const Login = () => {
       const currentParams = new URLSearchParams(window.location.search);
       const requestedNext = currentParams.get('next');
 
-      // 1. Check for Admin/Manager Demo Credentials
-      const matched = findDemoAdminAccount(form.identifier, form.password);
-      if (matched) {
+      // 2. Real Unified Login (checks both staff_accounts and users)
+      const data = await login(form);
+      
+      if (data.user.role === 'admin' || data.user.role === 'staff') {
         const nextPath =
           requestedNext && requestedNext.startsWith('/admin')
             ? requestedNext
-            : matched.role === 'manager'
-              ? '/admin/rentals'
-              : '/admin';
+            : data.user.role === 'admin'
+              ? '/admin'
+              : '/admin/rentals';
+
         const params = new URLSearchParams({
-          token: `demo-${matched.role}-token`,
-          role: matched.role,
+          token: data.accessToken,
+          role: data.user.role,
           next: nextPath,
         });
+        
         window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
         return;
       }
 
-      // 2. Real User Login
-      await login(form);
-      navigate('/');
+      // Regular User
+      const next = resolveClientNextPath(requestedNext);
+      navigate(next);
     } catch (error: any) {
       const message = error.message || "Invalid credentials. Please check your email/phone and password.";
       setErrors({ general: message });
@@ -198,18 +200,6 @@ const Login = () => {
             </div>
           </form>
 
-          {/* Social / Divider (Visual only) */}
-          {/* <div className="mt-8 flex items-center gap-4">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">demo access</span>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <p className="text-[12px] text-slate-500 leading-relaxed text-center italic">
-              Use <b className="text-slate-700">admin / admin123</b> for the dashboard or just click Sign In for the store.
-            </p>
-          </div> */}
 
           <div className="mt-6 pt-5 text-center relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-px bg-slate-200" />

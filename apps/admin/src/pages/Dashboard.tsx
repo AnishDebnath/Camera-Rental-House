@@ -2,32 +2,33 @@ import { ArrowRight, CalendarClock, PackagePlus, ScanLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StatsCard from '../components/StatsCard';
 import { adminRentals, adminStats } from '../data/mockAdmin';
-import { getDemoRole } from '../../../../packages/auth';
+import { getAuthRole } from '../../../../packages/auth';
 
 const Dashboard = () => {
-  const role = getDemoRole();
+  const role = getAuthRole();
+  const isStaff = role === 'staff';
 
   return (
     <div className="admin-shell space-y-6 py-6">
       <section
         className={`rounded-[28px] border px-5 py-5 ${
-          role === 'manager'
-            ? 'border-amber-200 bg-amber-50'
+          isStaff
+            ? 'border-teal-200 bg-teal-50'
             : 'border-primary/10 bg-primary-light'
         }`}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tertiary">
-          {role === 'manager' ? 'Manager Demo' : 'Admin Demo'}
+          {isStaff ? 'Staff Account' : 'Admin Account'}
         </p>
         <h2 className="mt-2 text-xl font-semibold text-ink">
-          {role === 'manager'
-            ? 'Counter workflow preview is active.'
-            : 'Operations control preview is active.'}
+          {isStaff
+            ? 'Counter workflow is active.'
+            : 'Operations control is active.'}
         </h2>
         <p className="mt-2 text-sm text-muted">
-          {role === 'manager'
-            ? 'Use this mode to simulate release, return, and day-of rental handling.'
-            : 'Use this mode to simulate inventory, users, and rental house oversight.'}
+          {isStaff
+            ? 'Access release, return, and daily rental handling.'
+            : 'Full access to inventory, users, and business oversight.'}
         </p>
       </section>
 
