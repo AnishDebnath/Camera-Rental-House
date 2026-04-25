@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Login from './auth/Login';
@@ -16,6 +16,9 @@ import Account from './pages/account';
 import { useAuth } from './store/AuthContext';
 import PageTransition from './components/feature/PageTransition';
 import ScrollToTop from './components/feature/ScrollToTop';
+import { resolveAdminAppUrl } from '../../../packages/auth/appUrls';
+
+const adminAppUrl = resolveAdminAppUrl(import.meta.env.VITE_ADMIN_APP_URL);
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -31,9 +34,20 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   const location = useLocation();
+  const { user } = useAuth();
   const authPage = ['/login', '/signup'].includes(location.pathname);
   const isProductPage = location.pathname.startsWith('/product/');
   const showBottomNav = !authPage && !isProductPage;
+
+  useEffect(() => {
+    if (user && 'role' in user) {
+      const role = (user as any).role;
+      if (role === 'admin' || role === 'staff') {
+        const defaultPath = role === 'admin' ? '/' : '/rentals';
+        window.location.replace(`${adminAppUrl}${defaultPath}`);
+      }
+    }
+  }, [user]);
 
   return (
     <div className="relative min-h-screen text-ink">

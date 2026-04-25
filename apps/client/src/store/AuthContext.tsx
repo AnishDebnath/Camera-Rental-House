@@ -127,6 +127,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       logout: () => {
         setUser(null);
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('camera_rental_house_admin_token');
+        localStorage.removeItem('camera_rental_house_admin_role');
         addToast({ title: 'Signed out', message: 'You have been logged out.', tone: 'info' });
       },
       refreshRentals: async () => {

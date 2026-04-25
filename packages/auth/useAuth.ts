@@ -9,4 +9,6 @@ export const saveAuthSession = (token: string, role: AppRole) => {
 export const clearAuthSession = () => {
   localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
   localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
+  localStorage.removeItem('camera_rental_house_user');
+  localStorage.removeItem('accessToken');
 };

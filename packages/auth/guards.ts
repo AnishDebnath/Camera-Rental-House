@@ -27,4 +27,6 @@ export const hasUserSession = () => {
 export const clearAdminSession = () => {
   localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
   localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
+  localStorage.removeItem('camera_rental_house_user');
+  localStorage.removeItem('accessToken');
 };
