@@ -2,7 +2,7 @@ import forms from '@tailwindcss/forms';
 
 export default {
   content: [
-    './index.html', 
+    './index.html',
     './src/**/*.{js,jsx,ts,tsx}',
     '../../packages/ui/**/*.{js,jsx,ts,tsx}'
   ],

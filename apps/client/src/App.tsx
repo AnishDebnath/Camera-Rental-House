@@ -86,7 +86,7 @@ function App() {
             <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
             <Route path="/checkout" element={<ProtectedRoute><PageTransition><Checkout /></PageTransition></ProtectedRoute>} />
-            <Route path="/favourites" element={<PageTransition><Favourites /></PageTransition>} />
+            <Route path="/favourites" element={<ProtectedRoute><PageTransition><Favourites /></PageTransition></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><PageTransition><Account /></PageTransition></ProtectedRoute>} />
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
