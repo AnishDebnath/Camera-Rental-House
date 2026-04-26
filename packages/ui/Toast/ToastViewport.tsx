@@ -38,8 +38,8 @@ const ToastViewport = () => {
                 <p className="text-[13px] font-bold text-ink">{toast.title}</p>
                 <p className="mt-1 text-xs font-medium text-muted">{toast.message}</p>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => removeToast(toast.id)}
                 className="mt-1 text-muted transition hover:text-ink"
               >
