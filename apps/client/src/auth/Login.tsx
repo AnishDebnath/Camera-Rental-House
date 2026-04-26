@@ -1,6 +1,6 @@
 import { Camera, Eye, EyeOff, Lock, User, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { type FormEvent, useState, useEffect, useRef, useMemo } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import LoadingButton from '../components/ui/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
@@ -8,7 +8,7 @@ import {
   resolveAdminAppUrl,
   resolveClientAppUrl,
 } from '../../../../packages/auth/appUrls';
-import { useToast } from '../store/ToastContext';
+import { useToast } from '@camera-rental-house/ui';
 
 const adminAppUrl = resolveAdminAppUrl(import.meta.env.VITE_ADMIN_APP_URL);
 const clientAppUrl = resolveClientAppUrl(import.meta.env.VITE_CLIENT_APP_URL);
@@ -19,23 +19,50 @@ const resolveClientNextPath = (requestedNext: string | null) =>
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, logout } = useAuth();
+  const { addToast } = useToast();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { addToast } = useToast();
+  
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const isClearingSession = searchParams.get('clear_session') === 'true';
+  const hasJustLoggedOut = searchParams.get('logged_out') === 'true';
+  const toastShownRef = useRef(false);
+
+  // 1. Handle cross-app session clearing (e.g. after admin logout)
+  useEffect(() => {
+    if (isClearingSession) {
+      logout({ silent: true });
+      window.location.replace('/login?logged_out=true');
+    }
+  }, [isClearingSession, logout]);
+
+  // 2. Show post-logout confirmation toast once
+  useEffect(() => {
+    if (hasJustLoggedOut && !toastShownRef.current) {
+      toastShownRef.current = true;
+      addToast({ 
+        title: 'Signed out', 
+        message: 'Your session has been securely closed.', 
+        tone: 'success' 
+      });
+      navigate('/login', { replace: true });
+    }
+  }, [hasJustLoggedOut, addToast, navigate]);
 
   const validate = () => {
-    const val = form.identifier.trim();
-    if (!val) return "Email or phone number is required";
+    const identifier = form.identifier.trim();
+    if (!identifier) return "Email or phone number is required";
 
-    // Check if input is numeric
-    const isNumeric = /^\d+$/.test(val);
+    const isNumeric = /^\d+$/.test(identifier);
     if (isNumeric) {
-      if (val.length !== 10) return "Phone number must be exactly 10 digits";
+      if (identifier.length !== 10) return "Phone number must be exactly 10 digits";
     } else {
-      // Basic email regex
-      const isEmail = /^[^\s@]+@gmail\.com$/.test(val);
+      const isEmail = /^[^\s@]+@gmail\.com$/.test(identifier);
       if (!isEmail) return "Please enter the valid email or 10-digit phone number";
     }
 
@@ -43,46 +70,60 @@ const Login = () => {
     return "";
   };
 
-  const { login } = useAuth();
+  const handleIdentifierChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let val = event.target.value;
+    if (/^\d+$/.test(val)) val = val.slice(0, 10);
+    setForm((prev) => ({ ...prev, identifier: val }));
+    if (errors.identifier || errors.general) setErrors({});
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, password: event.target.value }));
+    if (errors.password || errors.general) setErrors({});
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
     const validationError = validate();
     if (validationError) {
-      setErrors({ general: validationError, identifier: validationError.includes('Email') || validationError.includes('Phone') ? 'error' : '', password: validationError.includes('Password') ? 'error' : '' });
+      setErrors({ 
+        general: validationError, 
+        identifier: (validationError.includes('Email') || validationError.includes('Phone')) ? 'error' : '', 
+        password: validationError.includes('Password') ? 'error' : '' 
+      });
       return;
     }
+
     setErrors({});
     setLoading(true);
 
     try {
-      const currentParams = new URLSearchParams(window.location.search);
-      const requestedNext = currentParams.get('next');
-
-      // 2. Real Unified Login (checks both staff_accounts and users)
-      const data = await login(form);
+      const requestedNext = searchParams.get('next');
+      const data = await login(form, { silent: true });
       
+      // Handle Admin/Staff redirect to Admin portal
       if (data.user.role === 'admin' || data.user.role === 'staff') {
-        const nextPath =
-          requestedNext && requestedNext.startsWith('/admin')
-            ? requestedNext
-            : data.user.role === 'admin'
-              ? '/admin'
-              : '/admin/rentals';
+        let nextPath = '/';
+        if (requestedNext?.startsWith('/admin')) {
+          nextPath = requestedNext.replace(/^\/admin/, '') || '/';
+        } else {
+          nextPath = data.user.role === 'admin' ? '/' : '/rentals';
+        }
 
         const params = new URLSearchParams({
           token: data.accessToken,
           role: data.user.role,
           next: nextPath,
+          welcome: 'true'
         });
         
         window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
         return;
       }
 
-      // Regular User
-      const next = resolveClientNextPath(requestedNext);
-      navigate(next);
+      // Regular User redirect to Account or requested path
+      navigate(resolveClientNextPath(requestedNext));
     } catch (error: any) {
       const message = error.message || "Invalid credentials. Please check your email/phone and password.";
       setErrors({ general: message });
@@ -91,6 +132,17 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (isClearingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+          <p className="text-sm font-bold text-ink">Signing out safely...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -131,12 +183,7 @@ const Login = () => {
               <div className="relative">
                 <input
                   value={form.identifier}
-                  onChange={(event) => {
-                    let val = event.target.value;
-                    if (/^\d+$/.test(val)) val = val.slice(0, 10);
-                    setForm((current) => ({ ...current, identifier: val }));
-                    if (Object.keys(errors).length > 0) setErrors({});
-                  }}
+                  onChange={handleIdentifierChange}
                   className={clsx(
                     "w-full h-11 px-4 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
                     errors.identifier || (errors.general && (errors.general.includes('Email') || errors.general.includes('Phone') || errors.general.includes('found')))
@@ -159,10 +206,7 @@ const Login = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
-                  onChange={(event) => {
-                    setForm((current) => ({ ...current, password: event.target.value }));
-                    if (Object.keys(errors).length > 0) setErrors({});
-                  }}
+                  onChange={handlePasswordChange}
                   className={clsx(
                     "w-full h-11 pl-4 pr-11 rounded-xl bg-white/50 border outline-none transition-all focus:ring-4 focus:ring-primary/5 placeholder:text-slate-400 text-sm",
                     errors.password || (errors.general && errors.general.includes('Password'))

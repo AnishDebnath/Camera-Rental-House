@@ -5,7 +5,6 @@ import Login from './auth/Login';
 import Signup from './auth/Signup';
 import Navbar from './components/common/navbar/Navbar';
 import BottomNav from './components/common/navbar/BottomNav';
-import ToastViewport from './components/ui/Toast';
 import Home from './pages/home';
 import Category from './pages/category';
 import ProductDetail from './pages/product-detail';
@@ -35,19 +34,37 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 function App() {
   const location = useLocation();
   const { user } = useAuth();
-  const authPage = ['/login', '/signup'].includes(location.pathname);
+  const searchParams = new URLSearchParams(location.search);
+  const isClearingSession = searchParams.get('clear_session') === 'true';
+  const authPage = isClearingSession || ['/login', '/signup'].includes(location.pathname);
   const isProductPage = location.pathname.startsWith('/product/');
   const showBottomNav = !authPage && !isProductPage;
 
   useEffect(() => {
     if (user && 'role' in user) {
+      if (isClearingSession) {
+        return; // Login.tsx handles the logout
+      }
+
       const role = (user as any).role;
       if (role === 'admin' || role === 'staff') {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          // Broken state: user exists but token is missing. Clear it to prevent loops.
+          localStorage.removeItem('camera_rental_house_user');
+          window.location.reload();
+          return;
+        }
         const defaultPath = role === 'admin' ? '/' : '/rentals';
-        window.location.replace(`${adminAppUrl}${defaultPath}`);
+        const params = new URLSearchParams({
+          token,
+          role,
+          next: defaultPath
+        });
+        window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
       }
     }
-  }, [user]);
+  }, [user, isClearingSession]);
 
   return (
     <div className="relative min-h-screen text-ink">
@@ -77,7 +94,6 @@ function App() {
         </AnimatePresence>
       </main>
       {showBottomNav ? <BottomNav /> : null}
-      <ToastViewport />
     </div>
   );
 }

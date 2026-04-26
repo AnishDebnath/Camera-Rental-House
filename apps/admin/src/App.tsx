@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
@@ -11,18 +11,20 @@ import ReleaseReturn from './pages/ReleaseReturn';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
 import {
+  ADMIN_ROLE_STORAGE_KEY,
   ADMIN_TOKEN_STORAGE_KEY,
   isValidRole,
   saveAuthSession,
 } from '../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../packages/auth/appUrls';
+import { useToast } from '@camera-rental-house/ui';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
 const ProtectedRoute = ({ children, allowedRoles = ['admin'] }: { children: any; allowedRoles?: string[] }) => {
   const location = useLocation();
   const token = localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
-  const role = localStorage.getItem('camera_rental_house_admin_role');
+  const role = localStorage.getItem(ADMIN_ROLE_STORAGE_KEY);
 
   if (!token) {
     const next = `${location.pathname}${location.search}`;
@@ -42,12 +44,24 @@ const AUTH_PATHS = ['/login', '/auth-redirect'];
 const AuthRedirect = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { addToast } = useToast();
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
     const role = params.get('role');
     const next = params.get('next');
+    const welcome = params.get('welcome');
+
+    if (welcome === 'true' && !toastShownRef.current) {
+      toastShownRef.current = true;
+      addToast({
+        title: 'Welcome back',
+        message: 'Logged in successfully to admin portal.',
+        tone: 'success'
+      });
+    }
 
     if (token && isValidRole(role)) {
       saveAuthSession(token, role);
@@ -60,7 +74,7 @@ const AuthRedirect = () => {
     const requestedPath = next?.startsWith('/') ? next : '/';
     const authUrl = `${authAppUrl}/login?next=${encodeURIComponent(requestedPath)}`;
     window.location.replace(authUrl);
-  }, [location.search, navigate]);
+  }, [location.search, navigate, addToast]);
 
   return <div className="admin-shell py-10 text-sm text-muted">Redirecting to login...</div>;
 };
@@ -71,85 +85,87 @@ function App() {
   const isAuthPage = AUTH_PATHS.includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-page text-ink">
-      {!isAuthPage && (
-        <>
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
-        </>
-      )}
-      <main className={isAuthPage ? '' : 'lg:pl-72'}>
-        <Routes>
-          <Route path="/login" element={<AuthRedirect />} />
-          <Route path="/auth-redirect" element={<AuthRedirect />} />
+    <div className="min-h-screen text-ink">
+      <div className="flex min-h-screen flex-col">
+        {!isAuthPage && (
+          <>
+            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+            <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
+          </>
+        )}
+        <main className={isAuthPage ? '' : 'lg:pl-72'}>
+          <Routes>
+            <Route path="/login" element={<AuthRedirect />} />
+            <Route path="/auth-redirect" element={<AuthRedirect />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/products"
-            element={
-              <ProtectedRoute>
-                <Products />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/products/add"
-            element={
-              <ProtectedRoute>
-                <AddProduct />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/products/:id/edit"
-            element={
-              <ProtectedRoute>
-                <EditProduct />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <Users />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users/:id"
-            element={
-              <ProtectedRoute>
-                <UserDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/rentals"
-            element={
-              <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                <Rentals />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/release"
-            element={
-              <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                <ReleaseReturn />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute>
+                  <Products />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/add"
+              element={
+                <ProtectedRoute>
+                  <AddProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users/:id"
+              element={
+                <ProtectedRoute>
+                  <UserDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rentals"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                  <Rentals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/release"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                  <ReleaseReturn />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

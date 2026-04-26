@@ -4,6 +4,8 @@
 
 body {
   @apply bg-page font-sans text-ink antialiased;
+  background:
+    linear-gradient(135deg, #f4e8e8 0%, #f7f8fb 44%, #e9f3ff 100%);
 }
 
 @layer components {
@@ -12,11 +14,11 @@ body {
   }
 
   .card-surface {
-    @apply rounded-card border border-line bg-card shadow-card transition-all duration-200 ease-in-out;
+    @apply rounded-card border border-white/70 bg-white/[0.82] shadow-card transition-all duration-200 ease-in-out;
   }
 
   .pill-button {
-    @apply inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out active:scale-95 md:text-base;
+    @apply inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out active:scale-95;
   }
 
   .primary-button {
@@ -24,10 +26,10 @@ body {
   }
 
   .secondary-button {
-    @apply pill-button border border-line bg-white text-ink hover:bg-primary-light hover:text-primary-dark;
+    @apply pill-button border border-line bg-white/90 text-ink hover:bg-primary-light hover:text-primary-dark;
   }
 
   .input-shell {
-    @apply flex min-h-12 items-center gap-3 rounded-input border border-line bg-white px-4 transition-all duration-200 ease-in-out focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10;
+    @apply flex min-h-12 items-center gap-3 rounded-input border border-line bg-white/90 px-4 transition-all duration-200 ease-in-out focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10;
   }
 }

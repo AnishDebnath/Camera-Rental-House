@@ -4,10 +4,11 @@ import {
   useMemo,
   useState,
   useEffect,
+  useCallback,
   type ReactNode,
 } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import { useToast } from './ToastContext';
+import { useToast } from '@camera-rental-house/ui';
 
 export interface User {
   id: string;
@@ -24,6 +25,7 @@ export interface User {
   facebook?: string;
   instagram?: string;
   youtube?: string;
+  role: string;
   createdAt?: string;
 }
 
@@ -31,10 +33,10 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   rentals: any[];
-  login: (credentials: any) => Promise<any>;
+  login: (credentials: any, options?: { silent?: boolean }) => Promise<any>;
   signup: (formData: FormData) => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
-  logout: () => void;
+  logout: (options?: { silent?: boolean }) => void;
   refreshRentals: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -57,93 +59,103 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
+  const login = useCallback(async (credentials: any, options?: { silent?: boolean }) => {
+    const response = await axiosInstance.post('/auth/login', credentials);
+    const { user: data, accessToken } = response.data;
+    localStorage.setItem('accessToken', accessToken);
+    setUser(data);
+    if (!options?.silent) {
+      addToast({ title: 'Welcome back', message: 'Logged in successfully.', tone: 'success' });
+    }
+    return response.data;
+  }, [addToast]);
+
+  const signup = useCallback(async (formData: FormData) => {
+    try {
+      const response = await axiosInstance.post('/auth/signup', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const { user: data, accessToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      setUser(data);
+      addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
+    } catch (error: any) {
+      throw error;
+    }
+  }, [addToast]);
+
+  const updateProfile = useCallback(async (updates: any) => {
+    try {
+      const finalUpdates = { ...updates };
+      // Remove internal/read-only fields that shouldn't be sent back to server
+      delete (finalUpdates as any).aadhaarDocUrl;
+      delete (finalUpdates as any).voterDocUrl;
+      delete (finalUpdates as any).avatarUrl;
+      delete (finalUpdates as any).userQrBase64;
+      delete (finalUpdates as any).createdAt;
+      delete (finalUpdates as any).id;
+      delete (finalUpdates as any).memberId;
+
+      const hasFiles = finalUpdates.aadhaarDoc instanceof File || finalUpdates.voterDoc instanceof File || finalUpdates.selfie instanceof File;
+      let payload: any = finalUpdates;
+
+      if (hasFiles) {
+        const formData = new FormData();
+        Object.entries(finalUpdates).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, value as any);
+          }
+        });
+        payload = formData;
+      }
+
+      const response = await axiosInstance.patch('/auth/update-profile', payload);
+
+      const { user: updatedUser } = response.data;
+      setUser(updatedUser);
+      addToast({ title: 'Profile updated', message: 'Your changes were saved successfully.', tone: 'success' });
+    } catch (error: any) {
+      console.error('Update Profile Error:', error);
+      throw error;
+    }
+  }, [addToast]);
+
+  const logout = useCallback((options?: { silent?: boolean }) => {
+    setUser(null);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('camera_rental_house_admin_token');
+    localStorage.removeItem('camera_rental_house_admin_role');
+    if (!options?.silent) {
+      addToast({ title: 'Signed out', message: 'You have been logged out.', tone: 'info' });
+    }
+  }, [addToast]);
+
+  const refreshRentals = useCallback(async () => {
+    // Fetch real rentals here
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/auth/me');
+      setUser(response.data.user);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
       rentals,
-      login: async (credentials: any) => {
-        const response = await axiosInstance.post('/auth/login', credentials);
-        setUser(response.data.user);
-        localStorage.setItem('accessToken', response.data.accessToken);
-        addToast({ title: 'Welcome back', message: 'Logged in successfully.', tone: 'success' });
-        return response.data;
-      },
-      signup: async (formData: FormData) => {
-        try {
-          const response = await axiosInstance.post('/auth/signup', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-          const { user: data } = response.data;
-          setUser({
-            ...data,
-            avatarUrl: data.avatarUrl,
-            userQrBase64: data.userQrBase64,
-            aadhaarDocUrl: data.aadhaarDocUrl,
-            voterDocUrl: data.voterDocUrl,
-            createdAt: data.createdAt,
-          });
-          localStorage.setItem('accessToken', response.data.accessToken);
-          addToast({ title: 'Account created', message: 'Registration complete.', tone: 'success' });
-        } catch (error: any) {
-          throw error;
-        }
-      },
-      updateProfile: async (updates: any) => {
-        try {
-          const finalUpdates = { ...updates };
-          // Remove internal/read-only fields that shouldn't be sent back to server
-          delete (finalUpdates as any).aadhaarDocUrl;
-          delete (finalUpdates as any).voterDocUrl;
-          delete (finalUpdates as any).avatarUrl;
-          delete (finalUpdates as any).userQrBase64;
-          delete (finalUpdates as any).createdAt;
-          delete (finalUpdates as any).id;
-          delete (finalUpdates as any).memberId;
-
-          const hasFiles = finalUpdates.aadhaarDoc instanceof File || finalUpdates.voterDoc instanceof File || finalUpdates.selfie instanceof File;
-          let payload: any = finalUpdates;
-
-          if (hasFiles) {
-            const formData = new FormData();
-            Object.entries(finalUpdates).forEach(([key, value]) => {
-              if (value !== undefined && value !== null) {
-                formData.append(key, value as any);
-              }
-            });
-            payload = formData;
-          }
-
-          const response = await axiosInstance.patch('/auth/update-profile', payload);
-
-          const { user: updatedUser } = response.data;
-          setUser(updatedUser);
-          addToast({ title: 'Profile updated', message: 'Your changes were saved successfully.', tone: 'success' });
-        } catch (error: any) {
-          console.error('Update Profile Error:', error);
-          throw error;
-        }
-      },
-      logout: () => {
-        setUser(null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('camera_rental_house_admin_token');
-        localStorage.removeItem('camera_rental_house_admin_role');
-        addToast({ title: 'Signed out', message: 'You have been logged out.', tone: 'info' });
-      },
-      refreshRentals: async () => {
-        // Fetch real rentals here
-      },
-      refreshUser: async () => {
-        try {
-          const response = await axiosInstance.get('/auth/me');
-          setUser(response.data.user);
-        } catch (error) {
-          console.error('Failed to refresh user:', error);
-        }
-      },
+      login,
+      signup,
+      updateProfile,
+      logout,
+      refreshRentals,
+      refreshUser,
     }),
-    [addToast, rentals, user],
+    [user, rentals, login, signup, updateProfile, logout, refreshRentals, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

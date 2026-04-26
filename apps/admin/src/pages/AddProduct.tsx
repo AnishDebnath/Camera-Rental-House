@@ -27,13 +27,6 @@ const initialForm = {
   quantity: '1',
 } satisfies ProductForm;
 
-const productFields = [
-  { key: 'name', label: 'Product Name' },
-  { key: 'description', label: 'Description' },
-  { key: 'pricePerDay', label: 'Price Per Day' },
-  { key: 'quantity', label: 'Quantity' },
-] as const;
-
 const AddProduct = () => {
   const [form, setForm] = useState<ProductForm>(initialForm);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -49,8 +42,7 @@ const AddProduct = () => {
     setCreatedProduct({
       name: form.name || 'New Product',
       unique_code: 'CAM-4X9K',
-      qr_base64:
-        'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=CAM-4X9K',
+      qr_base64: 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=CAM-4X9K',
     });
   };
 
@@ -71,20 +63,20 @@ const AddProduct = () => {
   }
 
   return (
-    <div className="admin-shell space-y-6 py-6">
+    <div className="admin-shell space-y-5 py-6">
       <div>
-        <h1 className="text-2xl font-bold text-ink">Add Product</h1>
-        <p className="text-sm text-muted">Upload images, pricing, and generate a QR label.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Add Product</h1>
+        <p className="mt-2 text-sm font-medium text-muted">Upload images, pricing, and generate a QR label.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="card-surface space-y-5 p-5">
-        <label className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-card border border-dashed border-line bg-page text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light text-primary">
+      <form onSubmit={handleSubmit} className="card-surface space-y-5 p-5 md:p-6">
+        <label className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-card border border-dashed border-line bg-white/60 text-center transition hover:bg-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-card bg-primary-light text-primary">
             <ImagePlus className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-ink">Upload Images</p>
-            <p className="text-xs text-muted">Tap to upload or use camera</p>
+            <p className="text-sm font-bold text-ink">Upload Images</p>
+            <p className="text-xs font-medium text-muted">Tap to upload or use camera</p>
           </div>
           <input
             type="file"
@@ -99,53 +91,87 @@ const AddProduct = () => {
         {previews.length ? (
           <div className="flex flex-wrap gap-3">
             {previews.map((preview) => (
-              <img key={preview} src={preview} alt="" className="h-20 w-20 rounded-2xl object-cover" />
+              <img key={preview} src={preview} alt="" className="h-20 w-20 rounded-card object-cover" />
             ))}
           </div>
         ) : null}
 
-        {productFields.map(({ key, label }) => (
-          <label key={key} className="space-y-2">
-            <span className="text-sm font-medium text-ink">{label}</span>
-            <div className="input-shell">
-              {key === 'description' ? (
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-5">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-tertiary">General Info</h2>
+
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-ink">Product Name</span>
+              <div className="input-shell">
+                <input
+                  value={form.name}
+                  onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="e.g. Sony FX3 Cinema Line"
+                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
+                />
+              </div>
+            </label>
+
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-ink">Category</span>
+              <div className="input-shell">
+                <select
+                  value={form.category}
+                  onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
+                >
+                  {categories.map((category) => (
+                    <option key={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+            </label>
+
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-ink">Description</span>
+              <div className="input-shell h-auto items-start py-3">
                 <textarea
                   rows={4}
-                  value={form[key]}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, [key]: event.target.value }))
-                  }
-                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
+                  value={form.description}
+                  onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                  placeholder="Brief description of the product..."
+                  className="w-full resize-none border-0 bg-transparent p-0 text-sm focus:ring-0"
                 />
-              ) : (
-                <input
-                  value={form[key]}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, [key]: event.target.value }))
-                  }
-                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
-                />
-              )}
-            </div>
-          </label>
-        ))}
-
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-ink">Category</span>
-          <div className="input-shell">
-            <select
-              value={form.category}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, category: event.target.value }))
-              }
-              className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
-            >
-              {categories.map((category) => (
-                <option key={category}>{category}</option>
-              ))}
-            </select>
+              </div>
+            </label>
           </div>
-        </label>
+
+          <div className="space-y-5">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-tertiary">Pricing & Stock</h2>
+
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-ink">Price Per Day (Rs)</span>
+              <div className="input-shell">
+                <span className="font-medium text-muted">Rs</span>
+                <input
+                  type="number"
+                  value={form.pricePerDay}
+                  onChange={(event) => setForm((current) => ({ ...current, pricePerDay: event.target.value }))}
+                  placeholder="2500"
+                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
+                />
+              </div>
+            </label>
+
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-ink">Quantity in Stock</span>
+              <div className="input-shell">
+                <input
+                  type="number"
+                  value={form.quantity}
+                  onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))}
+                  placeholder="1"
+                  className="w-full border-0 bg-transparent p-0 text-sm focus:ring-0"
+                />
+              </div>
+            </label>
+          </div>
+        </div>
 
         <button type="submit" className="primary-button w-full">
           <Plus className="mr-2 h-4 w-4" />

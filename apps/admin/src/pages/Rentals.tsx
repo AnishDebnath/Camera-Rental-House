@@ -1,8 +1,15 @@
+import { CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
 import { useState } from 'react';
 import { adminRentals } from '../data/mockAdmin';
 import { getAuthRole } from '../../../../packages/auth';
 
 const tabs = ['upcoming', 'active', 'past'];
+
+const tabIcons = {
+  upcoming: CalendarDays,
+  active: Clock3,
+  past: CheckCircle2,
+};
 
 const Rentals = () => {
   const role = getAuthRole();
@@ -10,63 +17,69 @@ const Rentals = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   return (
-    <div className="admin-shell space-y-6 py-6">
-      <section
-        className={`rounded-[28px] border px-5 py-5 ${
-          isStaff
-            ? 'border-teal-200 bg-teal-50'
-            : 'border-primary/10 bg-primary-light'
-        }`}
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tertiary">
-          {isStaff ? 'Staff Rentals View' : 'Admin Rentals View'}
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          {isStaff
-            ? 'Access active counter operations and handoff schedules.'
-            : 'Monitor oversight across upcoming, active, and completed orders.'}
-        </p>
-      </section>
-
+    <div className="admin-shell space-y-5 py-6">
       <div>
-        <h1 className="text-2xl font-bold text-ink">Rentals</h1>
-        <p className="text-sm text-muted">Track upcoming, active, and returned orders.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Rentals</h1>
+        <p className="mt-2 text-sm font-medium text-muted">
+          {isStaff
+            ? 'Counter view for handoffs, returns, and customer pickup timing.'
+            : 'Track upcoming, active, and completed camera rental orders.'}
+        </p>
       </div>
 
-      <div className="flex gap-4 border-b border-line">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`border-b-2 px-1 pb-3 text-sm font-semibold capitalize ${
-              activeTab === tab
-                ? isStaff
-                  ? 'border-teal-500 text-teal-700'
-                  : 'border-primary text-primary'
-                : 'border-transparent text-muted'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      <section className="grid gap-3 md:grid-cols-3">
+        {tabs.map((tab) => {
+          const Icon = tabIcons[tab];
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-card border p-4 text-left shadow-card transition ${
+                activeTab === tab
+                  ? 'border-primary bg-primary text-white'
+                  : 'border-white/70 bg-white/[0.82] text-ink hover:bg-white'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold capitalize">{tab}</p>
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className={`mt-3 text-3xl font-bold ${activeTab === tab ? 'text-white' : 'text-ink'}`}>
+                {adminRentals[tab].length}
+              </p>
+            </button>
+          );
+        })}
+      </section>
 
       <div className="space-y-3">
         {adminRentals[activeTab].map((rental) => (
-          <article key={rental.id} className="card-surface p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-ink">{rental.name}</p>
-                <p className="text-xs text-muted">{rental.phone}</p>
-                <p className="mt-2 text-sm text-muted">{rental.items}</p>
+          <article key={rental.id} className="card-surface p-5 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-base font-bold text-ink">{rental.name}</p>
+                  <span className="rounded-pill bg-primary-light px-3 py-1 text-xs font-bold text-ink">
+                    {rental.id}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm font-medium text-muted">{rental.phone}</p>
+                <p className="mt-3 text-sm font-semibold text-ink">{rental.items}</p>
               </div>
-              <div className="space-y-2 text-sm text-muted">
-                <p>Pickup: {rental.pickup}</p>
-                <p>Event: {rental.event}</p>
-                <span className="inline-flex rounded-pill bg-primary-light px-4 py-2 text-xs font-semibold text-primary-dark">
-                  {rental.status}
-                </span>
+              <div className="grid gap-3 text-sm font-medium text-muted sm:grid-cols-3 md:min-w-[360px]">
+                <div className="rounded-card bg-white/70 p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-tertiary">Pickup</p>
+                  <p className="mt-1 font-bold text-ink">{rental.pickup}</p>
+                </div>
+                <div className="rounded-card bg-white/70 p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-tertiary">Event</p>
+                  <p className="mt-1 font-bold text-ink">{rental.event}</p>
+                </div>
+                <div className="rounded-card bg-emerald-50 p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-tertiary">Status</p>
+                  <p className="mt-1 font-bold capitalize text-success">{rental.status}</p>
+                </div>
               </div>
             </div>
           </article>
