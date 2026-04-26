@@ -1,35 +1,7 @@
 import { Sparkles, ShieldCheck } from 'lucide-react';
 import formatCurrency from '../../utils/formatCurrency';
 
-// Asset imports
-import canonIcon from '../../assets/brands/canon.png';
-import leicaIcon from '../../assets/brands/leica.png';
-import nikonIcon from '../../assets/brands/nikon.png';
-import sonyIcon from '../../assets/brands/sony.png';
-import zeissIcon from '../../assets/brands/zeiss.png';
-
-import cameraIcon from '../../assets/categories/camera.png';
-import lenseIcon from '../../assets/categories/lense.png';
-import lightIcon from '../../assets/categories/light.png';
-import micIcon from '../../assets/categories/mic.png';
-import tripodIcon from '../../assets/categories/tripod.png';
-
-const BRAND_ICONS: Record<string, string> = {
-  Canon: canonIcon,
-  Leica: leicaIcon,
-  Nikon: nikonIcon,
-  Sony: sonyIcon,
-  Zeiss: zeissIcon,
-};
-
-const CATEGORY_ICONS: Record<string, string> = {
-  Camera: cameraIcon,
-  Lense: lenseIcon,
-  Light: lightIcon,
-  Audio: micIcon,
-  Tripod: tripodIcon,
-  Drones: cameraIcon, // Fallback
-};
+import { BRAND_ICONS, CATEGORY_ICONS, } from '../../data/categories';
 
 interface ProductInfoProps {
   product: any;
@@ -42,14 +14,14 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
-            <img src={CATEGORY_ICONS[product.category] || cameraIcon} alt="" className="h-full w-full object-contain" />
+            <img src={CATEGORY_ICONS[product.category]} alt="" className="h-full w-full object-contain" />
           </div>
           <span className="text-xs font-bold text-ink">{product.category}</span>
         </div>
 
         <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
-            <img src={BRAND_ICONS[product.brand] || sonyIcon} alt="" className="h-full w-full object-contain" />
+            <img src={BRAND_ICONS[product.brand]} alt="" className="h-full w-full object-contain" />
           </div>
           <span className="text-xs font-bold text-ink">{product.brand}</span>
         </div>

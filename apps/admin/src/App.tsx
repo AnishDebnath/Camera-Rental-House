@@ -8,8 +8,8 @@ import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Rentals from './pages/Rentals';
 import ReleaseReturn from './pages/ReleaseReturn';
-import Sidebar from './components/Sidebar';
-import AdminNavbar from './components/AdminNavbar';
+import Sidebar from './components/common/Sidebar';
+import AdminNavbar from './components/common/AdminNavbar';
 import {
   ADMIN_ROLE_STORAGE_KEY,
   ADMIN_TOKEN_STORAGE_KEY,

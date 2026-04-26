@@ -8,7 +8,7 @@ import { useFavourites } from '../../../store/FavouritesContext';
 import clsx from 'clsx';
 import { useTypewriter } from '../../../hooks/useTypewriter';
 
-import logo from '../../../assets/logo.png';
+import { logo } from '../../../data/categories';
 
 const Navbar = () => {
   const navigate = useNavigate();

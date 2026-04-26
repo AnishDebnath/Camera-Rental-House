@@ -10,7 +10,8 @@ import {
   X,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { getAuthRole } from '../../../../packages/auth';
+import { getAuthRole } from '../../../../../packages/auth';
+import logo from '@camera-rental-house/ui/assets/logo.png';
 
 const items = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard, adminOnly: true },
@@ -41,9 +42,9 @@ const Sidebar = ({ open, onClose }) => {
           open ? 'flex translate-x-0' : 'hidden -translate-x-full',
         )}
       >
-        <div className="mb-8 flex items-center justify-between px-3">
-          <Link to="/" onClick={onClose} className="text-xl font-bold tracking-tight text-ink">
-            Camera House
+        <div className="mb-8 flex items-center justify-between px-2">
+          <Link to="/" onClick={onClose} className="flex items-center transition-opacity hover:opacity-80">
+            <img src={logo} alt="Camera Rental House" className="h-11 w-auto object-contain" />
           </Link>
           <button
             type="button"

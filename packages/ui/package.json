@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./index.ts",
-    "./theme": "./theme.ts"
+    "./theme": "./theme.ts",
+    "./assets/*": "./assets/*"
   },
   "peerDependencies": {
     "clsx": "^2.1.1",

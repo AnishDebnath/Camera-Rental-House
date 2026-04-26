@@ -1,6 +1,6 @@
 import { Bell, LogOut, Menu, Search } from 'lucide-react';
-import { clearAdminSession, getAuthRole } from '../../../../packages/auth';
-import { resolveAuthAppUrl } from '../../../../packages/auth/appUrls';
+import { clearAdminSession, getAuthRole } from '../../../../../packages/auth';
+import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
