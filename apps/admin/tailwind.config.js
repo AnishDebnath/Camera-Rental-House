@@ -1,7 +1,11 @@
 import forms from '@tailwindcss/forms';
 
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  content: [
+    './index.html', 
+    './src/**/*.{js,jsx,ts,tsx}',
+    '../../packages/ui/**/*.{js,jsx,ts,tsx}'
+  ],
   theme: {
     extend: {
       colors: {
