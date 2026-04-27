@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BrandsList } from '../../data/categories';
+import { BRANDS_LIST as BrandsList } from '../../../../../packages/data/categories';
 import { LayoutGrid } from 'lucide-react';
 
 import LazyImage from '../../components/feature/LazyImage';

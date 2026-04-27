@@ -1,23 +1,25 @@
-import logo from '@camera-rental-house/ui/assets/logo.png';
+// Shared Data: Categories, Brands, and Assets
+// This file centralizes the core taxonomy and associated imagery for the entire platform.
 
-// Category Images
-import CameraImg from '@camera-rental-house/ui/assets/categories/camera.png';
-import LenseImg from '@camera-rental-house/ui/assets/categories/lense.png';
-import LightImg from '@camera-rental-house/ui/assets/categories/light.png';
-import AudioImg from '@camera-rental-house/ui/assets/categories/mic.png';
-import TripodImg from '@camera-rental-house/ui/assets/categories/tripod.png';
-
-// Brand Images
-import CanonImg from '@camera-rental-house/ui/assets/brands/canon.png';
-import SonyImg from '@camera-rental-house/ui/assets/brands/sony.png';
-import LeicaImg from '@camera-rental-house/ui/assets/brands/leica.png';
-import NikonImg from '@camera-rental-house/ui/assets/brands/nikon.png';
-import ZeissImg from '@camera-rental-house/ui/assets/brands/zeiss.png';
-
+import logo from '../ui/assets/logo.png';
 export { logo };
 
-// 1. Simple category lists for navigation
-export const Categories = [
+// Category Images (Relative to packages/data/categories.ts)
+import CameraImg from '../ui/assets/categories/camera.png';
+import LenseImg from '../ui/assets/categories/lense.png';
+import LightImg from '../ui/assets/categories/light.png';
+import AudioImg from '../ui/assets/categories/mic.png';
+import TripodImg from '../ui/assets/categories/tripod.png';
+
+// Brand Images
+import CanonImg from '../ui/assets/brands/canon.png';
+import SonyImg from '../ui/assets/brands/sony.png';
+import LeicaImg from '../ui/assets/brands/leica.png';
+import NikonImg from '../ui/assets/brands/nikon.png';
+import ZeissImg from '../ui/assets/brands/zeiss.png';
+
+// 1. Simple category lists
+export const CATEGORIES = [
   'All',
   'Cameras',
   'Lenses',
@@ -26,7 +28,7 @@ export const Categories = [
   'Tripods',
 ];
 
-export const CategoriesList = [
+export const CATEGORIES_LIST = [
   { category: 'Cameras', image: CameraImg, path: '/category?category=Cameras' },
   { category: 'Lenses', image: LenseImg, path: '/category?category=Lenses' },
   { category: 'Lights', image: LightImg, path: '/category?category=Lights' },
@@ -35,7 +37,7 @@ export const CategoriesList = [
 ];
 
 // 2. Simple brand lists
-export const Brands = [
+export const BRANDS = [
   'All',
   'Canon',
   'Sony',
@@ -44,7 +46,7 @@ export const Brands = [
   'Zeiss'
 ];
 
-export const BrandsList = [
+export const BRANDS_LIST = [
   { category: 'Canon', image: CanonImg, path: '/category?category=Canon' },
   { category: 'Sony', image: SonyImg, path: '/category?category=Sony' },
   { category: 'Leica', image: LeicaImg, path: '/category?category=Leica' },
@@ -52,7 +54,7 @@ export const BrandsList = [
   { category: 'Zeiss', image: ZeissImg, path: '/category?category=Zeiss' },
 ];
 
-// 3. Icons mapping for product details
+// 3. Icons mapping for UI components
 export const CATEGORY_ICONS: Record<string, string> = {
   Cameras: CameraImg,
   Lenses: LenseImg,

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { CategoriesList, BrandsList } from '../../data/categories';
+import { CATEGORIES_LIST as CategoriesList, BRANDS_LIST as BrandsList } from '../../../../../packages/data/categories';
 
 interface FilterChipsProps {
   activeCategory: string;

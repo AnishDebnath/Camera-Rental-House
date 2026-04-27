@@ -1,7 +1,7 @@
 import { Sparkles, ShieldCheck } from 'lucide-react';
 import formatCurrency from '../../utils/formatCurrency';
 
-import { BRAND_ICONS, CATEGORY_ICONS, } from '../../data/categories';
+import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
 
 interface ProductInfoProps {
   product: any;
@@ -14,14 +14,26 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
-            <img src={CATEGORY_ICONS[product.category]} alt="" className="h-full w-full object-contain" />
+            {product.category && (
+              <img
+                src={CATEGORY_ICONS[product.category] || CATEGORY_ICONS[product.category.endsWith('s') ? product.category : `${product.category}s`]}
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            )}
           </div>
           <span className="text-xs font-bold text-ink">{product.category}</span>
         </div>
 
         <div className="flex items-center gap-1.5 rounded-xl border border-line bg-card/50 p-1 pr-3 transition-all">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-line/50 p-1">
-            <img src={BRAND_ICONS[product.brand]} alt="" className="h-full w-full object-contain" />
+            {product.brand && (
+              <img
+                src={BRAND_ICONS[product.brand] || BRAND_ICONS[Object.keys(BRAND_ICONS).find(k => k.toLowerCase() === product.brand.toLowerCase()) || '']}
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            )}
           </div>
           <span className="text-xs font-bold text-ink">{product.brand}</span>
         </div>

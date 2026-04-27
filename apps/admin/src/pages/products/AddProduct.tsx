@@ -5,35 +5,7 @@ import PrintLabel from '../../components/PrintLabel';
 import CustomSelect from '../../components/ui/CustomSelect';
 import axiosInstance from '../../api/axiosInstance';
 
-// Category Images
-import CameraImg from '../../../../../packages/ui/assets/categories/camera.png';
-import LenseImg from '../../../../../packages/ui/assets/categories/lense.png';
-import LightImg from '../../../../../packages/ui/assets/categories/light.png';
-import AudioImg from '../../../../../packages/ui/assets/categories/mic.png';
-import TripodImg from '../../../../../packages/ui/assets/categories/tripod.png';
-
-// Brand Images
-import CanonImg from '../../../../../packages/ui/assets/brands/canon.png';
-import SonyImg from '../../../../../packages/ui/assets/brands/sony.png';
-import LeicaImg from '../../../../../packages/ui/assets/brands/leica.png';
-import NikonImg from '../../../../../packages/ui/assets/brands/nikon.png';
-import ZeissImg from '../../../../../packages/ui/assets/brands/zeiss.png';
-
-const categoryOptions = [
-  { name: 'Cameras', image: CameraImg },
-  { name: 'Lenses', image: LenseImg },
-  { name: 'Lights', image: LightImg },
-  { name: 'Audio', image: AudioImg },
-  { name: 'Tripods', image: TripodImg },
-];
-
-const brandOptions = [
-  { name: 'Canon', image: CanonImg },
-  { name: 'Sony', image: SonyImg },
-  { name: 'Leica', image: LeicaImg },
-  { name: 'Nikon', image: NikonImg },
-  { name: 'Zeiss', image: ZeissImg },
-];
+import { CATEGORIES_LIST as categoryOptions, BRANDS_LIST as brandOptions } from '../../../../../packages/data/categories';
 
 type ProductForm = {
   name: string;

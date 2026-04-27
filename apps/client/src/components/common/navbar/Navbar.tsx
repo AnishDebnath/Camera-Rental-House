@@ -7,8 +7,8 @@ import { useCart } from '../../../store/CartContext';
 import { useFavourites } from '../../../store/FavouritesContext';
 import clsx from 'clsx';
 import { useTypewriter } from '../../../hooks/useTypewriter';
+import { logo } from '../../../../../../packages/data/categories';
 
-import { logo } from '../../../data/categories';
 
 const Navbar = () => {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { Instagram, Facebook, Youtube, Send, Camera, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { useToast } from '@camera-rental-house/ui';
-import { logo } from '../../../data/categories';
+import { logo } from '../../../../../../packages/data/categories';
 
 const Footer = () => {
   const { addToast } = useToast();

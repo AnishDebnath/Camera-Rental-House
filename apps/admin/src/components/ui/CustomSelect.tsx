@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
 type Option = {
-  name: string;
+  category: string;
   image: string;
 };
 
@@ -19,7 +19,7 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((opt) => opt.name === value);
+  const selectedOption = options.find((opt) => opt.category === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +47,7 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
             {selectedOption ? (
               <>
                 <img src={selectedOption.image} alt="" className="h-6 w-6 rounded-md object-contain bg-slate-50 border border-line p-0.5" />
-                <span className="truncate text-sm font-bold text-ink">{selectedOption.name}</span>
+                <span className="truncate text-sm font-bold text-ink">{selectedOption.category}</span>
               </>
             ) : (
               <span className="text-sm text-muted">{placeholder || 'Select...'}</span>
@@ -60,19 +60,19 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
           <div className="absolute top-full left-0 z-50 mt-2 w-full max-h-60 overflow-y-auto rounded-card border border-white bg-white/90 p-1 shadow-xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
             {options.map((option) => (
               <button
-                key={option.name}
+                key={option.category}
                 type="button"
                 onClick={() => {
-                  onChange(option.name);
+                  onChange(option.category);
                   setIsOpen(false);
                 }}
                 className={clsx(
                   'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors',
-                  value === option.name ? 'bg-primary/5 text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-ink'
+                  value === option.category ? 'bg-primary/5 text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-ink'
                 )}
               >
                 <img src={option.image} alt="" className="h-8 w-8 rounded-lg object-contain bg-white border border-line p-1" />
-                <span className="text-sm font-bold">{option.name}</span>
+                <span className="text-sm font-bold">{option.category}</span>
               </button>
             ))}
           </div>
