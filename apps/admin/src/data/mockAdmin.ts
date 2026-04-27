@@ -9,10 +9,10 @@ export const adminProducts = [
   {
     id: '1',
     name: 'Sony FX3 Cinema Camera',
+    brand: 'Sony',
     category: 'Cameras',
     description: 'Compact full-frame cinema camera with cage, top handle, and dual media kit.',
     price_per_day: 4200,
-    quantity: 3,
     created_at: '2026-03-28',
     unique_code: 'CAM-8D2L',
     qr_base64: 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=CAM-8D2L',
@@ -21,10 +21,10 @@ export const adminProducts = [
   {
     id: '2',
     name: 'Canon RF 24-70mm f/2.8L',
+    brand: 'Canon',
     category: 'Lenses',
     description: 'Fast RF zoom lens for events, interviews, and production coverage.',
     price_per_day: 1800,
-    quantity: 4,
     created_at: '2026-03-30',
     unique_code: 'LNS-7YQ1',
     qr_base64: 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=LNS-7YQ1',

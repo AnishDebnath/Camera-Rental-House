@@ -137,9 +137,9 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                 className="flex items-center gap-3 rounded-2xl border border-line/20 bg-white/20 p-3 transition-colors hover:bg-white/40"
                               >
                                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
-                                  {item.products?.product_images?.[0]?.url ? (
+                                  {item.products?.images?.[0] ? (
                                     <img
-                                      src={item.products.product_images[0].url}
+                                      src={item.products.images[0]}
                                       alt=""
                                       className="h-full w-full object-cover"
                                     />

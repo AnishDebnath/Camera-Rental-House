@@ -230,11 +230,11 @@ router.delete('/users/:id', roleMiddleware(['admin']), async (req: Request, res:
 
 router.post('/products', roleMiddleware(['admin']), upload.array('images', 8), async (req: Request, res: Response) => {
   try {
-    const { name, category, description, pricePerDay, quantity } = req.body;
+    const { name, brand, category, description, pricePerDay } = req.body;
 
-    if (!name || !category || !pricePerDay) {
+    if (!name || !category || !pricePerDay || isNaN(Number(pricePerDay))) {
       return res.status(400).json({
-        message: 'Name, category, and price per day are required.',
+        message: 'Name, category, and a valid numeric price are required.',
       });
     }
 
@@ -242,83 +242,136 @@ router.post('/products', roleMiddleware(['admin']), upload.array('images', 8), a
     const uniqueCode = await generateUniqueCode(category);
     const qrBase64 = await generateQrBase64({ productId, uniqueCode });
 
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .insert({
-        id: productId,
-        name,
-        category,
-        description,
-        price_per_day: Number(pricePerDay),
-        quantity: Number(quantity || 1),
-        unique_code: uniqueCode,
-        qr_base64: qrBase64,
-      })
-      .select('*')
-      .single();
-
-    if (productError) {
-      throw productError;
-    }
-
-    const productImages = await Promise.all(
-      ((req.files as Express.Multer.File[]) || []).map(async (file, index) => {
+    const productImages = [];
+    const files = (req.files as Express.Multer.File[]) || [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
         const buffer = await sharp(file.buffer)
           .resize({ width: 1800, withoutEnlargement: true })
           .jpeg({ quality: 82 })
           .toBuffer();
 
-        const key = `${productId}/${Date.now()}-${index}.jpg`;
+        const key = `${productId}/${Date.now()}-${i}.jpg`;
         const imageUrl = await uploadFile({
           buffer,
           key,
           mimetype: 'image/jpeg',
           folder: 'Camera Rental House/Products',
         });
-
-        return {
-          product_id: productId,
-          image_url: imageUrl,
-          display_order: index,
-        };
-      }),
-    );
-
-    if (productImages.length) {
-      const { error: imagesError } = await supabase
-        .from('product_images')
-        .insert(productImages);
-
-      if (imagesError) {
-        throw imagesError;
+        
+        productImages.push(imageUrl);
+      } catch (imgError) {
+        console.error(`Error processing image ${i}:`, imgError);
+        // Continue with other images if one fails
       }
     }
 
-    return res.status(201).json({
-      ...product,
-      product_images: productImages,
-    });
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .insert({
+        id: productId,
+        name,
+        brand,
+        category,
+        description,
+        price_per_day: Number(pricePerDay),
+        unique_code: uniqueCode,
+        qr_base64: qrBase64,
+        images: productImages, // Single table storage
+      })
+      .select('*')
+      .single();
+
+    if (productError) {
+      console.error('Supabase Insert Error:', productError);
+      return res.status(500).json({ 
+        message: 'Database error: ' + (productError.message || 'Unknown error'),
+        details: productError.details
+      });
+    }
+
+    return res.status(201).json(product);
   } catch (error: any) {
-    return res.status(500).json({ message: error.message || 'Unable to create product.' });
+    console.error('Create Product Exception:', error);
+    return res.status(500).json({ 
+      message: error.message || 'Unable to create product.',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
   }
 });
 
 router.put('/products/:id', roleMiddleware(['admin']), upload.array('images', 8), async (req: Request, res: Response) => {
   try {
-    const removeImageIds = req.body.removeImageIds
-      ? JSON.parse(req.body.removeImageIds)
-      : [];
+    const { id } = req.params;
+    const { name, brand, category, description, pricePerDay, removeImageUrls } = req.body;
+    
+    const removedUrls = removeImageUrls ? JSON.parse(removeImageUrls) : [];
 
-    const { data: product, error: updateError } = await supabase
+    // Fetch current product to get existing images array
+    const { data: currentProduct, error: fetchError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !currentProduct) {
+      throw fetchError || new Error('Product not found.');
+    }
+
+    // Deletions from Cloudinary
+    if (removedUrls.length) {
+      await Promise.all(
+        removedUrls.map((url: string) =>
+          deleteFile({ key: extractPublicId(url) as string }),
+        ),
+      );
+    }
+
+    // Upload new images
+    const newImageUrls = [];
+    const files = (req.files as Express.Multer.File[]) || [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const buffer = await sharp(file.buffer)
+          .resize({ width: 1800, withoutEnlargement: true })
+          .jpeg({ quality: 82 })
+          .toBuffer();
+
+        const key = `${id}/${Date.now()}-${i}.jpg`;
+        const imageUrl = await uploadFile({
+          buffer,
+          key,
+          mimetype: 'image/jpeg',
+          folder: 'Camera Rental House/Products',
+        });
+        
+        newImageUrls.push(imageUrl);
+      } catch (imgError) {
+        console.error(`Error processing new image ${i}:`, imgError);
+      }
+    }
+
+    // Merge image lists
+    const updatedImages = [
+      ...(currentProduct.images || []).filter((url: string) => !removedUrls.includes(url)),
+      ...newImageUrls,
+    ];
+
+    const { data: updatedProduct, error: updateError } = await supabase
       .from('products')
       .update({
-        name: req.body.name,
-        category: req.body.category,
-        description: req.body.description,
-        price_per_day: Number(req.body.pricePerDay),
-        quantity: Number(req.body.quantity),
+        name,
+        brand,
+        category,
+        description,
+        price_per_day: Number(pricePerDay),
+        images: updatedImages,
       })
-      .eq('id', req.params.id)
+      .eq('id', id)
       .select('*')
       .single();
 
@@ -326,78 +379,7 @@ router.put('/products/:id', roleMiddleware(['admin']), upload.array('images', 8)
       throw updateError;
     }
 
-    if (removeImageIds.length) {
-      const { data: imagesToRemove, error: removeFetchError } = await supabase
-        .from('product_images')
-        .select('*')
-        .in('id', removeImageIds);
-
-      if (removeFetchError) {
-        throw removeFetchError;
-      }
-
-      await Promise.all(
-        (imagesToRemove || []).map((image: any) =>
-          deleteFile({ key: extractPublicId(image.image_url) as string }),
-        ),
-      );
-
-      const { error: removeError } = await supabase
-        .from('product_images')
-        .delete()
-        .in('id', removeImageIds);
-
-      if (removeError) {
-        throw removeError;
-      }
-    }
-
-    const newImages = await Promise.all(
-      ((req.files as Express.Multer.File[]) || []).map(async (file, index) => {
-        const buffer = await sharp(file.buffer)
-          .resize({ width: 1800, withoutEnlargement: true })
-          .jpeg({ quality: 82 })
-          .toBuffer();
-
-        const key = `products/${req.params.id}/${Date.now()}-${index}.jpg`;
-        const imageUrl = await uploadFile({
-          buffer,
-          key,
-          mimetype: 'image/jpeg',
-        });
-
-        return {
-          product_id: req.params.id,
-          image_url: imageUrl,
-          display_order: index,
-        };
-      }),
-    );
-
-    if (newImages.length) {
-      const { error: newImagesError } = await supabase
-        .from('product_images')
-        .insert(newImages);
-
-      if (newImagesError) {
-        throw newImagesError;
-      }
-    }
-
-    const { data: images, error: imagesError } = await supabase
-      .from('product_images')
-      .select('*')
-      .eq('product_id', req.params.id)
-      .order('display_order', { ascending: true });
-
-    if (imagesError) {
-      throw imagesError;
-    }
-
-    return res.json({
-      ...product,
-      product_images: images || [],
-    });
+    return res.json(updatedProduct);
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to update product.' });
   }
@@ -405,18 +387,17 @@ router.put('/products/:id', roleMiddleware(['admin']), upload.array('images', 8)
 
 router.delete('/products/:id', roleMiddleware(['admin']), async (req: Request, res: Response) => {
   try {
-    const { data: images, error: imagesError } = await supabase
-      .from('product_images')
-      .select('image_url')
-      .eq('product_id', req.params.id);
+    const { data: currentProduct, error: fetchError } = await supabase
+      .from('products')
+      .select('images')
+      .eq('id', req.params.id)
+      .single();
 
-    if (imagesError) {
-      throw imagesError;
+    if (currentProduct?.images?.length) {
+      await Promise.all(
+        currentProduct.images.map((url: string) => deleteFile({ key: extractPublicId(url) as string })),
+      );
     }
-
-    await Promise.all(
-      (images || []).map((image: any) => deleteFile({ key: extractPublicId(image.image_url) as string })),
-    );
 
     const { error } = await supabase.from('products').delete().eq('id', req.params.id);
 
@@ -436,7 +417,7 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager']), async (_re
     const { data, error } = await supabase
       .from('rentals')
       .select(
-        '*, users(full_name, phone), rental_items(*, products(name, unique_code, product_images(image_url)))',
+        '*, users(full_name, phone), rental_items(*, products(name, unique_code, images))',
       )
       .gte('pickup_date', today)
       .order('pickup_date', { ascending: true });
@@ -455,7 +436,7 @@ router.get('/rentals/active', roleMiddleware(['admin', 'manager']), async (_req:
   try {
     const { data, error } = await supabase
       .from('rental_items')
-      .select('*, rentals(*, users(full_name, phone)), products(*, product_images(*))')
+      .select('*, rentals(*, users(full_name, phone)), products(*)')
       .eq('status', 'released')
       .order('created_at', { ascending: false });
 
@@ -476,7 +457,7 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager']), async (req: Re
 
     const { data, count, error } = await supabase
       .from('rental_items')
-      .select('*, rentals(*, users(full_name, phone)), products(*, product_images(*))', {
+      .select('*, rentals(*, users(full_name, phone)), products(*)', {
         count: 'exact',
       })
       .eq('status', 'returned')

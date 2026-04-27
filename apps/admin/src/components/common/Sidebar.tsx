@@ -114,7 +114,7 @@ const Sidebar = ({ open, onClose }) => {
                 <div className="space-y-1">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
-                    const active = pathname === item.href;
+                    const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
                     return (
                       <Link
                         key={item.label}

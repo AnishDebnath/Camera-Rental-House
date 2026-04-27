@@ -85,9 +85,9 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                     {rental.rental_items.slice(0, 2).map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-3">
                         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
-                          {item.products?.product_images?.[0]?.url ? (
+                          {item.products?.images?.[0] ? (
                             <img
-                              src={item.products.product_images[0].url}
+                              src={item.products.images[0]}
                               alt=""
                               className="h-full w-full object-cover"
                             />

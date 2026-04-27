@@ -21,9 +21,6 @@ const enrichProduct = async (product: any) => {
 
   return {
     ...product,
-    images: (product.product_images || []).sort(
-      (left: any, right: any) => left.display_order - right.display_order,
-    ),
     available_quantity: Math.max((product.quantity || 0) - reservedQuantity, 0),
   };
 };
@@ -38,7 +35,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     let query = supabase
       .from('products')
-      .select('*, product_images(*)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -79,7 +76,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('products')
-      .select('*, product_images(*)')
+      .select('*')
       .eq('id', req.params.id)
       .maybeSingle();
 

@@ -102,7 +102,9 @@ export default app;
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const port = Number(process.env.PORT || 5000);
   // Listen on 0.0.0.0 so the server is reachable from other devices on the LAN
-  app.listen(port, '0.0.0.0', () => {
+  const server = app.listen(port, '0.0.0.0', () => {
     console.log(`Camera Rental House server listening on http://0.0.0.0:${port}`);
   });
+  server.timeout = 300000;
+  server.keepAliveTimeout = 300000;
 }

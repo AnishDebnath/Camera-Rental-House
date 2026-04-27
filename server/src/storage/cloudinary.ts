@@ -20,7 +20,7 @@ export const uploadFile = async ({
   buffer,
   key,
   mimetype,
-  folder = 'camera-rental-house',
+  folder = 'Camera Rental House',
 }: FileProps): Promise<string> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -51,7 +51,7 @@ export const deleteFile = async ({
 
 export const getSignedUrl = async ({
   key,
-  folder = 'camera-rental-house',
+  folder = 'Camera Rental House',
 }: {
   key: string;
   folder?: string;

@@ -80,7 +80,7 @@ const Account = () => {
           products: {
             name: 'Sony Alpha a7 IV',
             brand: 'Sony',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=200']
           }
         },
         {
@@ -88,7 +88,7 @@ const Account = () => {
           products: {
             name: 'Sony FE 24-70mm f/2.8 GM II',
             brand: 'Sony',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1617005082133-548c4dd27f35?auto=format&fit=crop&q=80&w=200']
           }
         },
       ],
@@ -104,7 +104,7 @@ const Account = () => {
           products: {
             name: 'DJI Mavic 3 Pro',
             brand: 'DJI',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&q=80&w=200']
           }
         },
       ],
@@ -120,7 +120,7 @@ const Account = () => {
           products: {
             name: 'Canon EOS R5',
             brand: 'Canon',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&q=80&w=200']
           }
         },
         {
@@ -128,7 +128,7 @@ const Account = () => {
           products: {
             name: 'Canon RF 50mm f/1.2L USM',
             brand: 'Canon',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1613588718956-c2e80305bf61?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1613588718956-c2e80305bf61?auto=format&fit=crop&q=80&w=200']
           }
         },
       ],
@@ -144,7 +144,7 @@ const Account = () => {
           products: {
             name: 'Blackmagic Pocket 6K Pro',
             brand: 'Blackmagic',
-            product_images: [{ url: 'https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=200' }]
+            images: ['https://images.unsplash.com/photo-1589652717521-10c0d092dea9?auto=format&fit=crop&q=80&w=200']
           }
         },
       ],

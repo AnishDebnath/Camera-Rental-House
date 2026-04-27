@@ -66,7 +66,7 @@ router.get('/my', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('rentals')
-      .select('*, rental_items(*, products(*, product_images(*)))')
+      .select('*, rental_items(*, products(*))')
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false });
 
