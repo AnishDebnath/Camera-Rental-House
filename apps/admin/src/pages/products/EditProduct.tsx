@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { adminProducts } from '../data/mockAdmin';
+import { adminProducts } from '../../data/mockAdmin';
 
 const EditProduct = () => {
   const { id } = useParams();

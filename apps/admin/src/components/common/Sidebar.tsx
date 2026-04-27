@@ -3,23 +3,51 @@ import {
   CalendarClock,
   LayoutDashboard,
   Package,
-  PackagePlus,
   ScanLine,
   Settings,
   Users,
   X,
+  LogOut,
+  Building2,
+  Wallet,
+  UserCog,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { getAuthRole } from '../../../../../packages/auth';
+import { getAuthRole, clearAdminSession } from '../../../../../packages/auth';
+import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
+
+const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 import logo from '@camera-rental-house/ui/assets/logo.png';
 
-const items = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard, adminOnly: true },
-  { label: 'Products', href: '/products', icon: Package, adminOnly: true, count: '24' },
-  { label: 'Users', href: '/users', icon: Users, adminOnly: true, count: '32' },
-  { label: 'Rentals', href: '/rentals', icon: CalendarClock, count: '18' },
-  { label: 'Release / Return', href: '/release', icon: ScanLine },
-  { label: 'Settings', href: '/release', icon: Settings, muted: true },
+const MENU_GROUPS = [
+  {
+    title: 'Core',
+    items: [
+      { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'Inventory & Operations',
+    items: [
+      { label: 'Products', href: '/products', icon: Package, adminOnly: true, count: '24' },
+      { label: 'Rentals', href: '/rentals', icon: CalendarClock, count: '18' },
+      { label: 'Release / Return', href: '/release', icon: ScanLine },
+    ],
+  },
+  {
+    title: 'Partners & People',
+    items: [
+      { label: 'Production Houses', href: '/houses', icon: Building2 },
+      { label: 'Platform Users', href: '/users', icon: Users, adminOnly: true, count: '32' },
+      { label: 'Team Members', href: '/staff', icon: UserCog, adminOnly: true },
+    ],
+  },
+  {
+    title: 'Financials',
+    items: [
+      { label: 'Accounts', href: '/accounts', icon: Wallet, adminOnly: true },
+    ],
+  },
 ];
 
 const Sidebar = ({ open, onClose }) => {
@@ -43,8 +71,8 @@ const Sidebar = ({ open, onClose }) => {
         )}
       >
         <div className="mb-8 flex items-center justify-between px-2">
-          <Link to="/" onClick={onClose} className="flex items-center transition-opacity hover:opacity-80">
-            <img src={logo} alt="Camera Rental House" className="h-11 w-auto object-contain" />
+          <Link to="/" onClick={onClose} className="flex items-center">
+            <img src={logo} alt="Camera Rental House" className="h-12 w-auto object-contain" />
           </Link>
           <button
             type="button"
@@ -56,51 +84,83 @@ const Sidebar = ({ open, onClose }) => {
           </button>
         </div>
 
-        <div className="mb-5 rounded-card border border-line/70 bg-white/[0.78] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-tertiary">
-            {isStaff ? 'Staff Counter' : 'Admin Console'}
-          </p>
-          <p className="mt-2 text-sm font-semibold leading-5 text-ink">
-            {isStaff ? 'Rentals, release, and returns.' : 'Inventory, customers, and daily rentals.'}
-          </p>
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
+          <div className="relative h-11 w-11 shrink-0">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-100 to-sky-100 text-sm font-bold text-ink border border-white/40">
+              CR
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+          </div>
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="truncate text-sm font-bold text-ink">
+              {isStaff ? 'Counter Staff' : 'Admin Manager'}
+            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted/80">
+              {isStaff ? 'Store Counter' : 'Store Manager'}
+            </p>
+          </div>
         </div>
 
-        <nav className="space-y-1.5">
-          {items
-            .filter((item) => (item.adminOnly ? role === 'admin' : true))
-            .map((item) => {
-              const Icon = item.icon;
-              const active = pathname === item.href && !item.muted;
-              return (
-                <Link
-                  key={item.label}
-                  to={item.href}
-                  onClick={onClose}
-                  className={clsx(
-                    'flex min-h-12 items-center gap-3 rounded-card px-4 py-3 text-sm font-semibold transition',
-                    active
-                      ? 'bg-primary text-white shadow-[0_14px_26px_rgba(0,0,0,0.16)]'
-                      : 'text-slate-600 hover:bg-white hover:text-ink',
-                    item.muted && 'opacity-60',
-                  )}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.count ? (
-                    <span className={clsx('text-[11px] font-bold', active ? 'text-white' : 'text-ink')}>
-                      {item.count}
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
+        <nav className="flex-1 space-y-7 overflow-y-auto pr-1 custom-scrollbar">
+          {MENU_GROUPS.map((group) => {
+            const visibleItems = group.items.filter((item) => !item.adminOnly || role === 'admin');
+            if (visibleItems.length === 0) return null;
+
+            return (
+              <div key={group.title} className="space-y-2">
+                <p className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted/50">
+                  {group.title}
+                </p>
+                <div className="space-y-1">
+                  {visibleItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.label}
+                        to={item.href}
+                        onClick={onClose}
+                        className={clsx(
+                          'flex min-h-11 items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all',
+                          active
+                            ? 'bg-primary text-white shadow-[0_10px_20px_rgba(0,0,0,0.12)]'
+                            : 'text-slate-500 hover:bg-white hover:text-ink',
+                        )}
+                      >
+                        <Icon className={clsx('h-4.5 w-4.5 shrink-0', active ? 'text-white' : 'text-slate-400')} />
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {item.count && (
+                          <span
+                            className={clsx(
+                              'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-black',
+                              active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500',
+                            )}
+                          >
+                            {item.count}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </nav>
 
-        <div className="mt-auto pt-5">
-          <Link to={isStaff ? '/release' : '/products/add'} onClick={onClose} className="primary-button w-full">
-            {isStaff ? <ScanLine className="mr-2 h-4 w-4" /> : <PackagePlus className="mr-2 h-4 w-4" />}
-            {isStaff ? 'Open Station' : 'Add Product'}
-          </Link>
+        <div className="mt-auto pt-6">
+          <button
+            onClick={() => {
+              clearAdminSession();
+              window.location.replace(`${authAppUrl}/login?clear_session=true`);
+            }}
+            className="group flex w-full items-center gap-3 rounded-xl bg-rose-50 px-4 py-3 text-[13px] font-black text-rose-600 transition-all hover:bg-rose-100 hover:shadow-sm"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm transition-transform group-hover:scale-110">
+              <LogOut className="h-4 w-4" />
+            </div>
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
     </>

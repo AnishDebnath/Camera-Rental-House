@@ -1,8 +1,8 @@
 import { Filter, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import DataTable from '../components/DataTable';
-import { adminProducts } from '../data/mockAdmin';
+import DataTable from '../../components/DataTable';
+import { adminProducts } from '../../data/mockAdmin';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('en-IN', {

@@ -1,13 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
-import Products from './pages/Products';
-import AddProduct from './pages/AddProduct';
-import EditProduct from './pages/EditProduct';
+import Products from './pages/products';
+import AddProduct from './pages/products/AddProduct';
+import EditProduct from './pages/products/EditProduct';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Rentals from './pages/Rentals';
 import ReleaseReturn from './pages/ReleaseReturn';
+import ProductionHouses from './pages/ProductionHouses';
+import AdminBooking from './pages/AdminBooking';
+import Staff from './pages/Staff';
+import Accounts from './pages/Accounts';
 import Sidebar from './components/common/Sidebar';
 import AdminNavbar from './components/common/AdminNavbar';
 import {
@@ -159,6 +163,38 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'staff']}>
                   <ReleaseReturn />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/houses"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                  <ProductionHouses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin-booking"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                  <AdminBooking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/staff"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Staff />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accounts"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Accounts />
                 </ProtectedRoute>
               }
             />

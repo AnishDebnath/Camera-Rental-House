@@ -1,7 +1,7 @@
 import { ImagePlus, Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import PrintLabel from '../components/PrintLabel';
+import PrintLabel from '../../components/PrintLabel';
 
 const categories = ['Cameras', 'Lenses', 'Lights', 'Audio', 'Tripods', 'Drones', 'Accessories'];
 
@@ -51,9 +51,9 @@ const AddProduct = () => {
       <div className="admin-shell space-y-6 py-6">
         <PrintLabel product={createdProduct} />
         <div className="grid gap-3 md:grid-cols-2">
-          <Link to="/products/add" className="secondary-button">
+          <button onClick={() => setCreatedProduct(null)} className="secondary-button">
             Add Another Product
-          </Link>
+          </button>
           <Link to="/products" className="primary-button">
             Go to Products
           </Link>
