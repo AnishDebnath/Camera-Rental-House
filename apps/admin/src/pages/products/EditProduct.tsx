@@ -13,7 +13,7 @@ const EditProduct = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Image states
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [removeImageUrls, setRemoveImageUrls] = useState<string[]>([]);
@@ -22,8 +22,8 @@ const EditProduct = () => {
 
   const [form, setForm] = useState({
     name: '',
-    brand: 'Sony',
-    category: 'Cameras',
+    brand: '',
+    category: '',
     description: '',
     price: '',
   });
@@ -36,9 +36,9 @@ const EditProduct = () => {
         setExistingImages(data.images || []);
         setForm({
           name: data.name,
-          brand: data.brand || 'Sony',
+          brand: data.brand,
           category: data.category,
-          description: data.description || '',
+          description: data.description,
           price: String(data.price_per_day),
         });
       } catch (err) {
@@ -65,7 +65,7 @@ const EditProduct = () => {
   };
 
   const toggleRemoveExisting = (url: string) => {
-    setRemoveImageUrls(prev => 
+    setRemoveImageUrls(prev =>
       prev.includes(url) ? prev.filter(u => u !== url) : [...prev, url]
     );
   };
@@ -143,7 +143,7 @@ const EditProduct = () => {
                 </button>
               </div>
             ))}
-            
+
             {/* New Previews */}
             {newPreviews.map((preview, index) => (
               <div key={preview} className="relative aspect-square">
@@ -242,7 +242,7 @@ const EditProduct = () => {
                 />
               </div>
             </label>
-            
+
             <div className="rounded-card bg-slate-50 p-4 border border-line">
               <p className="text-xs font-bold text-ink">Unique Asset Tracking</p>
               <p className="mt-1 text-[11px] text-muted leading-relaxed">
@@ -258,8 +258,8 @@ const EditProduct = () => {
           </div>
         )}
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isSaving}
           className="primary-button w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >

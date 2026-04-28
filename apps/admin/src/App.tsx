@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/products';
 import AddProduct from './pages/products/AddProduct';
@@ -97,7 +98,10 @@ function App() {
             <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
           </>
         )}
-        <main className={isAuthPage ? '' : 'lg:pl-72'}>
+        <main className={clsx(
+          'relative min-h-[calc(100vh-80px)]',
+          isAuthPage ? '' : 'lg:pl-72'
+        )}>
           <Routes>
             <Route path="/login" element={<AuthRedirect />} />
             <Route path="/auth-redirect" element={<AuthRedirect />} />

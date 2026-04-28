@@ -4,25 +4,33 @@ import supabase from '../db/supabase.js';
 const router = express.Router();
 
 const enrichProduct = async (product: any) => {
-  const { data, error } = await supabase
-    .from('rental_items')
-    .select('quantity')
-    .eq('product_id', product.id)
-    .in('status', ['pending_pickup', 'released']);
+  try {
+    const { data, error } = await supabase
+      .from('rental_items')
+      .select('quantity')
+      .eq('product_id', product.id)
+      .in('status', ['pending_pickup', 'released']);
 
-  if (error) {
-    throw error;
+    if (error) {
+      console.warn('Error fetching rental items for enrichment:', error);
+      return { ...product, available_quantity: 1 };
+    }
+
+    const reservedQuantity = (data || []).reduce(
+      (sum: number, item: any) => sum + Number(item.quantity || 0),
+      0,
+    );
+
+    // In the "unique identity" model, each product row is 1 physical unit.
+    // So availability is 1 (if not reserved) or 0 (if reserved).
+    return {
+      ...product,
+      available_quantity: reservedQuantity > 0 ? 0 : 1,
+    };
+  } catch (err) {
+    console.error('Enrichment exception:', err);
+    return { ...product, available_quantity: 1 };
   }
-
-  const reservedQuantity = (data || []).reduce(
-    (sum: number, item: any) => sum + Number(item.quantity || 0),
-    0,
-  );
-
-  return {
-    ...product,
-    available_quantity: Math.max((product.quantity || 0) - reservedQuantity, 0),
-  };
 };
 
 router.get('/', async (req: Request, res: Response) => {
