@@ -146,7 +146,7 @@ export default function ProductForm() {
     return (
       <div className="admin-shell space-y-6 py-6">
         <div className="rounded-card bg-emerald-50 p-4 border border-emerald-100 text-emerald-800 text-sm font-bold text-center">
-          Product added successfully! Each item is now a unique gear identity.
+          Product added successfully! Each product is now a unique product identity.
         </div>
         <PrintLabel product={createdProduct} />
         <div className="grid gap-3 md:grid-cols-2">
@@ -154,7 +154,7 @@ export default function ProductForm() {
             onClick={() => { setCreatedProduct(null); setForm(initialForm); setNewPreviews([]); setNewFiles([]); }}
             className="secondary-button"
           >
-            Add Another Gear
+            Add Another Product
           </button>
           <Link to="/products" className="primary-button text-center flex items-center justify-center">
             Go to Inventory
@@ -224,7 +224,7 @@ export default function ProductForm() {
 
             {/* Upload Button */}
             {(existingImages.length - removeImageUrls.length + newFiles.length) < 5 && (
-              <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-line bg-white/50 transition hover:bg-white hover:border-primary/40">
+              <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-primary/40 bg-white/50">
                 <ImagePlus className="h-6 w-6 text-primary" />
                 <span className="text-sm font-bold text-muted">{(existingImages.length - removeImageUrls.length + newFiles.length) === 0 ? 'Add Images' : 'Add More'}</span>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleNewImages(e.target.files)} />
@@ -294,16 +294,16 @@ export default function ProductForm() {
 
           {isEditMode && product ? (
             <div className="rounded-card bg-amber-50 p-4 border border-amber-100">
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">Warning: Active Gear</p>
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">Warning: Active Product</p>
               <p className="mt-1 text-sm text-amber-600 leading-relaxed">
-                A QR code and unique product code ({product.unique_code}) are already generated and actively tracked for this gear. Please do not change major details to avoid mismatching physical asset labels.
+                A QR code and unique product code ({product.unique_code}) are already generated and actively tracked for this product. Please do not change major details to avoid mismatching physical asset labels.
               </p>
             </div>
           ) : (
             <div className="rounded-card bg-amber-50 p-4 border border-amber-100">
               <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">Unique Identity Policy</p>
               <p className="mt-1 text-sm text-amber-600 leading-relaxed">
-                Each gear unit is a unique physical item. Add the same model separately to track serial numbers individually.
+                Each product is a unique physical item. Add the same model separately to track serial numbers individually.
               </p>
             </div>
           )}
