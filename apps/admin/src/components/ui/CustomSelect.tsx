@@ -13,9 +13,10 @@ type CustomSelectProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  required?: boolean;
 };
 
-const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSelectProps) => {
+const CustomSelect = ({ label, options, value, onChange, placeholder, required }: CustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +34,9 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
 
   return (
     <div className="block space-y-2" ref={containerRef}>
-      <span className="text-sm font-medium text-ink">{label}</span>
+      <span className="text-base font-semibold text-ink">
+        {label} {required && <span className="text-danger">*</span>}
+      </span>
       <div className="relative">
         <button
           type="button"
@@ -47,10 +50,10 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
             {selectedOption ? (
               <>
                 <img src={selectedOption.image} alt="" className="h-6 w-6 rounded-md object-contain bg-slate-50 border border-line p-0.5" />
-                <span className="truncate text-sm font-bold text-ink">{selectedOption.category}</span>
+                <span className="truncate text-base font-bold text-ink">{selectedOption.category}</span>
               </>
             ) : (
-              <span className="text-sm text-muted">{placeholder || 'Select...'}</span>
+              <span className="text-base text-muted">{placeholder || 'Select...'}</span>
             )}
           </div>
           <ChevronDown className={clsx('h-4 w-4 text-muted transition-transform', isOpen && 'rotate-180')} />
@@ -72,7 +75,7 @@ const CustomSelect = ({ label, options, value, onChange, placeholder }: CustomSe
                 )}
               >
                 <img src={option.image} alt="" className="h-8 w-8 rounded-lg object-contain bg-white border border-line p-1" />
-                <span className="text-sm font-bold">{option.category}</span>
+                <span className="text-base font-bold">{option.category}</span>
               </button>
             ))}
           </div>

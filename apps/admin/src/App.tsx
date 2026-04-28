@@ -3,8 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import clsx from 'clsx';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/products';
-import AddProduct from './pages/products/AddProduct';
-import EditProduct from './pages/products/EditProduct';
+import ProductForm from './pages/products/ProductForm';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Rentals from './pages/Rentals';
@@ -126,7 +125,7 @@ function App() {
               path="/products/add"
               element={
                 <ProtectedRoute>
-                  <AddProduct />
+                  <ProductForm />
                 </ProtectedRoute>
               }
             />
@@ -134,7 +133,7 @@ function App() {
               path="/products/:id/edit"
               element={
                 <ProtectedRoute>
-                  <EditProduct />
+                  <ProductForm />
                 </ProtectedRoute>
               }
             />
