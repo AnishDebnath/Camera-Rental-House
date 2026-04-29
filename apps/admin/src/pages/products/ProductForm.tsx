@@ -97,12 +97,24 @@ export default function ProductForm() {
       setError('Please upload at least one product image.');
       return;
     }
+    if (!form.name.trim()) {
+      setError('Product name is required.');
+      return;
+    }
     if (!form.category) {
       setError('Please select a category.');
       return;
     }
     if (!form.brand) {
       setError('Please select a brand.');
+      return;
+    }
+    if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
+      setError('Please enter a valid rental price.');
+      return;
+    }
+    if (!form.description.trim()) {
+      setError('Description is required.');
       return;
     }
 
@@ -167,14 +179,14 @@ export default function ProductForm() {
   return (
     <div className="admin-shell space-y-6 py-8">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">{isEditMode ? 'Edit Gear' : 'Add New Product'}</h1>
-          <p className="mt-1 text-sm font-medium text-muted">
-            {isEditMode ? 'Update details for this specific gear unit.' : 'Register a unique physical unit with QR tracking.'}
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{isEditMode ? 'Edit Product' : 'Add New Product'}</h1>
+          <p className="mt-1 line-clamp-1 text-xs font-medium text-muted sm:text-sm sm:line-clamp-none">
+            {isEditMode ? 'Update details for this product.' : 'Register a unique physical item.'}
           </p>
         </div>
-        <Link to="/products" className="secondary-button text-sm w-fit">
+        <Link to="/products" className="secondary-button h-9 px-3 text-xs sm:h-11 sm:px-5 sm:text-sm whitespace-nowrap">
           Back to Inventory
         </Link>
       </div>
