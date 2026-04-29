@@ -9,18 +9,18 @@ const AdminNavbar = ({ onOpenSidebar }) => {
   const isStaff = role === 'staff';
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/60 bg-white/[0.58] backdrop-blur-2xl lg:pl-72">
+    <header className="sticky top-0 z-30 border-b border-white/60 bg-white/[0.58] backdrop-blur-2xl xl:pl-72">
       <div className="admin-shell flex h-20 items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onOpenSidebar}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white xl:hidden"
             aria-label="Open navigation"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="lg:hidden">
+          <div className="xl:hidden">
             <p className="text-base font-bold text-ink">Camera House</p>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-tertiary">
               {isStaff ? 'staff mode' : 'admin mode'}

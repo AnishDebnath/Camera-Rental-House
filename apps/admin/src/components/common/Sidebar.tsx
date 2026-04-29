@@ -59,14 +59,14 @@ const Sidebar = ({ open, onClose }) => {
     <>
       <div
         className={clsx(
-          'z-40 bg-slate-950/25 backdrop-blur-sm transition lg:hidden',
+          'z-40 bg-slate-950/25 backdrop-blur-sm transition xl:hidden',
           open ? 'fixed inset-0 pointer-events-auto opacity-100' : 'hidden pointer-events-none opacity-0',
         )}
         onClick={onClose}
       />
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-white/70 bg-white/[0.72] px-4 py-5 shadow-[18px_0_50px_rgba(31,41,55,0.07)] backdrop-blur-2xl transition-transform lg:flex lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-white/70 bg-white/[0.72] px-4 py-5 shadow-[18px_0_50px_rgba(31,41,55,0.07)] backdrop-blur-2xl transition-transform xl:flex xl:translate-x-0',
           open ? 'flex translate-x-0' : 'hidden -translate-x-full',
         )}
       >
@@ -77,7 +77,7 @@ const Sidebar = ({ open, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white xl:hidden"
             aria-label="Close navigation"
           >
             <X className="h-5 w-5" />

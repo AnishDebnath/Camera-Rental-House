@@ -99,7 +99,7 @@ function App() {
         )}
         <main className={clsx(
           'relative min-h-[calc(100vh-80px)]',
-          isAuthPage ? '' : 'lg:pl-72'
+          isAuthPage ? '' : 'xl:pl-72'
         )}>
           <Routes>
             <Route path="/login" element={<AuthRedirect />} />
