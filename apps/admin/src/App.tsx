@@ -6,7 +6,7 @@ import Products from './pages/products';
 import ProductForm from './pages/products/ProductForm';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
-import Rentals from './pages/Rentals';
+import Rentals from './pages/rentals';
 import ReleaseReturn from './pages/ReleaseReturn';
 import ProductionHouses from './pages/ProductionHouses';
 import AdminBooking from './pages/AdminBooking';

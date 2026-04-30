@@ -28,7 +28,7 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     const monthStart = new Date();
     monthStart.setDate(1);
 
-    const [productsCount, usersCount, activeTodayCount, recentRentals, revenueItems] =
+    const [productsCount, usersCount, activeTodayCount, activeRentalsCount, recentRentals, revenueItems] =
       await Promise.all([
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('users').select('id', { count: 'exact', head: true }),
@@ -36,6 +36,10 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
           .from('rentals')
           .select('id', { count: 'exact', head: true })
           .eq('pickup_date', today),
+        supabase
+          .from('rental_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'released'),
         supabase
           .from('rentals')
           .select('*, users(full_name), rental_items(*, products(name, price_per_day))')
@@ -59,6 +63,7 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     return res.json({
       totalProducts: productsCount.count || 0,
       activeRentalsToday: activeTodayCount.count || 0,
+      totalActiveRentals: activeRentalsCount.count || 0,
       totalUsers: usersCount.count || 0,
       revenueThisMonth,
       recentRentals: recentRentals.data || [],

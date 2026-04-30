@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import {
   CalendarClock,
@@ -15,45 +16,87 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { getAuthRole, clearAdminSession } from '../../../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
-
-const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
+import axiosInstance from '../../api/axiosInstance';
 import logo from '@camera-rental-house/ui/assets/logo.png';
 
-const MENU_GROUPS = [
-  {
-    title: 'Core',
-    items: [
-      { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: 'Inventory & Operations',
-    items: [
-      { label: 'Products', href: '/products', icon: Package, adminOnly: true, count: '24' },
-      { label: 'Rentals', href: '/rentals', icon: CalendarClock, count: '18' },
-      { label: 'Release / Return', href: '/release', icon: ScanLine },
-    ],
-  },
-  {
-    title: 'Partners & People',
-    items: [
-      { label: 'Production Houses', href: '/houses', icon: Building2 },
-      { label: 'Platform Users', href: '/users', icon: Users, adminOnly: true, count: '32' },
-      { label: 'Team Members', href: '/staff', icon: UserCog, adminOnly: true },
-    ],
-  },
-  {
-    title: 'Financials',
-    items: [
-      { label: 'Accounts', href: '/accounts', icon: Wallet, adminOnly: true },
-    ],
-  },
-];
+const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
 const Sidebar = ({ open, onClose }) => {
   const { pathname } = useLocation();
   const role = getAuthRole();
   const isStaff = role === 'staff';
+  const [counts, setCounts] = useState<{ products: number; rentals: number; users: number }>({
+    products: 0,
+    rentals: 0,
+    users: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const endpoint = isStaff ? '/manage/counts' : '/admin/dashboard';
+        const { data } = await axiosInstance.get(endpoint);
+        
+        setCounts({
+          products: data.totalActiveRentals || 0, // Show active rentals in product tab as requested
+          rentals: data.totalActiveRentals || 0,
+          users: data.totalUsers || 0,
+        });
+      } catch (err) {
+        console.error('Sidebar counts fetch fail:', err);
+      }
+    };
+
+    fetchCounts();
+  }, [isStaff]);
+
+  const menuGroups = [
+    {
+      title: 'Core',
+      items: [
+        { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+      ],
+    },
+    {
+      title: 'Inventory & Operations',
+      items: [
+        { 
+          label: 'Products', 
+          href: '/products', 
+          icon: Package, 
+          adminOnly: true, 
+          count: counts.products > 0 ? String(counts.products) : undefined 
+        },
+        { 
+          label: 'Rentals', 
+          href: '/rentals', 
+          icon: CalendarClock, 
+          count: counts.rentals > 0 ? String(counts.rentals) : undefined 
+        },
+        { label: 'Release / Return', href: '/release', icon: ScanLine },
+      ],
+    },
+    {
+      title: 'Partners & People',
+      items: [
+        { label: 'Production Houses', href: '/houses', icon: Building2 },
+        { 
+          label: 'Platform Users', 
+          href: '/users', 
+          icon: Users, 
+          adminOnly: true, 
+          count: counts.users > 0 ? String(counts.users) : undefined 
+        },
+        { label: 'Team Members', href: '/staff', icon: UserCog, adminOnly: true },
+      ],
+    },
+    {
+      title: 'Financials',
+      items: [
+        { label: 'Accounts', href: '/accounts', icon: Wallet, adminOnly: true },
+      ],
+    },
+  ];
 
   return (
     <>
@@ -102,7 +145,7 @@ const Sidebar = ({ open, onClose }) => {
         </div>
 
         <nav className="flex-1 space-y-7 overflow-y-auto pr-1 custom-scrollbar">
-          {MENU_GROUPS.map((group) => {
+          {menuGroups.map((group) => {
             const visibleItems = group.items.filter((item) => !item.adminOnly || role === 'admin');
             if (visibleItems.length === 0) return null;
 

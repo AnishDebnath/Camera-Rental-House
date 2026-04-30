@@ -122,4 +122,20 @@ router.post('/return', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/counts', async (_req: Request, res: Response) => {
+  try {
+    const [productsCount, activeRentalsCount] = await Promise.all([
+      supabase.from('products').select('id', { count: 'exact', head: true }),
+      supabase.from('rental_items').select('id', { count: 'exact', head: true }).eq('status', 'released'),
+    ]);
+
+    return res.json({
+      totalProducts: productsCount.count || 0,
+      totalActiveRentals: activeRentalsCount.count || 0,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch counts.' });
+  }
+});
+
 export default router;
