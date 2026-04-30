@@ -1,10 +1,12 @@
-import { Loader2, Filter, Pencil, Plus, Search, Trash2, QrCode, X } from 'lucide-react';
+import { Loader2, Filter, Pencil, Plus, Search, Trash2, QrCode, X, SlidersHorizontal, CheckCircle2, Clock } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/DataTable';
 import axiosInstance from '../../api/axiosInstance';
-import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
+import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../packages/data/categories';
 import PrintLabel from '../../components/PrintLabel';
+import FilterSelect from '../../components/ui/FilterSelect';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -18,8 +20,48 @@ const Products = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [brandFilter, setBrandFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedQrProduct, setSelectedQrProduct] = useState<any>(null);
   const [loadingQrId, setLoadingQrId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showFilters) setIsExpanded(false);
+  }, [showFilters]);
+
+  const categoryOptions = [
+    { label: 'All Categories', value: 'All' },
+    ...CATEGORIES.filter(c => c !== 'All').map(c => ({
+      label: c,
+      value: c,
+      image: CATEGORY_ICONS[c]
+    }))
+  ];
+
+  const brandOptions = [
+    { label: 'All Brands', value: 'All' },
+    ...BRANDS.filter(b => b !== 'All').map(b => ({
+      label: b,
+      value: b,
+      image: BRAND_ICONS[b]
+    }))
+  ];
+
+  const statusOptions = [
+    { label: 'All Status', value: 'all' },
+    { 
+      label: 'In Stock', 
+      value: 'in_stock', 
+      icon: <CheckCircle2 className="h-3 w-3 text-emerald-500" /> 
+    },
+    { 
+      label: 'On Rent', 
+      value: 'on_rent', 
+      icon: <Clock className="h-3 w-3 text-amber-500" /> 
+    }
+  ];
 
   const handleShowQr = async (row: any) => {
     try {
@@ -40,6 +82,8 @@ const Products = () => {
         params: {
           search: searchTerm,
           category: categoryFilter,
+          brand: brandFilter,
+          status: statusFilter,
           limit: 100 // Admin needs more visibility
         }
       });
@@ -67,7 +111,7 @@ const Products = () => {
       fetchProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchTerm, categoryFilter]);
+  }, [searchTerm, categoryFilter, brandFilter, statusFilter]);
 
   return (
     <div className="admin-shell space-y-6 py-8">
@@ -106,8 +150,8 @@ const Products = () => {
           </section>
 
           <section className="card-surface p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <label className="input-shell min-h-11 flex-1 md:max-w-md">
+            <div className="flex items-center gap-3 sm:max-w-4xl">
+              <label className="input-shell min-h-11 flex-1 sm:max-w-xl">
                 <Search className="h-4 w-4 text-muted" />
                 <input
                   type="search"
@@ -117,19 +161,83 @@ const Products = () => {
                   className="w-full border-0 bg-transparent p-0 text-sm font-medium focus:ring-0"
                 />
               </label>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="secondary-button h-[42px] py-0 text-sm"
+
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 rounded-xl border p-1 pr-1 transition-all sm:pr-3 ${showFilters
+                  ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-500/20'
+                  : 'border-line bg-slate-50/50 hover:bg-slate-100'
+                  }`}
               >
-                <option value="All">All Categories</option>
-                <option value="Cameras">Cameras</option>
-                <option value="Lenses">Lenses</option>
-                <option value="Lights">Lights</option>
-                <option value="Audio">Audio</option>
-                <option value="Tripods">Tripods</option>
-              </select>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-lg shadow-sm border transition-all ${showFilters
+                  ? 'bg-sky-500 text-white border-sky-500'
+                  : 'bg-white text-sky-500 border-line/40'
+                  }`}>
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                </div>
+                <span className={`hidden text-[10px] font-black uppercase tracking-widest sm:inline ${showFilters ? 'text-sky-600' : 'text-tertiary'
+                  }`}>
+                  {showFilters ? 'Hide Filters' : 'Filters'}
+                </span>
+              </button>
             </div>
+
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{
+                    height: showFilters ? 'auto' : 0,
+                    opacity: showFilters ? 1 : 0
+                  }}
+                  onAnimationComplete={() => setIsExpanded(showFilters)}
+                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                  className={isExpanded ? 'relative z-[70]' : 'overflow-hidden relative z-[70]'}
+                >
+                  <div className="mt-4 flex flex-col md:flex-row md:flex-wrap items-stretch md:items-end gap-3 border-t border-line/50 pt-4 sm:max-w-4xl">
+                    <div className="flex flex-col gap-1.5 w-full md:w-44">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-tertiary px-1">Category</span>
+                      <FilterSelect
+                        options={categoryOptions}
+                        value={categoryFilter}
+                        onChange={setCategoryFilter}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 w-full md:w-44">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-tertiary px-1">Brand</span>
+                      <FilterSelect
+                        options={brandOptions}
+                        value={brandFilter}
+                        onChange={setBrandFilter}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 w-full md:w-44">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-tertiary px-1">Availability</span>
+                      <FilterSelect
+                        options={statusOptions}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryFilter('All');
+                        setBrandFilter('All');
+                        setStatusFilter('all');
+                      }}
+                      className="h-9 px-4 text-xs font-bold text-muted hover:text-danger transition md:mb-0"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
 
           <DataTable

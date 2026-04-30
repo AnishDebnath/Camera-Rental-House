@@ -39,7 +39,8 @@ router.get('/', async (req: Request, res: Response) => {
     const offset = Number(req.query.offset || 0);
     const search = String(req.query.search || '').trim();
     const category = String(req.query.category || '').trim();
-    const availableOnly = req.query.available === 'true';
+    const brand = String(req.query.brand || '').trim();
+    const status = String(req.query.status || 'all').toLowerCase();
 
     let query = supabase
       .from('products')
@@ -51,8 +52,12 @@ router.get('/', async (req: Request, res: Response) => {
       query = query.ilike('category', category);
     }
 
+    if (brand && brand.toLowerCase() !== 'all') {
+      query = query.ilike('brand', brand);
+    }
+
     if (search) {
-      query = query.ilike('name', `%${search}%`);
+      query = query.or(`name.ilike.%${search}%,unique_code.ilike.%${search}%`);
     }
 
     const { data, count, error } = await query;
@@ -62,9 +67,13 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     const items = await Promise.all((data || []).map(enrichProduct));
-    const filteredItems = availableOnly
-      ? items.filter((item) => item.available_quantity > 0)
-      : items;
+    
+    let filteredItems = items;
+    if (status === 'in_stock') {
+      filteredItems = items.filter((item) => item.available_quantity > 0);
+    } else if (status === 'on_rent') {
+      filteredItems = items.filter((item) => item.available_quantity === 0);
+    }
 
     return res.json({
       items: filteredItems,
