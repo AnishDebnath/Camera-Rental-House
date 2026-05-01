@@ -8,7 +8,7 @@ const RentalTabs = ({ activeTab, setActiveTab, counts }: RentalTabsProps) => {
   const tabs = [
     { 
       id: 'upcoming', 
-      label: 'Upcoming', 
+      label: 'To Collect', 
       tone: 'bg-sky-50', 
       accent: 'bg-sky-500',
       text: 'text-sky-700'
@@ -21,8 +21,8 @@ const RentalTabs = ({ activeTab, setActiveTab, counts }: RentalTabsProps) => {
       text: 'text-amber-700'
     },
     { 
-      id: 'past', 
-      label: 'Returned', 
+      id: 'returning', 
+      label: 'To Return', 
       tone: 'bg-emerald-50', 
       accent: 'bg-emerald-500',
       text: 'text-emerald-700'
