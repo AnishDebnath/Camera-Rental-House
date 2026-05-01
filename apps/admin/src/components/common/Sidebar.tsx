@@ -12,6 +12,7 @@ import {
   Building2,
   Wallet,
   UserCog,
+  History,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { getAuthRole, clearAdminSession } from '../../../../../packages/auth';
@@ -72,6 +73,12 @@ const Sidebar = ({ open, onClose }) => {
           href: '/rentals', 
           icon: CalendarClock, 
           count: counts.rentals > 0 ? String(counts.rentals) : undefined 
+        },
+        { 
+          label: 'Rental History', 
+          href: '/rentals/history', 
+          icon: History,
+          adminOnly: true 
         },
         { label: 'Release / Return', href: '/release', icon: ScanLine },
       ],
@@ -157,7 +164,12 @@ const Sidebar = ({ open, onClose }) => {
                 <div className="space-y-1">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
-                    const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+                    let active = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+                    
+                    // Special case: /rentals should not be active if we are in /rentals/history
+                    if (item.href === '/rentals' && pathname.startsWith('/rentals/history')) {
+                      active = false;
+                    }
                     return (
                       <Link
                         key={item.label}

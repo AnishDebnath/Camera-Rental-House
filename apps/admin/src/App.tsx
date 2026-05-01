@@ -7,6 +7,7 @@ import ProductForm from './pages/products/ProductForm';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Rentals from './pages/rentals';
+import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/ReleaseReturn';
 import ProductionHouses from './pages/ProductionHouses';
 import AdminBooking from './pages/AdminBooking';
@@ -158,6 +159,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'staff']}>
                   <Rentals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rentals/history"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                  <RentalHistory />
                 </ProtectedRoute>
               }
             />

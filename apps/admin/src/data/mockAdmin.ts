@@ -111,4 +111,34 @@ export const adminRentals = {
       ]
     },
   ],
+  completed: [
+    {
+      id: 'RN-1950',
+      name: 'John Creative',
+      user_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80',
+      phone: '8877665544',
+      pickup: '2026-04-20',
+      return_date: '2026-04-22',
+      total_price: 15600,
+      status: 'completed',
+      products: [
+        { id: 'p1', name: 'Sony FX3', price: 4200, qty: 2, image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100' }
+      ]
+    }
+  ],
+  cancelled: [
+    {
+      id: 'RN-1911',
+      name: 'Old Studio',
+      user_image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80',
+      phone: '6655443322',
+      pickup: '2026-04-10',
+      return_date: '2026-04-12',
+      total_price: 4500,
+      status: 'cancelled',
+      products: [
+        { id: 'p4', name: 'DJI Mic 2', price: 1500, qty: 3, image: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=100' }
+      ]
+    }
+  ]
 };
