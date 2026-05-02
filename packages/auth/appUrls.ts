@@ -8,9 +8,18 @@ const browserOrigin = () => {
   return `${window.location.protocol}//${window.location.hostname}`;
 };
 
-const isLocalDevelopment = () =>
-  typeof window !== 'undefined' &&
-  ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const isLocalDevelopment = () => {
+  if (typeof window === 'undefined') return false;
+  const h = window.location.hostname;
+  return (
+    h === 'localhost' ||
+    h === '127.0.0.1' ||
+    // LAN / private ranges — still dev, still need port
+    /^192\.168\./.test(h) ||
+    /^10\./.test(h) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(h)
+  );
+};
 
 const resolveAppUrl = (
   envValue: string | undefined,
