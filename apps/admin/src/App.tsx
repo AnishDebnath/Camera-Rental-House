@@ -8,7 +8,7 @@ import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
-import ReleaseReturn from './pages/ReleaseReturn';
+import ReleaseReturn from './pages/release';
 import ProductionHouses from './pages/ProductionHouses';
 import AdminBooking from './pages/AdminBooking';
 import Staff from './pages/Staff';
