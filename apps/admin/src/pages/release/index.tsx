@@ -77,7 +77,7 @@ const ReleaseReturn = () => {
             key="verify"
             rental={activeRental}
             scannedProducts={scannedProducts}
-            onToggleScan={toggleProductScan}
+            onVerifyProduct={toggleProductScan}
             isUserVerified={isUserVerified}
             onToggleVerify={() => setIsUserVerified((v) => !v)}
             proofPhoto={proofPhoto}

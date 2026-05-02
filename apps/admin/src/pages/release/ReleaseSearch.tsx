@@ -29,7 +29,7 @@ const ReleaseSearch = ({ searchId, setSearchId, onSearch, error }: Props) => (
 
     <h2 className="text-xl font-bold tracking-tight text-ink">Search Rental Record</h2>
     <p className="mt-1.5 text-xs font-medium text-muted sm:text-sm">
-      Scan customer booking QR or enter ID manually.
+      Enter Rental ID to begin the verification process.
     </p>
 
     <div className="mt-10 w-full max-w-lg space-y-4">
@@ -38,7 +38,7 @@ const ReleaseSearch = ({ searchId, setSearchId, onSearch, error }: Props) => (
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             type="text"
-            placeholder="Booking ID (e.g. RN-2041)"
+            placeholder="Rental ID (e.g. RN-2041)"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && onSearch()}
