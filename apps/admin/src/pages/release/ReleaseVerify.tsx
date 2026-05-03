@@ -14,7 +14,7 @@ interface Props {
   isUserVerified: boolean;
   onToggleVerify: () => void;
   proofPhoto: string | null;
-  onCapture: () => void;
+  onCapture: (photo: string) => void;
   onClearPhoto: () => void;
   onRelease: () => void;
   onReset: () => void;

@@ -81,11 +81,7 @@ const ReleaseReturn = () => {
             isUserVerified={isUserVerified}
             onToggleVerify={() => setIsUserVerified((v) => !v)}
             proofPhoto={proofPhoto}
-            onCapture={() =>
-              setProofPhoto(
-                'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&q=80'
-              )
-            }
+            onCapture={(photo) => setProofPhoto(photo)}
             onClearPhoto={() => setProofPhoto(null)}
             onRelease={() => setIsComplete(true)}
             onReset={handleReset}

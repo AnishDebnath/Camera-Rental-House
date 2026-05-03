@@ -1,12 +1,28 @@
-import { Camera, X } from 'lucide-react';
+import { useRef } from 'react';
+import { Camera, ShieldCheck, RefreshCw } from 'lucide-react';
 
 interface Props {
   photo: string | null;
-  onCapture: () => void;
+  onCapture: (photo: string) => void;
   onClear: () => void;
 }
 
 const Step3Proof = ({ photo, onCapture, onClear }: Props) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onCapture(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      // Reset input value to allow same file capture
+      e.target.value = '';
+    }
+  };
+
   return (
     <section className="card-surface p-6">
       <div className="mb-6 flex items-center gap-4">
@@ -19,32 +35,56 @@ const Step3Proof = ({ photo, onCapture, onClear }: Props) => {
         </div>
       </div>
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-line bg-slate-50/50 group">
-        {photo ? (
-          <div className="relative h-full w-full group">
-            <img src={photo} className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="space-y-6">
+        <div className="flex justify-center">
+          <div className={`relative h-72 w-72 rounded-3xl border-2 overflow-hidden transition-all duration-500 ${photo ? 'border-emerald-500 shadow-xl scale-105' : 'border-dashed border-slate-200 bg-slate-50/50'}`}>
+            {photo ? (
+              <img src={photo} className="h-full w-full object-cover" alt="Handover Proof" />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2">
+                <Camera className="h-12 w-12 text-slate-300" />
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Capture</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {!photo ? (
             <button
-              onClick={onClear}
-              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-rose-500 shadow-lg transition-transform hover:scale-110 active:scale-90"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all hover:border-orange-500/30 active:scale-95"
             >
-              <X className="h-5 w-5" />
+              <Camera className="h-5 w-5 text-orange-600" />
+              Take Handover Photo
             </button>
-          </div>
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center text-center p-8">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-white shadow-card text-muted/30 border border-line/40">
-              <Camera className="h-10 w-10" />
+          ) : (
+            <div className="space-y-3">
+              <div className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 border border-emerald-100 text-sm font-bold text-emerald-600 animate-in fade-in zoom-in duration-300">
+                <ShieldCheck className="h-5 w-5" />
+                Handover Proof Captured!
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-500 hover:text-orange-600 hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Retake Photo
+              </button>
             </div>
-            <p className="text-sm font-semibold text-ink">Ready for Capture</p>
-            <p className="mt-2 text-xs font-medium text-muted leading-relaxed max-w-[180px]">
-              Take a live picture for handover insurance and verification.
-            </p>
-            <button onClick={onCapture} className="mt-6 secondary-button w-full">
-              Click Live Picture
-            </button>
-          </div>
-        )}
+          )}
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handleFileChange}
+        />
       </div>
     </section>
   );
