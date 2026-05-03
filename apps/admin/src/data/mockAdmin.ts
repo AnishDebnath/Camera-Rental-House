@@ -63,6 +63,7 @@ export const adminRentals = {
   upcoming: [
     {
       id: 'RN-2041',
+      user_id: 'u1',
       name: 'Alex Director',
       user_image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&q=80',
       phone: '9876543210',
@@ -83,6 +84,7 @@ export const adminRentals = {
   active: [
     {
       id: 'RN-2007',
+      user_id: 'u2',
       name: 'Maya Films',
       user_image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
       phone: '9012345678',
@@ -99,6 +101,7 @@ export const adminRentals = {
   returning: [
     {
       id: 'RN-1985',
+      user_id: 'u3',
       name: 'Studio South',
       user_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
       phone: '9988776655',
@@ -129,6 +132,7 @@ export const adminRentals = {
   cancelled: [
     {
       id: 'RN-1911',
+      user_id: 'u5',
       name: 'Old Studio',
       user_image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80',
       phone: '6655443322',

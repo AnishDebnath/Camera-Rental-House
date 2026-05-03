@@ -1,7 +1,8 @@
-import { UserCheck, CheckCircle2 } from 'lucide-react';
+import { UserCheck, CheckCircle2, Phone } from 'lucide-react';
 
 interface Props {
   user: {
+    id: string;
     name: string;
     phone: string;
     image: string;
@@ -19,49 +20,55 @@ const Step2UserIdentity = ({ user, isVerified, onToggleVerify }: Props) => {
         </div>
         <div>
           <h3 className="text-sm font-bold tracking-tight text-ink">Step 2 — User Identity</h3>
-          <p className="text-xs font-medium text-muted mt-0.5">Scan customer ID or QR to match booking</p>
+          <p className="text-xs font-medium text-muted mt-0.5">Scan user ID or QR to match booking</p>
         </div>
       </div>
 
       <div
-        className={`group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 ${
-          isVerified ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white shadow-sm'
-        }`}
+        className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-500 ${isVerified
+          ? 'border-emerald-200 bg-emerald-50/40 shadow-sm'
+          : 'border-line bg-white shadow-sm hover:shadow-md'
+          }`}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-6">
-            <div className="relative h-20 w-20 shrink-0">
-              <div className="h-full w-full overflow-hidden rounded-xl border border-line shadow-sm">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-5">
+            <div className="relative shrink-0">
+              <div className={`h-16 w-16 overflow-hidden rounded-2xl border transition-all duration-500 ${isVerified ? 'border-emerald-500/30' : 'border-line shadow-sm'
+                }`}>
                 <img src={user.image} className="h-full w-full object-cover" />
               </div>
               {isVerified && (
                 <div className="absolute -bottom-1 -right-1 rounded-full bg-emerald-500 p-1.5 text-white shadow-lg border-2 border-white">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <CheckCircle2 className="h-3 w-3" />
                 </div>
               )}
             </div>
-            <div>
-              <p className="text-base font-bold text-ink">{user.name}</p>
-              <p className="mt-0.5 text-sm font-medium text-muted">{user.phone}</p>
-              <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex h-5 items-center rounded-full bg-slate-100 px-3 text-[10px] font-semibold uppercase tracking-wider text-tertiary">
-                  Customer
-                </span>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <p className="text-base font-black text-ink tracking-tight">{user.name}</p>
                 {isVerified && (
-                  <span className="inline-flex h-5 items-center rounded-full bg-emerald-500/10 px-3 text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
-                    Verified Record
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-500/20">
+                    Verified
                   </span>
                 )}
               </div>
+              <div className="flex items-center gap-1.5">
+                <Phone className="h-4 w-4 text-blue-500 fill-blue-500/10" />
+                <p className="text-sm font-bold text-muted tracking-tight">{user.phone}</p>
+              </div>
             </div>
           </div>
+
           <button
             onClick={onToggleVerify}
-            className={`h-11 rounded-xl px-6 text-sm font-semibold transition-all active:scale-95 ${
-              isVerified ? 'bg-emerald-500 text-white' : 'bg-ink text-white hover:bg-slate-900'
-            }`}
+            disabled={isVerified}
+            className={`relative h-12 overflow-hidden rounded-xl px-8 text-xs font-black uppercase tracking-widest transition-all duration-300 ${isVerified
+              ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 cursor-default pointer-events-none'
+              : 'bg-ink text-white hover:bg-slate-900 shadow-xl active:scale-95'
+              }`}
           >
-            {isVerified ? 'Identity Match ✓' : 'Scan to Verify'}
+            {isVerified ? 'Verified ✓' : 'Verify Profile'}
           </button>
         </div>
       </div>

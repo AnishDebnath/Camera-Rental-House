@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import VerificationModal from './VerificationModal';
+import ProductVerificationModal from './ProductVerificationModal';
+import UserVerificationModal from './UserVerificationModal';
 import Step1Products from './Step1Products';
 import Step2UserIdentity from './Step2UserIdentity';
 import Step3Proof from './Step3Proof';
@@ -32,6 +33,7 @@ const ReleaseVerify = ({
   onReset,
 }: Props) => {
   const [verifyingProduct, setVerifyingProduct] = useState<any>(null);
+  const [isVerifyingUser, setIsVerifyingUser] = useState(false);
   const allProductsScanned = rental.products.every((p: any) => scannedProducts.includes(p.id));
 
   return (
@@ -43,10 +45,22 @@ const ReleaseVerify = ({
     >
       <AnimatePresence>
         {verifyingProduct && (
-          <VerificationModal
+          <ProductVerificationModal
             product={verifyingProduct}
             onClose={() => setVerifyingProduct(null)}
             onVerify={onVerifyProduct}
+          />
+        )}
+        {isVerifyingUser && (
+          <UserVerificationModal
+            user={{
+              id: rental.user_id,
+              name: rental.name,
+              phone: rental.phone,
+              image: rental.user_image
+            }}
+            onClose={() => setIsVerifyingUser(false)}
+            onVerify={onToggleVerify}
           />
         )}
       </AnimatePresence>
@@ -61,12 +75,13 @@ const ReleaseVerify = ({
 
         <Step2UserIdentity
           user={{
+            id: rental.user_id,
             name: rental.name,
             phone: rental.phone,
             image: rental.user_image,
           }}
           isVerified={isUserVerified}
-          onToggleVerify={onToggleVerify}
+          onToggleVerify={() => setIsVerifyingUser(true)}
         />
       </div>
 

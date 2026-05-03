@@ -70,10 +70,11 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
                 </div>
               </div>
               <button
-                onClick={() => !isScanned && onVerifyClick(p)}
-                className={`flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all active:scale-95 sm:h-9 sm:px-3 ${isScanned
-                  ? 'bg-emerald-500 text-white cursor-default shadow-sm'
-                  : 'bg-slate-50 text-ink border border-line hover:bg-slate-100'
+                onClick={() => onVerifyClick(p)}
+                disabled={isScanned}
+                className={`flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:h-9 sm:px-3 ${isScanned
+                  ? 'bg-emerald-500 text-white cursor-default pointer-events-none shadow-sm'
+                  : 'bg-slate-50 text-ink border border-line hover:bg-slate-100 active:scale-95'
                   }`}
               >
                 <QrCode className="h-4 w-4" />

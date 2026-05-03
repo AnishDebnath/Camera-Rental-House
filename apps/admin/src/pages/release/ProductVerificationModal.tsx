@@ -9,7 +9,7 @@ interface Props {
   onVerify: (id: string) => void;
 }
 
-const VerificationModal = ({ product, onClose, onVerify }: Props) => {
+const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
   const [status, setStatus] = useState<'scanning' | 'success' | 'timeout'>('scanning');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -150,7 +150,7 @@ const VerificationModal = ({ product, onClose, onVerify }: Props) => {
               <motion.div
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-emerald-500/90 backdrop-blur-md"
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-emerald-500/90 backdrop-blur-md"
               >
                 <motion.div
                   initial={{ scale: 0.5 }}
@@ -173,7 +173,7 @@ const VerificationModal = ({ product, onClose, onVerify }: Props) => {
               <motion.div
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-rose-500/90 backdrop-blur-md p-6 text-center"
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-rose-500/90 backdrop-blur-md p-6 text-center"
               >
                 <div className="mb-4 rounded-full bg-white p-5 shadow-2xl">
                   <X className="h-10 w-10 text-rose-500" />
@@ -220,4 +220,4 @@ const VerificationModal = ({ product, onClose, onVerify }: Props) => {
   );
 };
 
-export default VerificationModal;
+export default ProductVerificationModal;
