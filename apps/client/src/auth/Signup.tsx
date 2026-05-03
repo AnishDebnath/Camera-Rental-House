@@ -4,7 +4,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import LoadingButton from '../components/ui/LoadingButton';
 import clsx from 'clsx';
 import { useAuth } from '../store/AuthContext';
-import { useToast } from '@camera-rental-house/ui';
+import { useToast, compressImage } from '@camera-rental-house/ui';
 import axiosInstance from '../api/axiosInstance';
 
 type UploadKey = 'aadhaarDoc' | 'voterDoc' | 'selfie';
@@ -13,8 +13,6 @@ type UploadFile = {
   file: File;
   preview: string;
 };
-
-import { compressImage } from '../utils/imageUtils';
 
 const signupFields = [
   { key: 'fullName', label: 'Full Name', placeholder: 'Enter your full name', icon: User },
@@ -80,7 +78,7 @@ const Signup = () => {
       // 2. Compress in the background
       setCompressing(prev => ({ ...prev, [key]: true }));
       try {
-        const compressed = await compressImage(file);
+        const compressed = await compressImage(file) as File;
 
         // Only update if we actually got a different file (e.g. was compressed)
         if (compressed !== file) {

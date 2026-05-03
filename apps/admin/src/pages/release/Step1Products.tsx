@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { PackageCheck, QrCode, CheckCircle2 } from 'lucide-react';
+import { PackageCheck, QrCode, CheckCircle2, Package } from 'lucide-react';
+import { LazyImage } from '@camera-rental-house/ui';
 
 interface Props {
   products: any[];
@@ -48,10 +49,17 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
             >
               <div className="flex items-center gap-4">
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 sm:h-12 sm:w-12">
-                  <img
-                    src={p.image}
-                    className="h-full w-full object-cover transition-all"
-                  />
+                  {p.image ? (
+                    <LazyImage
+                      src={p.image}
+                      alt={p.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-slate-50">
+                      <Package className="h-6 w-6 text-slate-200" />
+                    </div>
+                  )}
                   {isScanned && (
                     <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/10">
                       <div className="rounded-full bg-emerald-500 p-1 text-white shadow-lg">

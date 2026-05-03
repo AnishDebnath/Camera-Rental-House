@@ -22,7 +22,8 @@ import {
   saveAuthSession,
 } from '../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../packages/auth/appUrls';
-import { useToast } from '@camera-rental-house/ui';
+import { useToast, ScrollToTop, PageTransition, SmoothScroll } from '@camera-rental-house/ui';
+import { AnimatePresence } from 'framer-motion';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
@@ -91,129 +92,136 @@ function App() {
 
   return (
     <div className="min-h-screen text-ink">
-      <div className="flex min-h-screen flex-col">
-        {!isAuthPage && (
-          <>
-            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
-          </>
-        )}
-        <main className={clsx(
-          'relative min-h-[calc(100vh-80px)]',
-          isAuthPage ? '' : 'xl:pl-72'
-        )}>
-          <Routes>
-            <Route path="/login" element={<AuthRedirect />} />
-            <Route path="/auth-redirect" element={<AuthRedirect />} />
+      <ScrollToTop />
+      <SmoothScroll>
+        <div className="flex min-h-screen flex-col">
+          {!isAuthPage && (
+            <>
+              <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+              <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
+            </>
+          )}
+          <main className={clsx(
+            'relative min-h-[calc(100vh-80px)]',
+            isAuthPage ? '' : 'xl:pl-72'
+          )}>
+            <AnimatePresence mode="wait">
+              <PageTransition key={location.pathname}>
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/login" element={<AuthRedirect />} />
+                  <Route path="/auth-redirect" element={<AuthRedirect />} />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <ProtectedRoute>
-                  <Products />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/products/add"
-              element={
-                <ProtectedRoute>
-                  <ProductForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/products/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <ProductForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users/:id"
-              element={
-                <ProtectedRoute>
-                  <UserDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/rentals"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                  <Rentals />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/rentals/history"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                  <RentalHistory />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/release"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                  <ReleaseReturn />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/houses"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                  <ProductionHouses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin-booking"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                  <AdminBooking />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <Staff />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/accounts"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <Accounts />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/products"
+                    element={
+                      <ProtectedRoute>
+                        <Products />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/products/add"
+                    element={
+                      <ProtectedRoute>
+                        <ProductForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/products/:id/edit"
+                    element={
+                      <ProtectedRoute>
+                        <ProductForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users"
+                    element={
+                      <ProtectedRoute>
+                        <Users />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users/:id"
+                    element={
+                      <ProtectedRoute>
+                        <UserDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/rentals"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <Rentals />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/rentals/history"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <RentalHistory />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/release"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <ReleaseReturn />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/houses"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <ProductionHouses />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin-booking"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <AdminBooking />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/staff"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin']}>
+                        <Staff />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/accounts"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin']}>
+                        <Accounts />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </PageTransition>
+            </AnimatePresence>
+          </main>
+        </div>
+      </SmoothScroll>
     </div>
   );
 }

@@ -5,3 +5,8 @@ export { default as Table } from './Table';
 export * from './Toast/ToastContext';
 export { default as ToastViewport } from './Toast/ToastViewport';
 export * from './theme';
+export * from './feature/PageTransition';
+export * from './feature/ScrollToTop';
+export * from './feature/LazyImage';
+export * from './feature/SmoothScroll';
+export * from './utils/imageUtils';

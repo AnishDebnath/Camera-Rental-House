@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { Camera, ShieldCheck, RefreshCw } from 'lucide-react';
+import { compressImage } from '@camera-rental-house/ui';
 
 interface Props {
   photo: string | null;
@@ -10,15 +11,16 @@ interface Props {
 const Step3Proof = ({ photo, onCapture, onClear }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        onCapture(reader.result as string);
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        const compressed = await compressImage(base64) as string;
+        onCapture(compressed);
       };
       reader.readAsDataURL(file);
-      // Reset input value to allow same file capture
       e.target.value = '';
     }
   };

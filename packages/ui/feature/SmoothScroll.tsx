@@ -1,12 +1,15 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import Lenis from 'lenis';
-import { LenisContext } from '../../context/LenisContext';
 
-interface SmoothScrollProps {
+const LenisContext = createContext<Lenis | null>(null);
+
+export const useLenis = () => useContext(LenisContext);
+
+interface Props {
   children: ReactNode;
 }
 
-const SmoothScroll = ({ children }: SmoothScrollProps) => {
+export const SmoothScroll = ({ children }: Props) => {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
@@ -42,6 +45,3 @@ const SmoothScroll = ({ children }: SmoothScrollProps) => {
     </LenisContext.Provider>
   );
 };
-
-export default SmoothScroll;
-
