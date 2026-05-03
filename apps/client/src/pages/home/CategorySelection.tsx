@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { CATEGORIES_LIST as CategoriesList } from '../../../../../packages/data/categories';
 import { LayoutGrid } from 'lucide-react';
 
-import LazyImage from '../../components/feature/LazyImage';
+import { LazyImage } from '@camera-rental-house/ui';
 
 const CategorySelection = () => {
   return (

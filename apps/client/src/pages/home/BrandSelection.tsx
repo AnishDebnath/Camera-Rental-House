@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { BRANDS_LIST as BrandsList } from '../../../../../packages/data/categories';
 import { LayoutGrid } from 'lucide-react';
 
-import LazyImage from '../../components/feature/LazyImage';
+import { LazyImage } from '@camera-rental-house/ui';
 
 const BrandSelection = () => {
   return (

@@ -1,7 +1,7 @@
 import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { reviews } from '../../data/reviews';
-import LazyImage from '../../components/feature/LazyImage';
+import { LazyImage } from '@camera-rental-house/ui';
 
 const Testimonials = () => {
   // Triple the reviews to ensure a seamless loop

@@ -3,12 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
-import { ToastProvider, ToastViewport } from '@camera-rental-house/ui';
+import { ToastProvider, ToastViewport, SmoothScroll } from '@camera-rental-house/ui';
 import { AuthProvider } from './store/AuthContext';
 import { CartProvider } from './store/CartContext';
 import { FavouritesProvider } from './store/FavouritesContext';
-
-import SmoothScroll from './components/feature/SmoothScroll';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

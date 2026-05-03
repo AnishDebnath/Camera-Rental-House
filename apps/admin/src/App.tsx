@@ -22,7 +22,7 @@ import {
   saveAuthSession,
 } from '../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../packages/auth/appUrls';
-import { useToast, ScrollToTop, PageTransition, SmoothScroll } from '@camera-rental-house/ui';
+import { useToast, ScrollToTop, PageTransition } from '@camera-rental-house/ui';
 import { AnimatePresence } from 'framer-motion';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
@@ -93,21 +93,20 @@ function App() {
   return (
     <div className="min-h-screen text-ink">
       <ScrollToTop />
-      <SmoothScroll>
-        <div className="flex min-h-screen flex-col">
-          {!isAuthPage && (
-            <>
-              <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-              <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
-            </>
-          )}
-          <main className={clsx(
-            'relative min-h-[calc(100vh-80px)]',
-            isAuthPage ? '' : 'xl:pl-72'
-          )}>
-            <AnimatePresence mode="wait">
-              <PageTransition key={location.pathname}>
-                <Routes location={location} key={location.pathname}>
+      <div className="flex min-h-screen flex-col">
+        {!isAuthPage && (
+          <>
+            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+            <AdminNavbar onOpenSidebar={() => setSidebarOpen(true)} />
+          </>
+        )}
+        <main className={clsx(
+          'relative min-h-[calc(100vh-80px)]',
+          isAuthPage ? '' : 'xl:pl-72'
+        )}>
+          <AnimatePresence mode="wait">
+            <PageTransition key={location.pathname}>
+              <Routes location={location} key={location.pathname}>
                   <Route path="/login" element={<AuthRedirect />} />
                   <Route path="/auth-redirect" element={<AuthRedirect />} />
 
@@ -218,10 +217,9 @@ function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </PageTransition>
-            </AnimatePresence>
-          </main>
-        </div>
-      </SmoothScroll>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 }

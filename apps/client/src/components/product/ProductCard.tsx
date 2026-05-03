@@ -4,7 +4,7 @@ import { useCart } from '../../store/CartContext';
 import { useFavourites } from '../../store/FavouritesContext';
 import formatCurrency from '../../utils/formatCurrency';
 
-import LazyImage from '../feature/LazyImage';
+import { LazyImage } from '@camera-rental-house/ui';
 
 const ProductCard = ({ product }) => {
   const { items, addToCart, removeFromCart } = useCart();
