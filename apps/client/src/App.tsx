@@ -36,14 +36,16 @@ function App() {
   const { user } = useAuth();
   const searchParams = new URLSearchParams(location.search);
   const isClearingSession = searchParams.get('clear_session') === 'true';
+  const hasJustLoggedOut = searchParams.get('logged_out') === 'true';
   const authPage = isClearingSession || ['/login', '/signup'].includes(location.pathname);
   const isProductPage = location.pathname.startsWith('/product/');
   const showBottomNav = !authPage && !isProductPage;
 
   useEffect(() => {
     if (user && 'role' in user) {
-      if (isClearingSession) {
-        return; // Login.tsx handles the logout
+      // Guard: never redirect during active logout flow
+      if (isClearingSession || hasJustLoggedOut) {
+        return;
       }
 
       const role = (user as any).role;
@@ -64,7 +66,7 @@ function App() {
         window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);
       }
     }
-  }, [user, isClearingSession]);
+  }, [user, isClearingSession, hasJustLoggedOut]);
 
   return (
     <div className="relative min-h-screen text-ink">

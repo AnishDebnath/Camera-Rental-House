@@ -37,7 +37,7 @@ const Login = () => {
   useEffect(() => {
     if (isClearingSession) {
       logout({ silent: true });
-      window.location.replace('/login?logged_out=true');
+      window.location.replace(`${window.location.origin}/login?logged_out=true`);
     }
   }, [isClearingSession, logout]);
 

@@ -44,15 +44,13 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
           return (
             <div
               key={p.id}
-              className={`group relative flex items-center justify-between rounded-xl border p-3 transition-all duration-300 ${
-                isScanned ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white hover:border-line-hover'
-              }`}
+              className={`group relative flex flex-col gap-4 rounded-xl border p-4 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between sm:p-3 ${isScanned ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white hover:border-line-hover'}`}
             >
               <div className="flex items-center gap-4">
-                <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-line bg-slate-50">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 sm:h-12 sm:w-12">
                   <img
                     src={p.image}
-                    className="h-full w-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all"
+                    className="h-full w-full object-cover transition-all"
                   />
                   {isScanned && (
                     <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/10">
@@ -62,26 +60,24 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
                     </div>
                   )}
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-ink">{p.name}</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tertiary">
-                      {p.id.toUpperCase()}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-ink leading-tight">{p.name}</p>
+                  <div className="mt-1.5">
+                    <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tertiary border border-slate-200/50">
+                      Product Code: {p.id.toUpperCase()}
                     </span>
-                    <span className="text-xs font-medium text-muted">× {p.qty}</span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => !isScanned && onVerifyClick(p)}
-                className={`flex h-9 items-center gap-2 rounded-xl px-3 text-xs font-semibold transition-all active:scale-95 ${
-                  isScanned
-                    ? 'bg-emerald-500 text-white cursor-default'
-                    : 'bg-slate-50 text-ink border border-line hover:bg-slate-100'
-                }`}
+                className={`flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all active:scale-95 sm:h-9 sm:px-3 ${isScanned
+                  ? 'bg-emerald-500 text-white cursor-default shadow-sm'
+                  : 'bg-slate-50 text-ink border border-line hover:bg-slate-100'
+                  }`}
               >
                 <QrCode className="h-4 w-4" />
-                {isScanned ? 'Verified' : 'Verify Code'}
+                {isScanned ? 'Verified' : 'Verify QR Code'}
               </button>
             </div>
           );
