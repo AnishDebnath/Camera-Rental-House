@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ScanLine } from 'lucide-react';
+import { X, ScanLine, PackageCheck } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
 interface Props {
@@ -98,8 +98,13 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
         className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-ink text-sm uppercase tracking-wider">Verify Product</h3>
-          <button onClick={onClose} className="text-muted hover:text-ink">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+              <PackageCheck className="h-5 w-5" />
+            </div>
+            <h3 className="font-black text-ink text-xs uppercase tracking-widest">Verify Product</h3>
+          </div>
+          <button onClick={onClose} className="text-muted hover:text-ink transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>

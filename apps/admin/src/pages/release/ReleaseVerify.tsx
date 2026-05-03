@@ -83,16 +83,16 @@ const ReleaseVerify = ({
           isVerified={isUserVerified}
           onToggleVerify={() => setIsVerifyingUser(true)}
         />
-      </div>
 
-      {/* Right Column: Proof & Action */}
-      <div className="lg:col-span-5 space-y-5">
         <Step3Proof
           photo={proofPhoto}
           onCapture={onCapture}
           onClear={onClearPhoto}
         />
+      </div>
 
+      {/* Right Column: Summary & Action */}
+      <div className="lg:col-span-5 space-y-5">
         <ReleaseSummary
           allProductsScanned={allProductsScanned}
           isUserVerified={isUserVerified}
