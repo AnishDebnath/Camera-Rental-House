@@ -143,7 +143,7 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
           <div id={containerId} className="absolute inset-0 h-full w-full" />
 
           <AnimatePresence>
-            {status === 'scanning' && (
+            {/* {status === 'scanning' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pointer-events-none absolute inset-0 z-10">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative h-48 w-48">
@@ -154,7 +154,7 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
                   </div>
                 </div>
               </motion.div>
-            )}
+            )} */}
 
             {status === 'success' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-emerald-500/90 backdrop-blur-md">

@@ -129,7 +129,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
           <div id={containerId} className="absolute inset-0 h-full w-full" />
 
           {/* Scanning Overlay */}
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {status === 'scanning' && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -147,7 +147,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
 
           {/* Success State */}
           <AnimatePresence>
