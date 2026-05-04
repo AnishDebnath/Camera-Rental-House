@@ -1,6 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import Footer from '../../components/common/footer/Footer';
-import { mockProducts } from '../../data/mockProducts';
+import axiosInstance from '../../api/axiosInstance';
 import { useCart } from '../../store/CartContext';
 import { useFavourites } from '../../store/FavouritesContext';
 
@@ -13,8 +15,51 @@ const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart, removeFromCart, items } = useCart();
   const { isFavourite, toggleFavourite } = useFavourites();
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const product = mockProducts.find((item) => item.id === id) || mockProducts[0];
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const { data } = await axiosInstance.get(`/products/${id}`);
+        const mappedProduct = {
+          ...data,
+          images: (data.images || []).map((url: string, i: number) => ({
+            id: String(i),
+            image_url: url,
+            display_order: i
+          }))
+        };
+        setProduct(mappedProduct);
+      } catch (err: any) {
+        console.error('Failed to fetch product details:', err);
+        setError(err.message || 'Product not found');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+        <p className="text-lg font-bold text-ink">{error || 'Product not found'}</p>
+        <Link to="/category" className="primary-button">Back to Catalog</Link>
+      </div>
+    );
+  }
+
   const inCart = items.some((item) => item.id === product.id);
 
   const handleCartAction = () => {
@@ -43,20 +88,6 @@ const ProductDetail = () => {
               toggleFavourite={toggleFavourite}
               handleCartAction={handleCartAction}
             />
-
-            {/* Footer Nav Link Area */}
-            {/* <div className="mx-1 overflow-hidden rounded-[40px] bg-primary/5 border border-primary/10 p-8 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-lg font-black text-ink">Plan your production.</p>
-                <p className="text-sm text-muted">Proceed to cart to finalize dates and insurance.</p>
-              </div>
-              <Link
-                to="/cart"
-                className="flex h-12 items-center justify-center rounded-2xl bg-white px-8 text-sm font-bold text-primary shadow-sm border border-line hover:border-primary/50 transition-all active:scale-95"
-              >
-                Review Cart
-              </Link>
-            </div> */}
           </div>
         </div>
       </div>

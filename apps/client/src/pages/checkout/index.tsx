@@ -5,6 +5,7 @@ import { differenceInDays } from 'date-fns';
 
 import { useAuth } from '../../store/AuthContext';
 import { useCart } from '../../store/CartContext';
+import axiosInstance from '../../api/axiosInstance';
 
 import CheckoutHeader from './CheckoutHeader';
 import UserDetailsStep from './UserDetailsStep';
@@ -54,15 +55,27 @@ const Checkout = () => {
   };
 
   const handleConfirm = async () => {
+    if (!pickupDate || !dropDate) return;
+    
     setLoading(true);
-    // Capture the final total before clearing the cart
     setFinalTotal(totalCost);
     
-    // Simulate API call
-    await new Promise((resolve) => window.setTimeout(resolve, 2000));
-    clearCart();
-    setLoading(false);
-    setComplete(true);
+    try {
+      await axiosInstance.post('/rentals', {
+        pickupDate: pickupDate.toISOString(),
+        eventDate: dropDate.toISOString(),
+        items: items.map(item => ({
+          productId: item.id,
+          quantity: 1
+        }))
+      });
+      clearCart();
+      setComplete(true);
+    } catch (err) {
+      console.error('Failed to create rental:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) return null;

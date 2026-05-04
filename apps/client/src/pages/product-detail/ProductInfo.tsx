@@ -50,7 +50,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       <div className="flex">
         <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1 border border-line/50">
           <span className="text-[9px] font-bold text-muted uppercase tracking-widest mr-1 text-ink/40">Product Code:</span>
-          <span className="text-xs font-black text-ink">{product.product_code || `#${product.id.padStart(4, '0')}`}</span>
+          <span className="text-xs font-black text-ink">{product.unique_code || `#${String(product.id).padStart(4, '0')}`}</span>
         </div>
       </div>
 

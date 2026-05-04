@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CategoryHeader from './CategoryHeader';
 import CategoryProducts from './CategoryProducts';
 import MobileFilters from './MobileFilters';
 import Footer from '../../components/common/footer/Footer';
-import { mockProducts } from '../../data/mockProducts';
+import axiosInstance from '../../api/axiosInstance';
 import useDebounce from '../../hooks/useDebounce';
 import usePullToRefresh from '../../hooks/usePullToRefresh';
 
@@ -12,13 +12,14 @@ const Category = () => {
   const [params, setParams] = useSearchParams();
   const initialSearch = params.get('q') || '';
   const [search, setSearch] = useState(initialSearch);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [itemsToShow, setItemsToShow] = useState(8);
+  const [itemsToShow, setItemsToShow] = useState(12);
 
   const activeCategory = params.get('category') || 'All';
   const activeBrand = params.get('brand') || 'All';
-  const debouncedSearch = useDebounce(search, 250);
+  const debouncedSearch = useDebounce(search, 300);
 
   // Sync state with URL params
   useEffect(() => {
@@ -43,32 +44,37 @@ const Category = () => {
 
   const refresh = async () => {
     setLoading(true);
-    await new Promise((resolve) => window.setTimeout(resolve, 500));
-    setLoading(false);
+    try {
+      const { data } = await axiosInstance.get('/products', {
+        params: {
+          category: activeCategory,
+          brand: activeBrand,
+          search: debouncedSearch,
+          limit: itemsToShow
+        }
+      });
+      
+      const mappedProducts = data.items.map((p: any) => ({
+        ...p,
+        images: (p.images || []).map((url: string, i: number) => ({
+          id: String(i),
+          image_url: url,
+          display_order: i
+        }))
+      }));
+      setProducts(mappedProducts);
+    } catch (err) {
+      console.error('Failed to fetch category products:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const pullDistance = usePullToRefresh(refresh);
 
   useEffect(() => {
     refresh();
-  }, [activeCategory, activeBrand]);
-
-  const filteredProducts = useMemo(
-    () =>
-      mockProducts.filter((product) => {
-        const matchesCategory = activeCategory === 'All' ||
-          product.category === activeCategory ||
-          product.name.toLowerCase().includes(activeCategory.toLowerCase());
-
-        const matchesBrand = activeBrand === 'All' ||
-          product.name.toLowerCase().includes(activeBrand.toLowerCase());
-
-        const matchesSearch = product.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-
-        return matchesCategory && matchesBrand && matchesSearch;
-      }),
-    [activeCategory, activeBrand, debouncedSearch],
-  );
+  }, [activeCategory, activeBrand, debouncedSearch, itemsToShow]);
 
   const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
 
@@ -97,7 +103,7 @@ const Category = () => {
       <div className="app-shell mt-4 md:mt-6">
         <CategoryProducts
           loading={loading}
-          filteredProducts={filteredProducts}
+          filteredProducts={products}
           itemsToShow={itemsToShow}
           setItemsToShow={setItemsToShow}
         />
