@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children, allowedRoles = ['admin'] }: { children: any;
 
   if (!allowedRoles.includes(role as string)) {
     // Staff can only access rentals and release
-    return <Navigate to="/rentals" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -71,9 +71,7 @@ const AuthRedirect = () => {
 
     if (token && isValidRole(role)) {
       saveAuthSession(token, role);
-      // staff goes to /rentals, admin goes to /
-      const defaultPath = role === 'staff' ? '/rentals' : '/';
-      navigate(next?.startsWith('/') ? next : defaultPath, { replace: true });
+      navigate('/', { replace: true });
       return;
     }
 
@@ -113,7 +111,7 @@ function App() {
                   <Route
                     path="/"
                     element={
-                      <ProtectedRoute>
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
                         <Dashboard />
                       </ProtectedRoute>
                     }

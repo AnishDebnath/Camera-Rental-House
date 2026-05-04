@@ -12,10 +12,7 @@ import { useToast } from '@camera-rental-house/ui';
 
 const adminAppUrl = resolveAdminAppUrl(import.meta.env.VITE_ADMIN_APP_URL);
 const clientAppUrl = resolveClientAppUrl(import.meta.env.VITE_CLIENT_APP_URL);
-const resolveClientNextPath = (requestedNext: string | null) =>
-  requestedNext?.startsWith('/') && !requestedNext.startsWith('/admin')
-    ? requestedNext
-    : '/account';
+const resolveClientNextPath = (requestedNext: string | null) => '/';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -104,12 +101,7 @@ const Login = () => {
       
       // Handle Admin/Staff redirect to Admin portal
       if (data.user.role === 'admin' || data.user.role === 'staff') {
-        let nextPath = '/';
-        if (requestedNext?.startsWith('/admin')) {
-          nextPath = requestedNext.replace(/^\/admin/, '') || '/';
-        } else {
-          nextPath = data.user.role === 'admin' ? '/' : '/rentals';
-        }
+          nextPath = '/';
 
         const params = new URLSearchParams({
           token: data.accessToken,
