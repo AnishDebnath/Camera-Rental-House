@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 import clsx from 'clsx';
 import FilterChips from './FilterChips';
-import { useLenis } from '../../context/LenisContext';
+import { useLenis } from '@camera-rental-house/ui';
 
 interface CategoryHeaderProps {
   pullDistance: number;

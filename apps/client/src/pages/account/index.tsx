@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Camera, PackageSearch, UserRound } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { useToast } from '@camera-rental-house/ui';
-import { useLenis } from '../../context/LenisContext';
+import { useLenis } from '@camera-rental-house/ui';
 import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
 
 import AccountHeader from './AccountHeader';

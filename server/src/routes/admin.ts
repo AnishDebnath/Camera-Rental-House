@@ -19,7 +19,7 @@ const extractPublicId = (url: string | null): string | null => {
   const parts = url.split('/upload/');
   if (parts.length < 2) return null;
   const path = parts[1].replace(/^v\d+\//, '');
-  return path.split('.')[0];
+  return decodeURIComponent(path.split('.')[0]);
 };
 
 router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: Response) => {

@@ -239,7 +239,16 @@ export default function ProductForm() {
               <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-primary/40 bg-white/50">
                 <ImagePlus className="h-6 w-6 text-primary" />
                 <span className="text-sm font-bold text-muted">{(existingImages.length - removeImageUrls.length + newFiles.length) === 0 ? 'Add Images' : 'Add More'}</span>
-                <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleNewImages(e.target.files)} />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  multiple 
+                  className="hidden" 
+                  onChange={(e) => {
+                    handleNewImages(e.target.files);
+                    e.target.value = '';
+                  }} 
+                />
               </label>
             )}
           </div>
