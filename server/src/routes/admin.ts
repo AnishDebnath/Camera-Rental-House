@@ -416,7 +416,7 @@ router.delete('/products/:id', roleMiddleware(['admin']), async (req: Request, r
   }
 });
 
-router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager']), async (_req: Request, res: Response) => {
+router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), async (_req: Request, res: Response) => {
   try {
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await supabase
@@ -437,7 +437,7 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager']), async (_re
   }
 });
 
-router.get('/rentals/active', roleMiddleware(['admin', 'manager']), async (_req: Request, res: Response) => {
+router.get('/rentals/active', roleMiddleware(['admin', 'manager', 'staff']), async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('rental_items')
@@ -455,7 +455,7 @@ router.get('/rentals/active', roleMiddleware(['admin', 'manager']), async (_req:
   }
 });
 
-router.get('/rentals/past', roleMiddleware(['admin', 'manager']), async (req: Request, res: Response) => {
+router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async (req: Request, res: Response) => {
   try {
     const limit = Number(req.query.limit || 20);
     const offset = Number(req.query.offset || 0);
@@ -484,6 +484,38 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager']), async (req: Re
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch past rentals.' });
+  }
+});
+
+router.get('/rentals/:id', roleMiddleware(['admin', 'manager', 'staff']), async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from('rentals')
+      .select('*, users(*), rental_items(*, products(*))')
+      .eq('id', req.params.id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      // Try searching by ID prefix if it's a short code
+      const { data: searchData, error: searchError } = await supabase
+        .from('rentals')
+        .select('*, users(*), rental_items(*, products(*))')
+        .ilike('id', `${req.params.id}%`)
+        .limit(1)
+        .maybeSingle();
+        
+      if (searchError) throw searchError;
+      if (!searchData) return res.status(404).json({ message: 'Rental not found.' });
+      return res.json(searchData);
+    }
+
+    return res.json(data);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch rental details.' });
   }
 });
 

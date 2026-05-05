@@ -45,46 +45,46 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                 className="group card-surface flex flex-col rounded-[2rem] border border-white/60 bg-white/40 pt-4 px-4 pb-2.5 backdrop-blur-xl transition-all duration-300 md:pt-5 md:px-5 md:pb-3"
               >
                 <div className="flex items-center justify-between mb-3.5">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
                     <span className={`h-1.5 w-1.5 rounded-full ${isReleased ? 'bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-primary animate-pulse shadow-[0_0_8px_rgba(255,107,0,0.5)]'}`} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Order #{rental.id.slice(0, 8)}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Rental ID: {rental.rental_no || `#${rental.id.slice(0, 8)}`}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-primary/70" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
-                      {Math.ceil((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) || 1} Days
+                    <Calendar className="h-4 w-4 text-primary/70" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary/80">
+                      {(Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1} Days
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5 mb-4">
+                <div className="flex flex-col gap-3 mb-5">
                   <div className="flex items-center gap-3">
                     <div className="flex-1 space-y-1">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Pickup</p>
-                      <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.pickup_date)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pickup</p>
+                      <p className="text-base md:text-lg font-bold text-ink leading-tight truncate">{formatDate(rental.pickup_date)}</p>
                     </div>
-                    <div className="flex-shrink-0 text-slate-300 flex items-center justify-center h-8 w-8 rounded-full bg-white/50 border border-white shadow-sm">
-                      <ArrowRight className="h-4 w-4 text-primary/40" />
+                    <div className="flex-shrink-0 text-slate-300 flex items-center justify-center h-9 w-9 rounded-full bg-white/50 border border-white shadow-sm">
+                      <ArrowRight className="h-5 w-5 text-primary/40" />
                     </div>
                     <div className="flex-1 space-y-1 text-right">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Return</p>
-                      <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.event_date)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Return</p>
+                      <p className="text-base md:text-lg font-bold text-ink leading-tight truncate">{formatDate(rental.event_date)}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <span className={`h-1.5 w-1.5 rounded-full ${isReleased ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-primary shadow-[0_0_8px_rgba(255,107,0,0.5)]'}`} />
-                    <p className="text-[10px] font-semibold text-slate-500">
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className={`h-2 w-2 rounded-full animate-pulse ${isReleased ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-primary shadow-[0_0_8px_rgba(255,107,0,0.5)]'}`} />
+                    <p className="text-xs font-semibold text-slate-600">
                       {isReleased ? 'Return to Rental House' : 'Pickup at Rental House'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-3 border-t border-slate-200/80 pt-3.5">
-                  <div className="space-y-2.5">
-                    {rental.rental_items.slice(0, 2).map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
+                <div className="flex-1 space-y-4 border-t border-slate-200/80 pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {rental.rental_items.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3.5 rounded-2xl bg-white/40 p-2.5 border border-white/40 shadow-sm">
+                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
                           {item.products?.images?.[0] ? (
                             <img
                               src={item.products.images[0]}
@@ -93,93 +93,88 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                              <Camera className="h-4 w-4 text-muted" />
+                              <Camera className="h-5 w-5 text-muted" />
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-bold text-ink">
+                          <p className="truncate text-xs md:text-sm font-bold text-ink leading-tight">
                             {item.products?.name || 'Unknown Product'}
                           </p>
-                          <p className="text-[10px] font-medium text-muted">
-                            {item.products?.brand || 'Premium Equipment'}
+                          <p className="text-[10px] md:text-xs font-medium text-muted mt-1 flex items-center gap-1.5">
+                            <span className="inline-block px-1.5 py-0.5 rounded-md bg-slate-100 font-bold text-slate-500">{item.products?.unique_code || 'N/A'}</span>
                           </p>
                         </div>
                       </div>
                     ))}
-                    {rental.rental_items.length > 2 && (
-                      <p className="pl-13 text-[10px] font-bold text-primary">
-                        + {rental.rental_items.length - 2} more items
-                      </p>
-                    )}
                   </div>
 
                   <div className="mt-3 flex flex-col gap-3">
                     {/* Totals Card */}
-                    <div className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2.5 border border-white backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+                    <div className="flex items-center justify-between rounded-xl bg-white/60 px-4 py-3 border border-white backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
                       <div className="space-y-0.5">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Total Units</p>
-                        <p className="text-[11px] font-bold text-ink">{rental.rental_items.length} Items</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Units</p>
+                        <p className="text-xs md:text-sm font-bold text-ink">{rental.rental_items.length} Items</p>
                       </div>
-                      {rental.total_amount && (
-                        <div className="space-y-0.5 text-right">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
-                          <p className="text-[13px] md:text-sm font-black tracking-tight text-primary">₹{rental.total_amount.toLocaleString()}</p>
-                        </div>
-                      )}
+                      <div className="space-y-0.5 text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
+                        <p className="text-base md:text-lg font-black tracking-tight text-primary">
+                          ₹{(rental.total_amount || rental.rental_items.reduce((sum: number, item: any) => sum + (item.products?.price_per_day || 0) * (item.quantity || 1) * ((Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1), 0)).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Handover Cards */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-2xl bg-slate-50/80 p-3 border border-slate-100 transition-colors">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="rounded-2xl bg-slate-50/80 p-3.5 border border-slate-100 transition-colors">
                         {isReleased ? (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
-                              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Released By</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Released By</p>
                             </div>
-                            <p className="text-xs font-bold text-slate-800">{rental.released_by || 'Staff Member'}</p>
-                            <p className="text-[10px] font-medium text-slate-400">{rental.released_at ? formatDate(rental.released_at) : formatDate(rental.pickup_date)}</p>
+                            <p className="text-xs md:text-sm font-bold text-slate-800">{rental.released_by || 'Staff Member'}</p>
+                            <p className="text-[10px] md:text-xs font-medium text-slate-400">{rental.released_at ? formatDate(rental.released_at) : formatDate(rental.pickup_date)}</p>
                           </div>
                         ) : (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse" />
-                              <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600">Status</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">Status</p>
                             </div>
-                            <p className="text-xs font-bold text-amber-900">Awaiting Pickup</p>
-                            <p className="text-[10px] font-medium text-amber-600/70">Not released yet</p>
+                            <p className="text-xs md:text-sm font-bold text-amber-900">Awaiting Pickup</p>
+                            <p className="text-[10px] md:text-xs font-medium text-amber-600/70">Not released yet</p>
                           </div>
                         )}
                       </div>
 
-                      <div className="rounded-2xl bg-slate-50/80 p-3 border border-slate-100 transition-colors">
+                      <div className="rounded-2xl bg-slate-50/80 p-3.5 border border-slate-100 transition-colors">
                         {rental.received_by ? (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Received By</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Received By</p>
                             </div>
-                            <p className="text-xs font-bold text-slate-800">{rental.received_by}</p>
-                            <p className="text-[10px] font-medium text-slate-400">{rental.received_at ? formatDate(rental.received_at) : formatDate(new Date().toISOString())}</p>
+                            <p className="text-xs md:text-sm font-bold text-slate-800">{rental.received_by}</p>
+                            <p className="text-[10px] md:text-xs font-medium text-slate-400">{rental.received_at ? formatDate(rental.received_at) : formatDate(new Date().toISOString())}</p>
                           </div>
                         ) : isReleased ? (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-                              <p className="text-[9px] font-bold uppercase tracking-widest text-blue-600">Status</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="h-2 w-2 rounded-full bg-blue-400" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600">Status</p>
                             </div>
-                            <p className="text-xs font-bold text-blue-900">In Possession</p>
-                            <p className="text-[10px] font-medium text-blue-600/70">To be returned</p>
+                            <p className="text-xs md:text-sm font-bold text-blue-900">In Possession</p>
+                            <p className="text-[10px] md:text-xs font-medium text-blue-600/70">To be returned</p>
                           </div>
                         ) : (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Status</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="h-2 w-2 rounded-full bg-slate-300" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</p>
                             </div>
-                            <p className="text-xs font-bold text-slate-500">Pending</p>
-                            <p className="text-[10px] font-medium text-slate-400/60">—</p>
+                            <p className="text-xs md:text-sm font-bold text-slate-500">Pending</p>
+                            <p className="text-[10px] md:text-xs font-medium text-slate-400/60">—</p>
                           </div>
                         )}
                       </div>

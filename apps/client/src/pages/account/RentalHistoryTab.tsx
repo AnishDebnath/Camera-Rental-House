@@ -44,7 +44,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
         <div className="grid gap-3 lg:grid-cols-2 md:gap-4">
           {pastRentals.map((rental) => {
             const isExpanded = expandedId === rental.id;
-            const duration = Math.ceil((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) || 1;
+            const duration = (Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1;
 
             return (
               <article
@@ -59,7 +59,7 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
                       <span className={`h-1.5 w-1.5 rounded-full ${rental.status === 'failed' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Order #{rental.id.slice(0, 8)}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Order {rental.rental_no || `#${rental.id.slice(0, 8)}`}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-bold uppercase tracking-widest ${rental.status === 'failed' ? 'text-red-500' : 'text-success'}`}>
@@ -100,12 +100,12 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                       <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Total Units</p>
                       <p className="text-[11px] font-bold text-ink">{rental.rental_items.length} Items</p>
                     </div>
-                    {rental.total_amount && (
-                      <div className="space-y-0.5 text-right">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
-                        <p className="text-[13px] md:text-sm font-black tracking-tight text-primary">₹{rental.total_amount.toLocaleString()}</p>
-                      </div>
-                    )}
+                    <div className="space-y-0.5 text-right">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
+                      <p className="text-[13px] md:text-sm font-black tracking-tight text-primary">
+                        ₹{(rental.total_amount || rental.rental_items.reduce((sum: number, item: any) => sum + (item.products?.price_per_day || 0) * (item.quantity || 1) * duration, 0)).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -157,8 +157,8 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                                     <p className="shrink-0 text-xs font-black text-primary">₹{itemTotal.toLocaleString()}</p>
                                   </div>
                                   <div className="mt-1 flex items-center justify-between">
-                                    <p className="text-[10px] font-medium text-muted">
-                                      {item.products?.brand || 'Premium Equipment'}
+                                    <p className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                                      {item.products?.unique_code || 'N/A'}
                                     </p>
                                     <p className="text-[9px] font-bold text-slate-400 italic">₹{item.price_per_day}/d × {duration}</p>
                                   </div>

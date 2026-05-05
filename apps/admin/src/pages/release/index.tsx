@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { adminRentals } from '../../data/mockAdmin';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import axiosInstance from '../../api/axiosInstance';
 import ReleaseSearch from './ReleaseSearch';
 import ReleaseVerify from './ReleaseVerify';
 import ReleaseSuccess from './ReleaseSuccess';
@@ -13,19 +14,41 @@ const ReleaseReturn = () => {
   const [proofPhoto, setProofPhoto] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!searchId.trim()) return;
+    
     setError(null);
-    const all = [
-      ...adminRentals.upcoming,
-      ...adminRentals.active,
-      ...adminRentals.returning,
-    ];
-    const found = all.find((r) => r.id.toLowerCase() === searchId.toLowerCase());
-    if (found) {
-      setActiveRental(found);
-    } else {
-      setError('Booking ID not found. Please verify and try again.');
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`/admin/rentals/${searchId.trim()}`);
+      const rental = response.data;
+      
+      // Map DB rental to UI format
+      const mappedRental = {
+        id: rental.id.split('-')[0].toUpperCase(),
+        full_id: rental.id,
+        name: rental.users?.full_name || 'Guest',
+        phone: rental.users?.phone || 'N/A',
+        pickup: rental.pickup_date,
+        return_date: rental.event_date,
+        status: rental.status,
+        products: (rental.rental_items || []).map((item: any) => ({
+          id: item.product_id,
+          name: item.products?.name || 'Unknown',
+          image: item.products?.images?.[0] || '',
+          status: item.status,
+          unique_code: item.products?.unique_code
+        }))
+      };
+      
+      setActiveRental(mappedRental);
+    } catch (err: any) {
+      console.error('Search failed:', err);
+      setError(err.response?.data?.message || 'Booking ID not found. Please verify and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,6 +60,28 @@ const ReleaseReturn = () => {
     setProofPhoto(null);
     setIsComplete(false);
     setError(null);
+  };
+
+  const handleRelease = async () => {
+    if (!activeRental || scannedProducts.length === 0) return;
+    
+    setLoading(true);
+    try {
+      const isReturn = activeRental.status === 'released' || activeRental.products.some((p: any) => p.status === 'released');
+      const endpoint = isReturn ? '/manage/bulk-return' : '/manage/bulk-release';
+      
+      await axiosInstance.post(endpoint, {
+        rentalId: activeRental.full_id,
+        productIds: scannedProducts
+      });
+      
+      setIsComplete(true);
+    } catch (err: any) {
+      console.error('Action failed:', err);
+      setError(err.response?.data?.message || 'Failed to process gear. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleProductScan = (id: string) => {
@@ -55,39 +100,52 @@ const ReleaseReturn = () => {
       {activeRental && (
         <header className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">Release Gear</h1>
+            <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              {activeRental.status === 'released' ? 'Return Gear' : 'Release Gear'}
+            </h1>
             <p className="mt-1.5 text-xs font-medium text-muted sm:text-sm">
-              Verify products and user identity for secure gear handoff.
+              {activeRental.status === 'released' 
+                ? 'Verify returned products and update inventory.' 
+                : 'Verify products and user identity for secure gear handoff.'}
             </p>
           </div>
         </header>
       )}
 
-      <AnimatePresence mode="wait">
-        {!activeRental ? (
-          <ReleaseSearch
-            key="search"
-            searchId={searchId}
-            setSearchId={setSearchId}
-            onSearch={handleSearch}
-            error={error}
-          />
-        ) : (
-          <ReleaseVerify
-            key="verify"
-            rental={activeRental}
-            scannedProducts={scannedProducts}
-            onVerifyProduct={toggleProductScan}
-            isUserVerified={isUserVerified}
-            onToggleVerify={() => setIsUserVerified((v) => !v)}
-            proofPhoto={proofPhoto}
-            onCapture={(photo) => setProofPhoto(photo)}
-            onClearPhoto={() => setProofPhoto(null)}
-            onRelease={() => setIsComplete(true)}
-            onReset={handleReset}
-          />
-        )}
-      </AnimatePresence>
+      {loading && (
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
+          <p className="text-sm font-bold text-muted">Processing vault update...</p>
+        </div>
+      )}
+
+      {!loading && (
+        <AnimatePresence mode="wait">
+          {!activeRental ? (
+            <ReleaseSearch
+              key="search"
+              searchId={searchId}
+              setSearchId={setSearchId}
+              onSearch={handleSearch}
+              error={error}
+            />
+          ) : (
+            <ReleaseVerify
+              key="verify"
+              rental={activeRental}
+              scannedProducts={scannedProducts}
+              onVerifyProduct={toggleProductScan}
+              isUserVerified={isUserVerified}
+              onToggleVerify={() => setIsUserVerified((v) => !v)}
+              proofPhoto={proofPhoto}
+              onCapture={(photo) => setProofPhoto(photo)}
+              onClearPhoto={() => setProofPhoto(null)}
+              onRelease={handleRelease}
+              onReset={handleReset}
+            />
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 };

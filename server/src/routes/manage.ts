@@ -122,6 +122,64 @@ router.post('/return', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/bulk-release', async (req: Request, res: Response) => {
+  try {
+    const { rentalId, productIds } = req.body;
+    if (!rentalId || !productIds || !Array.isArray(productIds)) {
+      return res.status(400).json({ message: 'Rental ID and array of Product IDs are required.' });
+    }
+
+    const staffId = (req.user as any)?.id || null;
+    const staffName = (req.user as any)?.fullName || (req.user as any)?.username || null;
+
+    const { data, error } = await supabase
+      .from('rental_items')
+      .update({
+        status: 'released',
+        released_by_staff_id: staffId,
+        released_by_staff_name: staffName,
+        released_at: new Date().toISOString(),
+      })
+      .eq('rental_id', rentalId)
+      .in('product_id', productIds)
+      .select('*, products(*)');
+
+    if (error) throw error;
+
+    return res.json({
+      message: `${data.length} items released successfully.`,
+      items: data,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to release items.' });
+  }
+});
+
+router.post('/bulk-return', async (req: Request, res: Response) => {
+  try {
+    const { rentalId, productIds } = req.body;
+    if (!rentalId || !productIds || !Array.isArray(productIds)) {
+      return res.status(400).json({ message: 'Rental ID and array of Product IDs are required.' });
+    }
+
+    const { data, error } = await supabase
+      .from('rental_items')
+      .update({ status: 'returned' })
+      .eq('rental_id', rentalId)
+      .in('product_id', productIds)
+      .select('*, products(*)');
+
+    if (error) throw error;
+
+    return res.json({
+      message: `${data.length} items returned successfully.`,
+      items: data,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to return items.' });
+  }
+});
+
 router.get('/counts', async (_req: Request, res: Response) => {
   try {
     const [productsCount, activeRentalsCount] = await Promise.all([

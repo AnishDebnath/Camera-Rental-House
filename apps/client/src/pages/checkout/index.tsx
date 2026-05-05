@@ -6,6 +6,7 @@ import { differenceInDays } from 'date-fns';
 import { useAuth } from '../../store/AuthContext';
 import { useCart } from '../../store/CartContext';
 import axiosInstance from '../../api/axiosInstance';
+import { useToast } from '@camera-rental-house/ui';
 
 import CheckoutHeader from './CheckoutHeader';
 import UserDetailsStep from './UserDetailsStep';
@@ -18,10 +19,10 @@ const STEPS = [
   { id: 'dates', label: 'Rental Period', Icon: CalendarIcon },
   { id: 'summary', label: 'Order Summary', Icon: ShoppingBag },
 ];
-
 const Checkout = () => {
   const { user } = useAuth();
   const { items, subtotal, clearCart } = useCart();
+  const { addToast } = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
@@ -31,6 +32,7 @@ const Checkout = () => {
   const [dropDate, setDropDate] = useState<Date | null>(null);
 
   const [finalTotal, setFinalTotal] = useState<number>(0);
+  const [rentalNo, setRentalNo] = useState<string>('');
 
   const totalDays = useMemo(() => {
     if (!pickupDate || !dropDate) return 1;
@@ -55,13 +57,16 @@ const Checkout = () => {
   };
 
   const handleConfirm = async () => {
-    if (!pickupDate || !dropDate) return;
+    if (!pickupDate || !dropDate) {
+      addToast({ title: 'Select Dates', message: 'Please select pickup and return dates.', tone: 'warning' });
+      return;
+    }
     
     setLoading(true);
     setFinalTotal(totalCost);
     
     try {
-      await axiosInstance.post('/rentals', {
+      const { data } = await axiosInstance.post('/rentals', {
         pickupDate: pickupDate.toISOString(),
         eventDate: dropDate.toISOString(),
         items: items.map(item => ({
@@ -69,10 +74,18 @@ const Checkout = () => {
           quantity: 1
         }))
       });
+      
+      setRentalNo(data.rental_no);
+      addToast({ title: 'Success', message: 'Gear reserved successfully!', tone: 'success' });
       clearCart();
       setComplete(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create rental:', err);
+      addToast({ 
+        title: 'Booking Failed', 
+        message: err.message || 'Unable to connect to vault. Please try again.', 
+        tone: 'error' 
+      });
     } finally {
       setLoading(false);
     }
@@ -86,6 +99,7 @@ const Checkout = () => {
         pickupDate={pickupDate}
         dropDate={dropDate}
         totalCost={finalTotal}
+        rentalNo={rentalNo}
       />
     );
   }

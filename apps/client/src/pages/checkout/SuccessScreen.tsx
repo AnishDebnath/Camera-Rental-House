@@ -8,9 +8,10 @@ interface SuccessScreenProps {
   pickupDate: Date | null;
   dropDate: Date | null;
   totalCost: number;
+  rentalNo?: string;
 }
 
-const SuccessScreen = ({ pickupDate, dropDate, totalCost }: SuccessScreenProps) => {
+const SuccessScreen = ({ pickupDate, dropDate, totalCost, rentalNo }: SuccessScreenProps) => {
   return (
     <div className="page-animate app-shell pt-2 pb-10 flex flex-col items-center px-4">
       <motion.div
@@ -51,7 +52,7 @@ const SuccessScreen = ({ pickupDate, dropDate, totalCost }: SuccessScreenProps) 
         <div className="inline-block px-5 py-2.5 rounded-2xl bg-white border border-line/10 shadow-sm mb-8 transition-all hover:border-primary/20">
           <p className="text-xs font-bold uppercase tracking-[0.2em]">
             <span className="text-muted/60">Booking ID:</span>
-            <span className="text-primary ml-2">RH-{Math.floor(Math.random() * 100000)}</span>
+            <span className="text-primary ml-2">{rentalNo || 'N/A'}</span>
           </p>
         </div>
 

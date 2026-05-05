@@ -45,7 +45,7 @@ const RentalItem = ({ rental, activeTab }: { rental: Rental; activeTab: 'upcomin
 
   const getDays = (start: string, end: string) => {
     const diff = new Date(end).getTime() - new Date(start).getTime();
-    return Math.floor(diff / (1000 * 3600 * 24)) + 1;
+    return Math.round(diff / (1000 * 3600 * 24)) + 1;
   };
   const durationDays = getDays(rental.pickup, rental.return_date);
 

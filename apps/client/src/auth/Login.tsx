@@ -101,7 +101,7 @@ const Login = () => {
       
       // Handle Admin/Staff redirect to Admin portal
       if (data.user.role === 'admin' || data.user.role === 'staff') {
-          nextPath = '/';
+        const nextPath = '/';
 
         const params = new URLSearchParams({
           token: data.accessToken,
