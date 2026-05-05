@@ -27,7 +27,7 @@ type RentalCardProps = {
   activeTab: 'upcoming' | 'active' | 'returning';
 };
 
-const RentalItem = ({ rental, activeTab }: { rental: Rental; activeTab: 'upcoming' | 'active' | 'returning' }) => {
+const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activeTab: 'upcoming' | 'active' | 'returning'; index: number; total: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusStyle = (status: string) => {
@@ -69,9 +69,15 @@ const RentalItem = ({ rental, activeTab }: { rental: Rental; activeTab: 'upcomin
       >
         {/* Top Header: ID & Expansion */}
         <div className="mb-4 flex items-center justify-between border-b border-line/60 pb-3">
-          <div className="flex items-center gap-2 rounded-xl border border-line bg-slate-50 px-3 py-1.5 shadow-sm">
-            <span className="text-[10px] font-black uppercase tracking-widest text-tertiary">Rental ID:</span>
-            <span className="font-mono text-sm font-black text-primary">#{rental.id}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-black text-primary">
+              {index}
+            </div>
+            <div className="flex items-center gap-1.5 rounded-xl border border-line bg-slate-50 px-3 py-1.5 shadow-sm">
+              <span className="text-[10px] font-black uppercase tracking-widest text-tertiary">Rental ID:</span>
+              <span className="font-mono text-sm font-black text-primary">{rental.id}</span>
+            </div>
+            <span className="text-[10px] font-medium text-muted">{index} of {total}</span>
           </div>
           <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isExpanded ? 'bg-ink border-ink text-white rotate-180 shadow-md' : 'bg-white border-line text-ink hover:bg-slate-50 hover:border-line/80 shadow-sm'
             }`}>
@@ -246,10 +252,32 @@ const RentalItem = ({ rental, activeTab }: { rental: Rental; activeTab: 'upcomin
 };
 
 const RentalCard = ({ rentals, activeTab }: RentalCardProps) => {
+  if (!rentals.length) {
+    const emptyMessages = {
+      upcoming: "No pickups scheduled for this date.",
+      active: "No active rentals currently released.",
+      returning: "No returns expected for this date."
+    };
+
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20 px-6 text-center card-surface border-dashed border-2 border-slate-200 bg-slate-50/30">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100/80 text-slate-400">
+          <Calendar className="h-8 w-8 opacity-40" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-sm font-black uppercase tracking-widest text-ink">No Rentals Found</h3>
+          <p className="text-[13px] font-bold text-muted max-w-[240px] mx-auto leading-relaxed">
+            {emptyMessages[activeTab]}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {rentals.map((rental) => (
-        <RentalItem key={rental.id} rental={rental} activeTab={activeTab} />
+      {rentals.map((rental, idx) => (
+        <RentalItem key={rental.id} rental={rental} activeTab={activeTab} index={idx + 1} total={rentals.length} />
       ))}
     </div>
   );

@@ -99,27 +99,24 @@ const Rentals = () => {
     return Object.values(grouped);
   }, [rawRentals, activeTab]);
 
-  const counts = {
-    upcoming: activeTab === 'upcoming' ? mappedRentals.length : 0,
-    active: activeTab === 'active' ? mappedRentals.length : 0,
-    returning: activeTab === 'returning' ? mappedRentals.length : 0,
-  };
 
   const filteredRentals = useMemo(() => {
     let list = mappedRentals as any[];
 
-    // 1. Filter by Date (Only for Return tab strictly, Upcoming shows all queue by default but can be filtered)
-    if (activeTab === 'returning') {
-      list = list.filter(r => r.return_date.startsWith(filterDate));
-    } else if (activeTab === 'upcoming') {
-      // Optional: highlight today, but show all upcoming in the list
-      // For now, let's keep the date navigator but make it filter ONLY if user intentionally navigated away from today or if we want strict daily view.
-      // USER REQUEST: "can't show". Likely because they booked for a future date.
-      // FIX: If in upcoming tab, we only filter by date if the user has changed the date from today, OR we just show all.
-      // Let's show all for now to be safe.
+    // Helper: extract local YYYY-MM-DD from ISO timestamp
+    const toLocalDate = (iso: string) => {
+      const d = new Date(iso);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    // Date filter: upcoming = pickup_date, returning = return_date, active = no date filter
+    if (activeTab === 'upcoming') {
+      list = list.filter(r => toLocalDate(r.pickup) === filterDate);
+    } else if (activeTab === 'returning') {
+      list = list.filter(r => toLocalDate(r.return_date) === filterDate);
     }
 
-    // 2. Filter by Search Query
+    // Search filter
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
       list = list.filter((r) => 
@@ -131,9 +128,15 @@ const Rentals = () => {
     return list;
   }, [mappedRentals, activeTab, searchQuery, filterDate]);
 
+  const counts = useMemo(() => ({
+    upcoming: activeTab === 'upcoming' ? filteredRentals.length : 0,
+    active: activeTab === 'active' ? mappedRentals.length : 0,
+    returning: activeTab === 'returning' ? filteredRentals.length : 0,
+  }), [filteredRentals, mappedRentals, activeTab]);
+
   const shiftDate = (days: number) => {
-    const date = new Date(filterDate);
-    date.setDate(date.getDate() + days);
+    const [y, m, d] = filterDate.split('-').map(Number);
+    const date = new Date(y, m - 1, d + days); // local date, no UTC issue
     setFilterDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`);
   };
 

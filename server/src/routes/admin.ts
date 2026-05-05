@@ -418,20 +418,33 @@ router.delete('/products/:id', roleMiddleware(['admin']), async (req: Request, r
 
 router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), async (_req: Request, res: Response) => {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
+    const { data: rentals, error } = await supabase
       .from('rentals')
-      .select(
-        '*, users(full_name, phone), rental_items(*, products(name, unique_code, images))',
-      )
-      .gte('pickup_date', today)
+      .select('*, rental_items(*, products(name, unique_code, price_per_day, images))')
+      .in('status', ['confirmed'])
       .order('pickup_date', { ascending: true });
 
-    if (error) {
-      throw error;
+    if (error) throw error;
+
+    // Manually attach user info
+    const userIds = [...new Set((rentals || []).map((r: any) => r.user_id).filter(Boolean))];
+    let usersMap: Record<string, any> = {};
+
+    if (userIds.length) {
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, full_name, phone')
+        .in('id', userIds);
+      
+      (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 
-    return res.json(data || []);
+    const result = (rentals || []).map((r: any) => ({
+      ...r,
+      users: usersMap[r.user_id] || null,
+    }));
+
+    return res.json(result);
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch upcoming rentals.' });
   }
@@ -439,17 +452,28 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), a
 
 router.get('/rentals/active', roleMiddleware(['admin', 'manager', 'staff']), async (_req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase
+    const { data: items, error } = await supabase
       .from('rental_items')
-      .select('*, rentals(*, users(full_name, phone)), products(*)')
+      .select('*, rentals(*, rental_items(quantity, products(price_per_day))), products(name, unique_code, price_per_day, images)')
       .eq('status', 'released')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      throw error;
+    if (error) throw error;
+
+    // Attach user info manually
+    const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
+    let usersMap: Record<string, any> = {};
+    if (userIds.length) {
+      const { data: users } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
+      (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 
-    return res.json(data || []);
+    const result = (items || []).map((i: any) => ({
+      ...i,
+      rentals: i.rentals ? { ...i.rentals, users: usersMap[i.rentals.user_id] || null } : null,
+    }));
+
+    return res.json(result);
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch active rentals.' });
   }
@@ -460,27 +484,31 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async
     const limit = Number(req.query.limit || 20);
     const offset = Number(req.query.offset || 0);
 
-    const { data, count, error } = await supabase
+    const { data: items, count, error } = await supabase
       .from('rental_items')
-      .select('*, rentals(*, users(full_name, phone)), products(*)', {
-        count: 'exact',
-      })
+      .select('*, rentals(*, rental_items(quantity, products(price_per_day))), products(name, unique_code, price_per_day, images)', { count: 'exact' })
       .eq('status', 'returned')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (error) {
-      throw error;
+    if (error) throw error;
+
+    // Attach user info manually
+    const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
+    let usersMap: Record<string, any> = {};
+    if (userIds.length) {
+      const { data: users } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
+      (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 
+    const result = (items || []).map((i: any) => ({
+      ...i,
+      rentals: i.rentals ? { ...i.rentals, users: usersMap[i.rentals.user_id] || null } : null,
+    }));
+
     return res.json({
-      items: data || [],
-      pagination: {
-        limit,
-        offset,
-        total: count || 0,
-        hasMore: offset + limit < (count || 0),
-      },
+      items: result,
+      pagination: { limit, offset, total: count || 0, hasMore: offset + limit < (count || 0) },
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch past rentals.' });

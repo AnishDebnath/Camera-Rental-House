@@ -60,60 +60,7 @@ export const adminUsers = [
 ];
 
 export const adminRentals = {
-  upcoming: [
-    {
-      id: 'RN-2041',
-      user_id: 'u1',
-      name: 'Alex Director',
-      user_image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&q=80',
-      phone: '9876543210',
-      pickup: '2026-05-01',
-      return_date: '2026-05-03',
-      total_price: 12400,
-      status: 'upcoming',
-      products: [
-        { id: 'p1', name: 'Sony FX3', price: 4200, qty: 1, image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100' },
-        { id: 'p2', name: 'Aputure 600D', price: 4000, qty: 2, image: 'https://images.unsplash.com/photo-1616423642331-7e87363695ad?w=100' },
-        { id: 'p1', name: 'Sony FX3', price: 4200, qty: 1, image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100' },
-        { id: 'p2', name: 'Aputure 600D', price: 4000, qty: 2, image: 'https://images.unsplash.com/photo-1616423642331-7e87363695ad?w=100' },
-        { id: 'p1', name: 'Sony FX3', price: 4200, qty: 1, image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100' },
-        { id: 'p2', name: 'Aputure 600D', price: 4000, qty: 2, image: 'https://images.unsplash.com/photo-1616423642331-7e87363695ad?w=100' }
-      ]
-    },
-  ],
-  active: [
-    {
-      id: 'RN-2007',
-      user_id: 'u2',
-      name: 'Maya Films',
-      user_image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
-      phone: '9012345678',
-      pickup: '2026-04-28',
-      return_date: '2026-05-02',
-      total_price: 8600,
-      status: 'active',
-      products: [
-        { id: 'p3', name: 'Canon 24-70', price: 1800, qty: 1, image: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?w=100' },
-        { id: 'p4', name: 'DJI Mic 2', price: 1500, qty: 2, image: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=100' }
-      ]
-    },
-  ],
-  returning: [
-    {
-      id: 'RN-1985',
-      user_id: 'u3',
-      name: 'Studio South',
-      user_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
-      phone: '9988776655',
-      pickup: '2026-04-29',
-      return_date: '2026-05-01',
-      total_price: 3200,
-      status: 'returning',
-      products: [
-        { id: 'p5', name: 'Flowtech Tripod', price: 1600, qty: 1, image: 'https://images.unsplash.com/photo-1533035353720-f1c6a75cd8ab?w=100' }
-      ]
-    },
-  ],
+
   completed: [
     {
       id: 'RN-1950',
