@@ -3,13 +3,13 @@ import supabase from '../db/supabase.js';
 
 const randomBlock = (): string =>
   crypto
-    .randomBytes(4)
+    .randomBytes(3)
     .toString('hex')
     .toUpperCase()
     .slice(0, 5);
 
 export const generateRentalId = async (): Promise<string> => {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
     const rentalNo = `RN-${randomBlock()}`;
     const { data, error } = await supabase
       .from('rentals')

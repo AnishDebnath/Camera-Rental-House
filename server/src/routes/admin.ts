@@ -517,29 +517,24 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async
 
 router.get('/rentals/:id', roleMiddleware(['admin', 'manager', 'staff']), async (req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase
+    const id = req.params.id as string;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    console.log(`Rental lookup: id=${id} isUuid=${isUuid}`);
+
+    let query = supabase
       .from('rentals')
-      .select('*, users(*), rental_items(*, products(*))')
-      .eq('id', req.params.id)
-      .maybeSingle();
+      .select('*, users(*), rental_items(*, products(*))');
 
-    if (error) {
-      throw error;
+    if (isUuid) {
+      query = query.eq('id', id);
+    } else {
+      query = query.eq('rental_no', id);
     }
 
-    if (!data) {
-      // Try searching by ID prefix if it's a short code
-      const { data: searchData, error: searchError } = await supabase
-        .from('rentals')
-        .select('*, users(*), rental_items(*, products(*))')
-        .ilike('id', `${req.params.id}%`)
-        .limit(1)
-        .maybeSingle();
-        
-      if (searchError) throw searchError;
-      if (!searchData) return res.status(404).json({ message: 'Rental not found.' });
-      return res.json(searchData);
-    }
+    const { data, error } = await query.maybeSingle();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ message: 'Rental not found.' });
 
     return res.json(data);
   } catch (error: any) {

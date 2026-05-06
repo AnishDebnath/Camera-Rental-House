@@ -18,13 +18,13 @@ const ReleaseReturn = () => {
 
   const handleSearch = async () => {
     if (!searchId.trim()) return;
-    
+
     setError(null);
     setLoading(true);
     try {
       const response = await axiosInstance.get(`/admin/rentals/${searchId.trim()}`);
       const rental = response.data;
-      
+
       // Map DB rental to UI format
       const mappedRental = {
         id: rental.id.split('-')[0].toUpperCase(),
@@ -42,7 +42,7 @@ const ReleaseReturn = () => {
           unique_code: item.products?.unique_code
         }))
       };
-      
+
       setActiveRental(mappedRental);
     } catch (err: any) {
       console.error('Search failed:', err);
@@ -64,17 +64,17 @@ const ReleaseReturn = () => {
 
   const handleRelease = async () => {
     if (!activeRental || scannedProducts.length === 0) return;
-    
+
     setLoading(true);
     try {
       const isReturn = activeRental.status === 'released' || activeRental.products.some((p: any) => p.status === 'released');
       const endpoint = isReturn ? '/manage/bulk-return' : '/manage/bulk-release';
-      
+
       await axiosInstance.post(endpoint, {
         rentalId: activeRental.full_id,
         productIds: scannedProducts
       });
-      
+
       setIsComplete(true);
     } catch (err: any) {
       console.error('Action failed:', err);
@@ -104,8 +104,8 @@ const ReleaseReturn = () => {
               {activeRental.status === 'released' ? 'Return Gear' : 'Release Gear'}
             </h1>
             <p className="mt-1.5 text-xs font-medium text-muted sm:text-sm">
-              {activeRental.status === 'released' 
-                ? 'Verify returned products and update inventory.' 
+              {activeRental.status === 'released'
+                ? 'Verify returned products and update inventory.'
                 : 'Verify products and user identity for secure gear handoff.'}
             </p>
           </div>
@@ -115,7 +115,7 @@ const ReleaseReturn = () => {
       {loading && (
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
-          <p className="text-sm font-bold text-muted">Processing vault update...</p>
+          <p className="text-sm font-bold text-muted">Fetching rental records...</p>
         </div>
       )}
 

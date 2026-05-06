@@ -38,9 +38,12 @@ const ReleaseSearch = ({ searchId, setSearchId, onSearch, error }: Props) => (
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             type="text"
-            placeholder="Rental ID (e.g. RN-2041)"
+            placeholder="Rental ID (e.g. RN-F2FB3)"
             value={searchId}
-            onChange={(e) => setSearchId(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value.toUpperCase();
+              if (val.length <= 8) setSearchId(val);
+            }}
             onKeyDown={(e) => e.key === 'Enter' && onSearch()}
             className="h-12 w-full rounded-xl border border-line bg-white pl-11 pr-4 text-sm font-medium shadow-sm outline-none transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/5 placeholder:text-muted/50"
           />
