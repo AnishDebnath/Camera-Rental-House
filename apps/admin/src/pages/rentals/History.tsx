@@ -1,21 +1,77 @@
-import { useState, useMemo } from 'react';
-import { Search, History as HistoryIcon, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { adminRentals } from '../../data/mockAdmin';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, History as HistoryIcon, Loader2 } from 'lucide-react';
+import axiosInstance from '../../api/axiosInstance';
 import RentalCard from './RentalCard';
 
 const RentalHistory = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [rawRentals, setRawRentals] = useState<any[]>([]);
 
-  // Combine only finalized rentals for history
-  const allHistory = useMemo(() => {
-    const combined = [
-      ...adminRentals.completed,
-      ...adminRentals.cancelled
-    ];
-    // Sort by return date descending (most recent first)
-    return combined.sort((a, b) => new Date(b.return_date).getTime() - new Date(a.return_date).getTime());
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get('/admin/rentals/past');
+        const data = response.data.items || response.data;
+        setRawRentals(data);
+      } catch (error) {
+        console.error('Failed to fetch rental history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
   }, []);
+
+  const allHistory = useMemo(() => {
+    if (!rawRentals.length) return [];
+
+    // Group by rental_id if the API returns individual items, or map directly if it returns rentals
+    // Based on index.tsx, /past usually returns grouped rental items or rentals
+    
+    const mapped = rawRentals.reduce((acc: any[], item: any) => {
+      // Check if item is a rental or a rental_item
+      const rental = item.rentals || (item.pickup_date ? item : null);
+      if (!rental) return acc;
+
+      const rentalId = rental.id;
+      let existing = acc.find(r => r.actualId === rentalId);
+
+      if (!existing) {
+        existing = {
+          actualId: rentalId,
+          id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
+          name: rental.users?.full_name || 'Guest',
+          user_image: rental.users?.avatar_url || '',
+          phone: rental.users?.phone || 'N/A',
+          pickup: rental.pickup_date,
+          return_date: rental.event_date,
+          total_price: rental.total_amount || 0,
+          status: item.status || rental.status,
+          products: [],
+          created_at: rental.created_at
+        };
+        acc.push(existing);
+      }
+
+      if (item.products) {
+        existing.products.push({
+          id: item.product_id,
+          name: item.products.name,
+          price: item.products.price_per_day,
+          qty: item.quantity,
+          image: item.products.images?.[0] || '',
+        });
+      }
+
+      return acc;
+    }, []);
+
+    // Sort by return date descending
+    return mapped.sort((a, b) => new Date(b.return_date).getTime() - new Date(a.return_date).getTime());
+  }, [rawRentals]);
 
   const filteredHistory = useMemo(() => {
     if (!searchQuery) return allHistory;
@@ -55,7 +111,12 @@ const RentalHistory = () => {
 
         {/* List Section */}
         <div className="space-y-6">
-          {filteredHistory.length > 0 ? (
+          {loading ? (
+            <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
+              <p className="text-sm font-bold text-muted">Fetching archived records...</p>
+            </div>
+          ) : filteredHistory.length > 0 ? (
             <>
               <div className="flex items-center justify-between border-b border-line/60 pb-3 px-1">
                 <span className="text-[10px] font-black uppercase tracking-widest text-tertiary">
@@ -71,14 +132,24 @@ const RentalHistory = () => {
                 activeTab="returning" // History defaults to returning/completed style
               />
             </>
+          ) : allHistory.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-slate-50/50 py-24 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white shadow-card border border-line/60 mb-6">
+                <HistoryIcon className="h-10 w-10 text-muted/20" />
+              </div>
+              <h3 className="text-xl font-black text-ink">Archive Empty</h3>
+              <p className="mx-auto mt-2 max-w-xs text-sm font-medium text-muted leading-relaxed">
+                There are no completed or cancelled rental records in the system yet.
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-slate-50/50 py-24 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white shadow-card border border-line/60 mb-6">
-                <HistoryIcon className="h-10 w-10 text-muted/40" />
+                <Search className="h-10 w-10 text-muted/40" />
               </div>
-              <h3 className="text-xl font-black text-ink">No Records Found</h3>
+              <h3 className="text-xl font-black text-ink">No Match Found</h3>
               <p className="mx-auto mt-2 max-w-xs text-sm font-medium text-muted leading-relaxed">
-                We couldn't find any rental history matching your search criteria.
+                We couldn't find any records matching "{searchQuery}". Try a different ID or name.
               </p>
               <button
                 onClick={() => setSearchQuery('')}
