@@ -45,7 +45,9 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
           }
         },
         undefined
-      );
+      ).catch((err) => {
+        console.error('Html5QrCode start error:', err);
+      });
     } catch (err) {
       console.error('Start error:', err);
     }
@@ -71,8 +73,13 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
   };
 
   useEffect(() => {
-    startScanning();
-    return () => { stopScanner(); };
+    const timer = setTimeout(() => {
+      startScanning();
+    }, 500);
+    return () => { 
+      clearTimeout(timer);
+      stopScanner(); 
+    };
   }, []);
 
   return (
@@ -101,7 +108,15 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
 
         {/* User Card Mini */}
         <div className="mb-6 flex items-center gap-4 rounded-2xl border border-line p-3 bg-slate-50/50">
-          <img src={user.image} className="h-10 w-10 rounded-xl object-cover border border-line" />
+          <div className="h-10 w-10 rounded-xl overflow-hidden border border-line">
+            {user.image ? (
+              <img src={user.image} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-slate-50 text-slate-300">
+                <UserCheck className="h-5 w-5" />
+              </div>
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-ink">{user.name}</p>
             <div className="flex items-center gap-1.5">

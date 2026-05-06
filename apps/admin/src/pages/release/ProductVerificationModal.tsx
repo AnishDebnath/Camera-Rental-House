@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
-  const [status, setStatus] = useState<'scanning' | 'success' | 'timeout'>('scanning');
+  const [status, setStatus] = useState<'scanning' | 'success' | 'timeout' | 'error'>('scanning');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerId = 'qr-reader-container';
@@ -25,69 +25,110 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
     }
   };
 
-  const startScanning = async () => {
+  const startScanning = () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('Camera access restricted. Secure context (HTTPS or localhost) required.');
+      setStatus('timeout');
+      return;
+    }
+
     setStatus('scanning');
 
-    // Clear timeout
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
     // Timeout logic
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setStatus(prev => {
-        if (prev === 'scanning') {
-          stopScanner();
-          return 'timeout';
-        }
-        return prev;
-      });
+      if (status === 'scanning') {
+        stopScanner();
+        setStatus('timeout');
+      }
     }, 10000);
 
-    try {
-      const html5QrCode = new Html5Qrcode(containerId);
-      scannerRef.current = html5QrCode;
+    const config = {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0
+    };
 
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
-      };
+    const scanner = new Html5Qrcode(containerId);
+    scannerRef.current = scanner;
 
-      await html5QrCode.start(
-        { facingMode: 'environment' },
+    scanner.start(
+      { facingMode: 'environment' },
+      config,
+      (decodedText) => {
+        let scannedId = decodedText;
+        try {
+          const payload = JSON.parse(decodedText);
+          scannedId = payload.productId || payload.uniqueCode || decodedText;
+        } catch { /* use raw */ }
+
+        if (
+          scannedId.toLowerCase() === product.id.toLowerCase() ||
+          (product.unique_code && scannedId.toLowerCase() === product.unique_code.toLowerCase())
+        ) {
+          setStatus('success');
+          scanner.stop();
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setTimeout(() => {
+            onVerify(product.id);
+            onClose();
+          }, 1500);
+        } else {
+          // Wrong QR scanned
+          setStatus('error');
+          setTimeout(() => {
+            setStatus(prev => prev === 'error' ? 'scanning' : prev);
+          }, 2000);
+        }
+      },
+      undefined
+    ).catch(err => {
+      console.error('Scanner error:', err);
+      // Try again with user camera if environment fails
+      scanner.start(
+        { facingMode: 'user' },
         config,
         (decodedText) => {
-          // Success Callback
           let scannedId = decodedText;
           try {
             const payload = JSON.parse(decodedText);
             scannedId = payload.productId || payload.uniqueCode || decodedText;
-          } catch {
-            // Not JSON, use raw text
-          }
+          } catch { /* use raw */ }
 
-          if (scannedId.toLowerCase() === product.id.toLowerCase()) {
+          if (
+            scannedId.toLowerCase() === product.id.toLowerCase() ||
+            (product.unique_code && scannedId.toLowerCase() === product.unique_code.toLowerCase())
+          ) {
             setStatus('success');
-            stopScanner();
+            scanner.stop();
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
             setTimeout(() => {
               onVerify(product.id);
               onClose();
             }, 1500);
+          } else {
+            setStatus('error');
+            setTimeout(() => {
+              setStatus(prev => prev === 'error' ? 'scanning' : prev);
+            }, 2000);
           }
         },
-        undefined // Error callback (silent)
-      );
-    } catch (err) {
-      console.error('Start error:', err);
-      setStatus('timeout'); // Fallback if camera fails
-    }
+        undefined
+      ).catch(err2 => {
+        console.error('Final scanner error:', err2);
+        setStatus('timeout');
+      });
+    });
   };
 
   useEffect(() => {
-    startScanning();
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      startScanning();
+    }, 500);
 
     return () => {
+      clearTimeout(timer);
       stopScanner();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
@@ -198,6 +239,26 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Mismatch State */}
+          <AnimatePresence>
+            {status === 'error' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-rose-500/90 backdrop-blur-md p-6 text-center"
+              >
+                <div className="mb-4 rounded-full bg-white p-5 shadow-2xl">
+                  <X className="h-10 w-10 text-rose-500" />
+                </div>
+                <p className="text-base font-black text-white uppercase tracking-[0.25em]">Mismatch</p>
+                <p className="mt-2 text-[10px] font-bold text-rose-50 uppercase tracking-widest opacity-80 leading-relaxed">
+                  Wrong Product Scanned
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-2">
@@ -225,7 +286,12 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
           )}
 
           {status === 'success' && (
-            <div className="h-12" />
+            <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="h-1 w-12 rounded-full bg-emerald-100 mb-4" />
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">
+                Verification Successful
+              </p>
+            </div>
           )}
         </div>
       </motion.div>
