@@ -70,9 +70,11 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="truncate text-sm font-bold text-ink leading-tight">{p.name}</p>
-                  <p className="text-[12px] font-extrabold text-tertiary uppercase tracking-widest">
-                    Product Code: {p.id.toUpperCase()}
-                  </p>
+                  <div className="mt-1.5 inline-flex rounded-md bg-slate-100 px-2 py-0.5 border border-slate-200/50">
+                    <p className="text-[10px] font-black text-tertiary uppercase tracking-widest">
+                      {p.unique_code || 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
               <button

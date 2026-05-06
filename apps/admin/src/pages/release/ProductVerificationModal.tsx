@@ -57,7 +57,15 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
         config,
         (decodedText) => {
           // Success Callback
-          if (decodedText.toLowerCase() === product.id.toLowerCase()) {
+          let scannedId = decodedText;
+          try {
+            const payload = JSON.parse(decodedText);
+            scannedId = payload.productId || payload.uniqueCode || decodedText;
+          } catch {
+            // Not JSON, use raw text
+          }
+
+          if (scannedId.toLowerCase() === product.id.toLowerCase()) {
             setStatus('success');
             stopScanner();
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -118,7 +126,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-ink">{product.name}</p>
             <p className="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mt-0.5">
-              Product Code: {product.id}
+              Product Code: {product.unique_code || 'N/A'}
             </p>
           </div>
         </div>

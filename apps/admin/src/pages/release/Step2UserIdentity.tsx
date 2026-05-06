@@ -35,7 +35,13 @@ const Step2UserIdentity = ({ user, isVerified, onToggleVerify }: Props) => {
             <div className="relative shrink-0">
               <div className={`h-16 w-16 overflow-hidden rounded-2xl border transition-all duration-500 ${isVerified ? 'border-emerald-500/30' : 'border-line shadow-sm'
                 }`}>
-                <img src={user.image} className="h-full w-full object-cover" />
+                {user.image ? (
+                  <img src={user.image} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-50 text-slate-300">
+                    <UserCheck className="h-8 w-8" />
+                  </div>
+                )}
               </div>
               {isVerified && (
                 <div className="absolute -bottom-1 -right-1 rounded-full bg-emerald-500 p-1.5 text-white shadow-lg border-2 border-white">
