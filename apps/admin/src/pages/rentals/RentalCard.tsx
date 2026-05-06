@@ -30,12 +30,18 @@ type RentalCardProps = {
 const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activeTab: 'upcoming' | 'active' | 'returning'; index: number; total: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const statusLabels: Record<string, string> = {
+    confirmed: 'Coming to Collect',
+    released: 'Active in Rent',
+    returned: 'Coming to Return',
+    cancelled: 'Cancelled',
+  };
+
   const getStatusStyle = (status: string) => {
     const s = status.toLowerCase();
-    if (s === 'upcoming') return 'bg-sky-50 text-sky-600 border-sky-100';
-    if (s === 'active') return 'bg-amber-50 text-amber-600 border-amber-100';
-    if (s === 'returning') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-    if (s === 'completed') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+    if (s === 'confirmed' || s === 'upcoming') return 'bg-sky-50 text-sky-600 border-sky-100';
+    if (s === 'released' || s === 'active') return 'bg-amber-50 text-amber-600 border-amber-100';
+    if (s === 'returned' || s === 'completed' || s === 'returning') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
     if (s === 'cancelled') return 'bg-rose-50 text-rose-600 border-rose-100';
     return 'bg-slate-50 text-slate-600 border-slate-100';
   };
@@ -159,7 +165,7 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
             <div className="flex items-center gap-3 rounded-full border border-line bg-slate-50/50 p-1.5 shadow-sm transition-all hover:bg-slate-50 pr-4">
               <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusStyle(rental.status)}`}>
                 <div className="h-1.5 w-1.5 rounded-full bg-current" />
-                {rental.status}
+                {statusLabels[rental.status.toLowerCase()] || rental.status}
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-[10px] font-bold text-primary opacity-60 font-mono">₹</span>

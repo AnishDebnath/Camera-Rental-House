@@ -52,6 +52,7 @@ const Rentals = () => {
       return rawRentals.map((r: any) => ({
         id: r.rental_no || r.id.split('-')[0].toUpperCase(),
         name: r.users?.full_name || 'Guest',
+        user_image: r.users?.avatar_url || '',
         phone: r.users?.phone || 'N/A',
         pickup: r.pickup_date,
         return_date: r.event_date,
@@ -76,6 +77,7 @@ const Rentals = () => {
         acc[rental.id] = {
           id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
           name: rental.users?.full_name || 'Guest',
+          user_image: rental.users?.avatar_url || '',
           phone: rental.users?.phone || 'N/A',
           pickup: rental.pickup_date,
           return_date: rental.event_date,
@@ -213,7 +215,7 @@ const Rentals = () => {
         {loading ? (
           <div className="flex h-64 flex-col items-center justify-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
-            <p className="text-sm font-bold text-muted">Synchronizing with vault...</p>
+            <p className="text-sm font-bold text-muted">Fetching rental records...</p>
           </div>
         ) : (
           <RentalCard 

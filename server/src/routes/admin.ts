@@ -433,7 +433,7 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), a
     if (userIds.length) {
       const { data: users } = await supabase
         .from('users')
-        .select('id, full_name, phone')
+        .select('id, full_name, phone, avatar_url')
         .in('id', userIds);
       
       (users || []).forEach((u: any) => { usersMap[u.id] = u; });
@@ -464,7 +464,7 @@ router.get('/rentals/active', roleMiddleware(['admin', 'manager', 'staff']), asy
     const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
     let usersMap: Record<string, any> = {};
     if (userIds.length) {
-      const { data: users } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
+      const { data: users } = await supabase.from('users').select('id, full_name, phone, avatar_url').in('id', userIds);
       (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 
@@ -497,7 +497,7 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async
     const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
     let usersMap: Record<string, any> = {};
     if (userIds.length) {
-      const { data: users } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
+      const { data: users } = await supabase.from('users').select('id, full_name, phone, avatar_url').in('id', userIds);
       (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 

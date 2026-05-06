@@ -60,7 +60,22 @@ export const adminUsers = [
 ];
 
 export const adminRentals = {
-
+  upcoming: [
+    {
+      id: 'RN-8821',
+      name: 'Rohan Sharma',
+      items: 'Sony FX3 + 24-70mm',
+      status: 'upcoming',
+    },
+  ],
+  active: [
+    {
+      id: 'RN-8819',
+      name: 'Vikram Singh',
+      items: 'A7S III + G-Master',
+      status: 'released',
+    },
+  ],
   completed: [
     {
       id: 'RN-1950',
