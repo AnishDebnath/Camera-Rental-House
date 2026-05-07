@@ -203,7 +203,7 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-ink">{user.name}</p>
+            <p className="text-sm font-bold text-ink leading-tight">{user.name}</p>
             <div className="flex items-center gap-1.5">
               <Phone className="h-3 w-3 text-blue-500 fill-blue-500/10" />
               <p className="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mt-0.5">{user.phone}</p>

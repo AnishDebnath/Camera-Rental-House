@@ -45,10 +45,10 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
           return (
             <div
               key={p.id}
-              className={`group relative flex flex-col gap-4 rounded-xl border p-4 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between sm:p-3 ${isScanned ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white hover:border-line-hover'}`}
+              className={`group relative flex flex-col gap-4 rounded-xl border p-4 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between sm:p-3 lg:p-2.5 ${isScanned ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white hover:border-line-hover'}`}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 sm:h-12 sm:w-12">
+              <div className="flex items-center gap-4 lg:gap-2.5 flex-1 min-w-0">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 sm:h-12 sm:w-12 lg:h-10 lg:w-10">
                   {p.image ? (
                     <LazyImage
                       src={p.image}
@@ -57,21 +57,21 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-slate-50">
-                      <Package className="h-6 w-6 text-slate-200" />
+                      <Package className="h-5 w-5 text-slate-200" />
                     </div>
                   )}
                   {isScanned && (
                     <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/10">
-                      <div className="rounded-full bg-emerald-500 p-1 text-white shadow-lg">
-                        <CheckCircle2 className="h-3 w-3" />
+                      <div className="rounded-full bg-emerald-500 p-0.5 text-white shadow-lg">
+                        <CheckCircle2 className="h-2.5 w-2.5" />
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="truncate text-sm font-bold text-ink leading-tight">{p.name}</p>
-                  <div className="mt-1.5 inline-flex rounded-md bg-slate-100 px-2 py-0.5 border border-slate-200/50">
-                    <p className="text-[10px] font-black text-tertiary uppercase tracking-widest">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <p className="text-sm font-bold text-ink leading-tight lg:text-[13px]">{p.name}</p>
+                  <div className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 border border-slate-200/50">
+                    <p className="text-[10px] font-black text-tertiary uppercase tracking-widest lg:text-[9px]">
                       {p.unique_code || 'N/A'}
                     </p>
                   </div>
@@ -80,7 +80,7 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
               <button
                 onClick={() => onVerifyClick(p)}
                 disabled={isScanned}
-                className={`flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:h-9 sm:px-3 ${isScanned
+                className={`flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:h-9 sm:px-3 lg:h-8 lg:px-2.5 lg:text-[11px] ${isScanned
                   ? 'bg-emerald-500 text-white cursor-default pointer-events-none shadow-sm'
                   : 'bg-slate-50 text-ink border border-line hover:bg-slate-100 active:scale-95'
                   }`}

@@ -167,7 +167,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
             className="h-12 w-12 rounded-lg object-cover border border-line shadow-sm"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-ink">{product.name}</p>
+            <p className="text-sm font-bold text-ink leading-tight">{product.name}</p>
             <p className="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mt-0.5">
               Product Code: {product.unique_code || 'N/A'}
             </p>

@@ -50,18 +50,11 @@ const Step2UserIdentity = ({ user, isVerified, onToggleVerify }: Props) => {
               )}
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="text-base font-black text-ink tracking-tight">{user.name}</p>
-                {/* {isVerified && (
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-500/20">
-                    Verified
-                  </span>
-                )} */}
-              </div>
+            <div className="flex flex-1 flex-col gap-1 min-w-0">
+              <p className="text-base font-black text-ink tracking-tight break-words leading-tight">{user.name}</p>
               <div className="flex items-center gap-1.5">
-                <Phone className="h-4 w-4 text-blue-500 fill-blue-500/10" />
-                <p className="text-sm font-bold text-muted tracking-tight">{user.phone}</p>
+                <Phone className="h-4 w-4 text-blue-500 fill-blue-500/10 shrink-0" />
+                <p className="text-sm font-bold text-muted tracking-tight truncate">{user.phone}</p>
               </div>
             </div>
           </div>

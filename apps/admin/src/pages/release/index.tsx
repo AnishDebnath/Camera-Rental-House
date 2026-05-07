@@ -25,6 +25,12 @@ const ReleaseReturn = () => {
       const response = await axiosInstance.get(`/admin/rentals/${searchId.trim()}`);
       const rental = response.data;
 
+      if (['returned', 'cancelled', 'failed'].includes(rental.status)) {
+        setError('This rental is already processed.');
+        setLoading(false);
+        return;
+      }
+
       // Map DB rental to UI format
       const mappedRental = {
         id: rental.id.split('-')[0].toUpperCase(),
