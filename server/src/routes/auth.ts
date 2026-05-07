@@ -253,7 +253,7 @@ router.post(
       // Generate a unique, permanent member ID for this user
       const memberId = await generateMemberId();
 
-      // QR encodes only the stable memberId — never changes after creation
+      // QR encodes the memberId in a structured JSON object (Long format)
       const userQrBase64 = await generateQrBase64({ memberId });
 
       const { data, error } = await supabase

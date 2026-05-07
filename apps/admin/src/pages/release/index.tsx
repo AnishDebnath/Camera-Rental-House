@@ -31,6 +31,7 @@ const ReleaseReturn = () => {
         full_id: rental.id,
         name: rental.users?.full_name || 'Guest',
         phone: rental.users?.phone || 'N/A',
+        member_id: rental.users?.member_id,
         user_image: rental.users?.avatar_url || '',
         user_id: rental.user_id,
         pickup: rental.pickup_date,

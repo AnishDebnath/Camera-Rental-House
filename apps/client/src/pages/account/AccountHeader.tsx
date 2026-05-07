@@ -12,7 +12,7 @@ const AccountHeader = ({ user, onSignOut, onOpenQr }: AccountHeaderProps) => {
     <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/50 p-6 shadow-sm backdrop-blur-2xl md:p-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:text-left text-center">
-          
+
           {/* Avatar Group */}
           <div className="relative shrink-0">
             <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.5rem] border-2 border-white bg-gradient-to-br from-primary-light/50 to-blue-50/50 shadow-sm transition-transform duration-300 md:h-28 md:w-28 text-primary">
@@ -68,11 +68,11 @@ const AccountHeader = ({ user, onSignOut, onOpenQr }: AccountHeaderProps) => {
           onClick={onOpenQr}
         >
           <div className="flex items-center gap-4 pr-4 pl-1 min-w-[200px]">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-white p-2 shadow-sm border border-line transition-transform duration-300 group-hover:scale-105">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-white p-1 shadow-sm border border-line transition-transform duration-300 group-hover:scale-105">
               <img
                 src={user.userQrBase64}
                 alt="QR"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain blur-[1px]"
               />
             </div>
             <div className="flex flex-col space-y-1 text-left">

@@ -55,6 +55,7 @@ const ReleaseVerify = ({
           <UserVerificationModal
             user={{
               id: rental.user_id,
+              memberId: rental.member_id,
               name: rental.name,
               phone: rental.phone,
               image: rental.user_image

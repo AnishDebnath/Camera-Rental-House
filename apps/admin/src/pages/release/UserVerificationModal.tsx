@@ -6,6 +6,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 interface Props {
   user: {
     id: string;
+    memberId?: string;
     name: string;
     image: string;
     phone: string;
@@ -15,9 +16,10 @@ interface Props {
 }
 
 const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
-  const [status, setStatus] = useState<'scanning' | 'success' | 'error'>('scanning');
+  const [status, setStatus] = useState<'scanning' | 'success' | 'error' | 'timeout'>('scanning');
   const [manualId, setManualId] = useState('');
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerId = 'user-qr-reader';
 
   const stopScanner = async () => {
@@ -31,22 +33,100 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
   };
 
   const startScanning = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('Camera access restricted. Secure context (HTTPS or localhost) required.');
+      setStatus('timeout');
+      return;
+    }
+
     setStatus('scanning');
+
+    // Timeout logic - 10 seconds
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setStatus(current => {
+        if (current === 'scanning') {
+          stopScanner();
+          return 'timeout';
+        }
+        return current;
+      });
+    }, 10000);
+
+    const config = {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0
+    };
+
     try {
       const html5QrCode = new Html5Qrcode(containerId);
       scannerRef.current = html5QrCode;
 
       await html5QrCode.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+        config,
         (decodedText) => {
-          if (decodedText.toLowerCase() === user.id.toLowerCase()) {
+          const rawText = decodedText.trim();
+          let scannedId = rawText;
+
+          try {
+            const payload = JSON.parse(rawText);
+            // Support multiple possible property names
+            scannedId = payload.memberId || payload.member_id || payload.id || rawText;
+          } catch {
+            scannedId = rawText;
+          }
+
+          const targetId = user.id.toLowerCase();
+          const targetMemberId = user.memberId?.toLowerCase();
+          const currentScan = String(scannedId).toLowerCase();
+
+          if (currentScan === targetId || (targetMemberId && currentScan === targetMemberId)) {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             handleSuccess();
+          } else {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            setStatus('error');
+            html5QrCode.stop();
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
           }
         },
         undefined
       ).catch((err) => {
-        console.error('Html5QrCode start error:', err);
+        console.error('Environment camera failed, trying user camera...', err);
+        // Fallback to front camera
+        html5QrCode.start(
+          { facingMode: 'user' },
+          config,
+          (decodedText) => {
+            const rawText = decodedText.trim();
+            let scannedId = rawText;
+
+            try {
+              const payload = JSON.parse(rawText);
+              scannedId = payload.memberId || payload.member_id || payload.id || rawText;
+            } catch {
+              scannedId = rawText;
+            }
+
+            const targetId = user.id.toLowerCase();
+            const targetMemberId = user.memberId?.toLowerCase();
+            const currentScan = String(scannedId).toLowerCase();
+
+            if (currentScan === targetId || (targetMemberId && currentScan === targetMemberId)) {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              handleSuccess();
+            } else {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setStatus('error');
+              html5QrCode.stop();
+            }
+          },
+          undefined
+        ).catch((err2) => {
+          console.error('All cameras failed:', err2);
+        });
       });
     } catch (err) {
       console.error('Start error:', err);
@@ -55,7 +135,11 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
 
   const handleManualVerify = (e: React.FormEvent) => {
     e.preventDefault();
-    if (manualId.toLowerCase() === user.id.toLowerCase()) {
+    const cleanManual = manualId.trim().toLowerCase();
+    if (
+      cleanManual === user.id.toLowerCase() ||
+      (user.memberId && cleanManual === user.memberId.toLowerCase())
+    ) {
       handleSuccess();
     } else {
       setStatus('error');
@@ -76,9 +160,10 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
     const timer = setTimeout(() => {
       startScanning();
     }, 500);
-    return () => { 
+    return () => {
       clearTimeout(timer);
-      stopScanner(); 
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      stopScanner();
     };
   }, []);
 
@@ -180,18 +265,48 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
             )}
 
             {status === 'error' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-rose-500/90 backdrop-blur-md">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-rose-500/90 backdrop-blur-md p-6 text-center">
                 <div className="mb-4 rounded-full bg-white p-5 shadow-2xl"><X className="h-10 w-10 text-rose-500" /></div>
                 <p className="text-base font-black text-white uppercase tracking-[0.25em]">Mismatch</p>
-                <p className="mt-2 text-[10px] font-bold text-rose-50 uppercase tracking-widest opacity-80">Invalid User ID</p>
+                <p className="mt-2 text-[10px] font-bold text-rose-50 uppercase tracking-widest opacity-80">Wrong User Identity</p>
+              </motion.div>
+            )}
+            {status === 'timeout' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-rose-500/90 backdrop-blur-md p-6 text-center">
+                <div className="mb-4 rounded-full bg-white p-5 shadow-2xl"><X className="h-10 w-10 text-rose-500" /></div>
+                <p className="text-base font-black text-white uppercase tracking-[0.25em]">Scan Failed</p>
+                <p className="mt-2 text-[10px] font-bold text-rose-50 uppercase tracking-widest opacity-80">Timeout — No QR detected</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <p className="mt-6 text-center text-[9px] font-black text-muted uppercase tracking-[0.2em] animate-pulse">
-          Awaiting input or scan...
-        </p>
+        <div className="mt-6 flex flex-col items-center">
+          {status !== 'scanning' ? (
+            <div className="flex flex-col items-center gap-6">
+              {status === 'success' && (
+                <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="h-1 w-12 rounded-full bg-emerald-100 mb-4" />
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">
+                    Verification Successful
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={startScanning}
+                className="flex w-fit items-center justify-center gap-2 rounded-xl bg-ink h-10 px-6 text-xs font-black text-white hover:bg-slate-900 active:scale-95 transition-all shadow-lg"
+              >
+                <ScanLine className="h-4 w-4 text-white" />
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <p className="text-center text-[9px] font-black text-muted uppercase tracking-[0.2em] animate-pulse">
+              Awaiting input or scan...
+            </p>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );

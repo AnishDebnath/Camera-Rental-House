@@ -54,7 +54,7 @@ const PrintLabel = ({ product }: any) => {
       <img
         src={product.qr_base64}
         alt={product.name}
-        className="mx-auto h-48 w-48 rounded-card border border-line bg-white p-4 shadow-sm"
+        className="mx-auto h-48 w-48 rounded-card border border-line bg-white p-1 shadow-sm"
       />
       <button type="button" onClick={handlePrint} className="primary-button w-full md:w-80">
         Print Label

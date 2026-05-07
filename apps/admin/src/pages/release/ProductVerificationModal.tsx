@@ -34,13 +34,17 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
 
     setStatus('scanning');
 
-    // Timeout logic
+    // Timeout logic - 10 seconds
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      if (status === 'scanning') {
-        stopScanner();
-        setStatus('timeout');
-      }
+      // Use setStatus with a function to check the current state safely
+      setStatus(current => {
+        if (current === 'scanning') {
+          stopScanner();
+          return 'timeout';
+        }
+        return current;
+      });
     }, 10000);
 
     const config = {
@@ -76,9 +80,8 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
         } else {
           // Wrong QR scanned
           setStatus('error');
-          setTimeout(() => {
-            setStatus(prev => prev === 'error' ? 'scanning' : prev);
-          }, 2000);
+          scanner.stop();
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
         }
       },
       undefined
@@ -108,9 +111,8 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
             }, 1500);
           } else {
             setStatus('error');
-            setTimeout(() => {
-              setStatus(prev => prev === 'error' ? 'scanning' : prev);
-            }, 2000);
+            scanner.stop();
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
           }
         },
         undefined
@@ -234,8 +236,9 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
                 </div>
                 <p className="text-base font-black text-white uppercase tracking-[0.25em]">Scan Failed</p>
                 <p className="mt-2 text-[10px] font-bold text-rose-50 uppercase tracking-widest opacity-80 leading-relaxed">
-                  Could not detect QR code
+                  Timeout — No QR detected
                 </p>
+
               </motion.div>
             )}
           </AnimatePresence>
@@ -275,7 +278,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
             </>
           )}
 
-          {status === 'timeout' && (
+          {status !== 'scanning' && (
             <button
               onClick={startScanning}
               className="flex w-fit items-center justify-center gap-2 rounded-xl bg-ink h-10 px-6 text-xs font-black text-white hover:bg-slate-900 active:scale-95 transition-all shadow-lg"

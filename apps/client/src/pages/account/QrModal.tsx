@@ -84,11 +84,11 @@ const QrModal = ({ show, onClose, user, memberSince, lenis }: QrModalProps) => {
                   {/* QR Image with Border Effect */}
                   <div className="relative group mx-auto w-fit">
                     <div className="absolute -inset-4 bg-primary/5 rounded-[2.5rem] blur-2xl group-hover:bg-primary/10 transition-colors" />
-                    <div className="relative p-5 bg-white border border-line rounded-[2rem] shadow-sm">
+                    <div className="relative p-2 bg-white border border-line rounded-[2rem] shadow-sm">
                       <img
                         src={user.userQrBase64}
                         alt="User QR Identity"
-                        className="h-64 w-64 md:h-72 md:w-72 object-cover rounded-xl"
+                        className="h-56 w-56 md:h-60 md:w-60 object-cover rounded-xl"
                       />
                     </div>
                   </div>
