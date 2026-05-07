@@ -68,7 +68,9 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                     </div>
                     <div className="flex-1 space-y-1 text-right">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Return</p>
-                      <p className="text-base md:text-lg font-bold text-ink leading-tight truncate">{formatDate(rental.event_date)}</p>
+                      <p className={`text-base md:text-lg font-bold leading-tight truncate ${new Date() > new Date(rental.event_date) ? 'text-red-500 animate-pulse' : 'text-ink'}`}>
+                        {formatDate(rental.event_date)}
+                      </p>
                     </div>
                   </div>
 

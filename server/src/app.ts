@@ -97,6 +97,8 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
+import { startMaintenanceWorker } from './utils/maintenance.js';
+
 export default app;
 
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
@@ -104,6 +106,9 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   // Listen on 0.0.0.0 so the server is reachable from other devices on the LAN
   const server = app.listen(port, '0.0.0.0', () => {
     console.log(`Camera Rental House server listening on http://0.0.0.0:${port}`);
+    
+    // Start background maintenance worker
+    startMaintenanceWorker();
   });
   server.timeout = 300000;
   server.keepAliveTimeout = 300000;

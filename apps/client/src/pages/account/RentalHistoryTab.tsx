@@ -58,12 +58,12 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                 >
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
-                      <span className={`h-1.5 w-1.5 rounded-full ${rental.status === 'failed' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
+                      <span className={`h-1.5 w-1.5 rounded-full ${['failed', 'cancelled'].includes(rental.status) ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Order {rental.rental_no || `#${rental.id.slice(0, 8)}`}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${rental.status === 'failed' ? 'text-red-500' : 'text-success'}`}>
-                        {rental.status === 'failed' ? 'Failed' : 'Completed'}
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${['failed', 'cancelled'].includes(rental.status) ? 'text-red-500' : 'text-success'}`}>
+                        {rental.status === 'failed' ? 'Failed' : rental.status === 'cancelled' ? 'Cancelled' : 'Completed'}
                       </span>
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/50 border border-white">
                         <ChevronDown className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -75,14 +75,18 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                     <div className="flex items-center gap-3">
                       <div className="flex-1 space-y-1">
                         <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Pickup</p>
-                        <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.pickup_date)}</p>
+                        <p className={`text-sm md:text-base font-bold leading-tight truncate ${rental.status === 'cancelled' ? 'text-red-500' : (rental.status === 'returned' || rental.rental_items.every((i: any) => i.status === 'returned')) ? 'text-success' : 'text-ink'}`}>
+                          {formatDate(rental.pickup_date)}
+                        </p>
                       </div>
                       <div className="flex-shrink-0 text-slate-300 flex items-center justify-center h-8 w-8 rounded-full bg-white/50 border border-white shadow-sm">
                         <ArrowRight className="h-4 w-4 text-slate-400" />
                       </div>
                       <div className="flex-1 space-y-1 text-right">
                         <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Return</p>
-                        <p className="text-sm md:text-base font-bold text-ink leading-tight truncate">{formatDate(rental.event_date)}</p>
+                        <p className={`text-sm md:text-base font-bold leading-tight truncate ${rental.status === 'cancelled' ? 'text-slate-400' : rental.received_at && new Date(rental.received_at) > new Date(rental.event_date) ? 'text-red-500' : (rental.status === 'returned' || rental.rental_items.every((i: any) => i.status === 'returned')) ? 'text-success' : 'text-ink'}`}>
+                          {formatDate(rental.event_date)}
+                        </p>
                       </div>
                     </div>
 

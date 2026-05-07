@@ -116,15 +116,28 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
             <div className="flex w-full items-center justify-between rounded-2xl bg-slate-50 p-1.5 border border-line/60 shadow-sm lg:w-auto lg:justify-start">
 
               {/* Pickup */}
-              <div className={`flex flex-col items-center justify-center rounded-xl px-4 py-2 transition-colors ${activeTab === 'upcoming' ? 'bg-sky-50 shadow-sm ring-1 ring-sky-100/50' :
-                activeTab === 'active' ? 'bg-orange-50 shadow-sm ring-1 ring-orange-100/50' :
-                  'bg-transparent'
+              <div className={`flex flex-col items-center justify-center rounded-xl px-4 py-2 transition-colors ${rental.status.toLowerCase() === 'cancelled' ? 'bg-rose-50 shadow-sm ring-1 ring-rose-100/50' :
+                rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'bg-emerald-50 shadow-sm ring-1 ring-emerald-100/50' :
+                  (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) ? 'bg-emerald-50 shadow-sm ring-1 ring-emerald-100/50' :
+                    activeTab === 'upcoming' ? 'bg-sky-50 shadow-sm ring-1 ring-sky-100/50' :
+                      activeTab === 'active' ? 'bg-orange-50 shadow-sm ring-1 ring-orange-100/50' :
+                        'bg-transparent'
                 }`}>
-                <span className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${activeTab === 'upcoming' ? 'text-sky-600' : activeTab === 'active' ? 'text-orange-600' : 'text-tertiary'
+                <span className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${rental.status.toLowerCase() === 'cancelled' ? 'text-rose-600' :
+                  rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'text-emerald-600' :
+                    (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) ? 'text-emerald-600' :
+                      activeTab === 'upcoming' ? 'text-sky-600' :
+                        activeTab === 'active' ? 'text-orange-600' :
+                          'text-tertiary'
                   }`}>
                   <Calendar className="h-3 w-3" /> Pickup
                 </span>
-                <span className={`mt-1 text-xs sm:text-sm font-bold ${activeTab === 'upcoming' ? 'text-sky-700' : activeTab === 'active' ? 'text-orange-700' : 'text-ink'
+                <span className={`mt-1 text-xs sm:text-sm font-bold ${rental.status.toLowerCase() === 'cancelled' ? 'text-rose-700' :
+                  rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'text-emerald-700' :
+                    (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) ? 'text-emerald-700' :
+                      activeTab === 'upcoming' ? 'text-sky-700' :
+                        activeTab === 'active' ? 'text-orange-700' :
+                          'text-ink'
                   }`}>
                   {formatDate(rental.pickup)}
                 </span>
@@ -143,15 +156,28 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
               </div>
 
               {/* Return */}
-              <div className={`flex flex-col items-center justify-center rounded-xl px-4 py-2 transition-colors ${activeTab === 'returning' ? 'bg-emerald-50 shadow-sm ring-1 ring-emerald-100/50' :
-                activeTab === 'active' ? 'bg-orange-50 shadow-sm ring-1 ring-orange-100/50' :
-                  'bg-transparent'
+              <div className={`flex flex-col items-center justify-center rounded-xl px-4 py-2 transition-colors ${rental.status.toLowerCase() === 'cancelled' ? 'bg-slate-50' :
+                (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) || (activeTab === 'active' && new Date() > new Date(rental.return_date)) ? 'bg-rose-50 shadow-sm ring-1 ring-rose-100/50' :
+                  rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'bg-emerald-50 shadow-sm ring-1 ring-emerald-100/50' :
+                    activeTab === 'returning' ? 'bg-emerald-50 shadow-sm ring-1 ring-emerald-100/50' :
+                      activeTab === 'active' ? 'bg-orange-50 shadow-sm ring-1 ring-orange-100/50' :
+                        'bg-transparent'
                 }`}>
-                <span className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${activeTab === 'returning' ? 'text-emerald-600' : activeTab === 'active' ? 'text-orange-600' : 'text-tertiary'
+                <span className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${rental.status.toLowerCase() === 'cancelled' ? 'text-tertiary' :
+                  (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) || (activeTab === 'active' && new Date() > new Date(rental.return_date)) ? 'text-rose-600' :
+                    rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'text-emerald-600' :
+                      activeTab === 'returning' ? 'text-emerald-600' :
+                        activeTab === 'active' ? 'text-orange-600' :
+                          'text-tertiary'
                   }`}>
                   <Calendar className="h-3 w-3" /> Return
                 </span>
-                <span className={`mt-1 text-xs sm:text-sm font-bold ${activeTab === 'returning' ? 'text-emerald-700' : activeTab === 'active' ? 'text-orange-700' : 'text-ink'
+                <span className={`mt-1 text-xs sm:text-sm font-bold ${rental.status.toLowerCase() === 'cancelled' ? 'text-ink' :
+                  (rental as any).received_at && new Date((rental as any).received_at) > new Date(rental.return_date) || (activeTab === 'active' && new Date() > new Date(rental.return_date)) ? 'text-rose-700 animate-pulse' :
+                    rental.status.toLowerCase() === 'returned' || ((rental as any).received_at && new Date((rental as any).received_at) <= new Date(rental.return_date)) ? 'text-emerald-700' :
+                      activeTab === 'returning' ? 'text-emerald-700' :
+                        activeTab === 'active' ? 'text-orange-700' :
+                          'text-ink'
                   }`}>
                   {formatDate(rental.return_date)}
                 </span>
@@ -168,7 +194,7 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
                 {statusLabels[rental.status.toLowerCase()] || rental.status}
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-[10px] font-bold text-primary opacity-60 font-mono">₹</span>
+                <span className="text-[15px] font-bold text-primary opacity-60 font-mono">₹</span>
                 <span className="text-base font-black tracking-tight text-primary leading-none">
                   {rental.total_price.toLocaleString()}
                 </span>

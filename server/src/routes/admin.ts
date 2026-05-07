@@ -484,30 +484,17 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async
     const limit = Number(req.query.limit || 20);
     const offset = Number(req.query.offset || 0);
 
-    const { data: items, count, error } = await supabase
-      .from('rental_items')
-      .select('*, rentals(*, rental_items(quantity, products(price_per_day))), products(name, unique_code, price_per_day, images)', { count: 'exact' })
-      .eq('status', 'returned')
+    const { data: rentals, count, error } = await supabase
+      .from('rentals')
+      .select('*, users(full_name, phone, avatar_url), rental_items(*, products(*))', { count: 'exact' })
+      .in('status', ['returned', 'cancelled', 'failed'])
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
 
-    // Attach user info manually
-    const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
-    let usersMap: Record<string, any> = {};
-    if (userIds.length) {
-      const { data: users } = await supabase.from('users').select('id, full_name, phone, avatar_url').in('id', userIds);
-      (users || []).forEach((u: any) => { usersMap[u.id] = u; });
-    }
-
-    const result = (items || []).map((i: any) => ({
-      ...i,
-      rentals: i.rentals ? { ...i.rentals, users: usersMap[i.rentals.user_id] || null } : null,
-    }));
-
     return res.json({
-      items: result,
+      items: rentals || [],
       pagination: { limit, offset, total: count || 0, hasMore: offset + limit < (count || 0) },
     });
   } catch (error: any) {

@@ -26,51 +26,26 @@ const RentalHistory = () => {
   }, []);
 
   const allHistory = useMemo(() => {
-    if (!rawRentals.length) return [];
-
-    // Group by rental_id if the API returns individual items, or map directly if it returns rentals
-    // Based on index.tsx, /past usually returns grouped rental items or rentals
-    
-    const mapped = rawRentals.reduce((acc: any[], item: any) => {
-      // Check if item is a rental or a rental_item
-      const rental = item.rentals || (item.pickup_date ? item : null);
-      if (!rental) return acc;
-
-      const rentalId = rental.id;
-      let existing = acc.find(r => r.actualId === rentalId);
-
-      if (!existing) {
-        existing = {
-          actualId: rentalId,
-          id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
-          name: rental.users?.full_name || 'Guest',
-          user_image: rental.users?.avatar_url || '',
-          phone: rental.users?.phone || 'N/A',
-          pickup: rental.pickup_date,
-          return_date: rental.event_date,
-          total_price: rental.total_amount || 0,
-          status: item.status || rental.status,
-          products: [],
-          created_at: rental.created_at
-        };
-        acc.push(existing);
-      }
-
-      if (item.products) {
-        existing.products.push({
-          id: item.product_id,
-          name: item.products.name,
-          price: item.products.price_per_day,
-          qty: item.quantity,
-          image: item.products.images?.[0] || '',
-        });
-      }
-
-      return acc;
-    }, []);
-
-    // Sort by return date descending
-    return mapped.sort((a, b) => new Date(b.return_date).getTime() - new Date(a.return_date).getTime());
+    return rawRentals.map((rental: any) => ({
+      actualId: rental.id,
+      id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
+      name: rental.users?.full_name || 'Guest',
+      user_image: rental.users?.avatar_url || '',
+      phone: rental.users?.phone || 'N/A',
+      pickup: rental.pickup_date,
+      return_date: rental.event_date,
+      total_price: rental.total_amount || 0,
+      status: rental.status,
+      products: (rental.rental_items || []).map((item: any) => ({
+        id: item.product_id,
+        name: item.products?.name || 'Unknown',
+        price: item.products?.price_per_day || 0,
+        qty: item.quantity,
+        image: item.products?.images?.[0] || '',
+      })),
+      received_at: rental.received_at,
+      created_at: rental.created_at
+    })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [rawRentals]);
 
   const filteredHistory = useMemo(() => {
