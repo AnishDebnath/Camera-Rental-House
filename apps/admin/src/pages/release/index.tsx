@@ -44,6 +44,7 @@ const ReleaseReturn = () => {
         pickup: rental.pickup_date,
         return_date: rental.event_date,
         status: rental.status,
+        handover_proof: rental.handover_proof_url,
         products: (rental.rental_items || []).map((item: any) => ({
           id: item.product_id,
           name: item.products?.name || 'Unknown',
@@ -54,6 +55,9 @@ const ReleaseReturn = () => {
       };
 
       setActiveRental(mappedRental);
+      if (mappedRental.handover_proof) {
+        setProofPhoto(mappedRental.handover_proof);
+      }
     } catch (err: any) {
       console.error('Search failed:', err);
       setError(err.response?.data?.message || 'Booking ID not found. Please verify and try again.');
@@ -95,7 +99,7 @@ const ReleaseReturn = () => {
       setIsComplete(true);
     } catch (err: any) {
       console.error('Action failed:', err);
-      setError(err.response?.data?.message || 'Failed to process gear. Please try again.');
+      setError(err.response?.data?.message || 'Failed to process products. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -108,7 +112,7 @@ const ReleaseReturn = () => {
   };
 
   if (isComplete) {
-    return <ReleaseSuccess rental={activeRental} onReset={handleReset} />;
+    return <ReleaseSuccess rental={activeRental} onReset={handleReset} isReturn={activeRental.status === 'released'} />;
   }
 
   return (

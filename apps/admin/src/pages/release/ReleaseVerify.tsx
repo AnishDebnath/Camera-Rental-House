@@ -91,6 +91,7 @@ const ReleaseVerify = ({
           photo={proofPhoto}
           onCapture={onCapture}
           onClear={onClearPhoto}
+          isReadOnly={!!rental.handover_proof}
         />
       </div>
 

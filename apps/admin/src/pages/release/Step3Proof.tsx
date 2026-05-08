@@ -6,9 +6,10 @@ interface Props {
   photo: string | null;
   onCapture: (photo: string) => void;
   onClear: () => void;
+  isReadOnly?: boolean;
 }
 
-const Step3Proof = ({ photo, onCapture, onClear }: Props) => {
+const Step3Proof = ({ photo, onCapture, onClear, isReadOnly }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +53,12 @@ const Step3Proof = ({ photo, onCapture, onClear }: Props) => {
         </div>
 
         <div className="flex flex-col gap-3">
-          {!photo ? (
+          {isReadOnly ? (
+             <div className="w-full h-12 flex items-center justify-center gap-2 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-500">
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                Handover Evidence Linked
+             </div>
+          ) : !photo ? (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
