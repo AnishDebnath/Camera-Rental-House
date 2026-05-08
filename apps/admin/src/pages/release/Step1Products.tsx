@@ -48,7 +48,7 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
               className={`group relative flex flex-col gap-4 rounded-xl border p-4 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between sm:p-3 lg:p-2.5 ${isScanned ? 'border-emerald-200 bg-emerald-50/20' : 'border-line bg-white hover:border-line-hover'}`}
             >
               <div className="flex items-center gap-4 lg:gap-2.5 flex-1 min-w-0">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 sm:h-12 sm:w-12 lg:h-10 lg:w-10">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50">
                   {p.image ? (
                     <LazyImage
                       src={p.image}
@@ -69,9 +69,9 @@ const Step1Products = ({ products, scannedProducts, onVerifyClick }: Props) => {
                   )}
                 </div>
                 <div className="min-w-0 flex-1 space-y-1.5">
-                  <p className="text-sm font-bold text-ink leading-tight lg:text-[13px]">{p.name}</p>
+                  <p className="text-sm font-bold text-ink leading-tight">{p.name}</p>
                   <div className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 border border-slate-200/50">
-                    <p className="text-[10px] font-black text-tertiary uppercase tracking-widest lg:text-[9px]">
+                    <p className="text-[10px] font-black text-tertiary uppercase tracking-widest">
                       {p.unique_code || 'N/A'}
                     </p>
                   </div>
