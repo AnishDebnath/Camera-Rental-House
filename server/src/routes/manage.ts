@@ -1,7 +1,15 @@
 import express, { Request, Response } from 'express';
 import supabase from '../db/supabase.js';
-import { uploadFile } from '../storage/cloudinary.js';
+import { uploadFile, deleteFile } from '../storage/cloudinary.js';
 import { processImage } from '../utils/imageProcessor.js';
+
+const extractPublicId = (url: string | null): string | null => {
+  if (!url) return null;
+  const parts = url.split('/upload/');
+  if (parts.length < 2) return null;
+  const path = parts[1].replace(/^v\d+\//, '');
+  return decodeURIComponent(path.split('.')[0]);
+};
 
 const router = express.Router();
 
@@ -268,16 +276,33 @@ router.post('/bulk-return', async (req: Request, res: Response) => {
 
     const allReturned = (allItems || []).every(item => item.status === 'returned');
     if (allReturned) {
+      // Fetch handover proof URL before updating
+      const { data: rentalData } = await supabase
+        .from('rentals')
+        .select('handover_proof_url')
+        .eq('id', rentalId)
+        .single();
+
       const { error: rentalError } = await supabase
         .from('rentals')
         .update({ 
           status: 'returned',
-          received_at: new Date().toISOString()
+          received_at: new Date().toISOString(),
+          handover_proof_url: null // Clear the proof link
         })
         .eq('id', rentalId);
       
       if (rentalError && rentalError.message?.includes('column')) {
-         await supabase.from('rentals').update({ status: 'returned' }).eq('id', rentalId);
+         await supabase.from('rentals').update({ status: 'returned', handover_proof_url: null }).eq('id', rentalId);
+      }
+
+      // Delete from Cloudinary if exists
+      if (rentalData?.handover_proof_url) {
+        const publicId = extractPublicId(rentalData.handover_proof_url);
+        if (publicId) {
+          console.log(`[Bulk Return] Deleting handover proof: ${publicId}`);
+          await deleteFile({ key: publicId }).catch(err => console.error('Cloudinary delete fail:', err));
+        }
       }
     }
 
