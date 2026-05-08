@@ -39,7 +39,7 @@ const Sidebar = ({ open, onClose }) => {
         const { data } = await axiosInstance.get(endpoint);
         
         setCounts({
-          products: data.totalActiveRentals || 0, // Show active rentals in product tab as requested
+          products: data.totalActiveItems || 0,
           rentals: data.totalActiveRentals || 0,
           users: data.totalUsers || 0,
         });

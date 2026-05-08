@@ -282,29 +282,25 @@ const UserVerificationModal = ({ user, onClose, onVerify }: Props) => {
         </div>
 
         <div className="mt-6 flex flex-col items-center">
-          {status !== 'scanning' ? (
-            <div className="flex flex-col items-center gap-6">
-              {status === 'success' && (
-                <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  <div className="h-1 w-12 rounded-full bg-emerald-100 mb-4" />
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">
-                    Verification Successful
-                  </p>
-                </div>
-              )}
-
-              <button
-                onClick={startScanning}
-                className="flex w-fit items-center justify-center gap-2 rounded-xl bg-ink h-10 px-6 text-xs font-black text-white hover:bg-slate-900 active:scale-95 transition-all shadow-lg"
-              >
-                <ScanLine className="h-4 w-4 text-white" />
-                Try Again
-              </button>
-            </div>
-          ) : (
+          {status === 'scanning' ? (
             <p className="text-center text-[9px] font-black text-muted uppercase tracking-[0.2em] animate-pulse">
               Awaiting input or scan...
             </p>
+          ) : status === 'success' ? (
+            <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="h-1 w-12 rounded-full bg-emerald-100 mb-4" />
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">
+                Verification Successful
+              </p>
+            </div>
+          ) : (
+            <button
+              onClick={startScanning}
+              className="flex w-fit items-center justify-center gap-2 rounded-xl bg-ink h-10 px-6 text-xs font-black text-white hover:bg-slate-900 active:scale-95 transition-all shadow-lg"
+            >
+              <ScanLine className="h-4 w-4 text-white" />
+              Try Again
+            </button>
           )}
         </div>
       </motion.div>

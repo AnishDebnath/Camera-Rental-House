@@ -34,6 +34,7 @@ const ReleaseReturn = () => {
       // Map DB rental to UI format
       const mappedRental = {
         id: rental.id.split('-')[0].toUpperCase(),
+        rental_no: rental.rental_no,
         full_id: rental.id,
         name: rental.users?.full_name || 'Guest',
         phone: rental.users?.phone || 'N/A',
@@ -79,9 +80,16 @@ const ReleaseReturn = () => {
       const isReturn = activeRental.status === 'released' || activeRental.products.some((p: any) => p.status === 'released');
       const endpoint = isReturn ? '/manage/bulk-return' : '/manage/bulk-release';
 
+      console.log('[Release] Sending request to:', endpoint, {
+        rentalId: activeRental.full_id,
+        productIds: scannedProducts,
+        hasPhoto: !!proofPhoto
+      });
+
       await axiosInstance.post(endpoint, {
         rentalId: activeRental.full_id,
-        productIds: scannedProducts
+        productIds: scannedProducts,
+        proofPhoto: proofPhoto
       });
 
       setIsComplete(true);
@@ -151,6 +159,7 @@ const ReleaseReturn = () => {
               onClearPhoto={() => setProofPhoto(null)}
               onRelease={handleRelease}
               onReset={handleReset}
+              error={error}
             />
           )}
         </AnimatePresence>

@@ -65,6 +65,7 @@ const Rentals = () => {
           qty: item.quantity,
           image: item.products?.images?.[0] || '',
         })),
+        handover_proof: r.handover_proof_url,
       }));
     }
 
@@ -81,9 +82,10 @@ const Rentals = () => {
           phone: rental.users?.phone || 'N/A',
           pickup: rental.pickup_date,
           return_date: rental.event_date,
-          total_price: rental.total_amount || (rental.rental_items || []).reduce((sum: number, ri: any) => sum + (ri.products?.price_per_day || 0) * ri.quantity * ((Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1), 0),
-          status: item.status === 'released' ? 'active' : 'completed',
+          total_price: rental.total_amount || 0,
+          status: 'released',
           products: [],
+          handover_proof: rental.handover_proof_url,
         };
       }
       
@@ -130,11 +132,31 @@ const Rentals = () => {
     return list;
   }, [mappedRentals, activeTab, searchQuery, filterDate]);
 
-  const counts = useMemo(() => ({
-    upcoming: activeTab === 'upcoming' ? filteredRentals.length : 0,
-    active: activeTab === 'active' ? mappedRentals.length : 0,
-    returning: activeTab === 'returning' ? filteredRentals.length : 0,
-  }), [filteredRentals, mappedRentals, activeTab]);
+  const [apiCounts, setApiCounts] = useState({ upcoming: 0, active: 0, returning: 0 });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const response = await axiosInstance.get(`/manage/counts?date=${filterDate}`);
+        setApiCounts({
+          upcoming: response.data.upcoming,
+          active: response.data.active,
+          returning: response.data.returning
+        });
+      } catch (err) {
+        console.error('Failed to fetch counts:', err);
+      }
+    };
+    fetchCounts();
+  }, [rawRentals, filterDate]);
+
+  const counts = useMemo(() => {
+    return {
+      upcoming: apiCounts.upcoming,
+      active: apiCounts.active,
+      returning: apiCounts.returning,
+    };
+  }, [apiCounts]);
 
   const shiftDate = (days: number) => {
     const [y, m, d] = filterDate.split('-').map(Number);

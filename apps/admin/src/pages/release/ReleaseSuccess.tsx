@@ -16,14 +16,14 @@ const ReleaseSuccess = ({ rental, onReset }: Props) => (
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 shadow-sm border border-emerald-100">
         <CheckCircle2 className="h-12 w-12" />
       </div>
-      <h2 className="text-2xl font-bold tracking-tight text-ink">Handover Success</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-ink">Release Success</h2>
       <p className="mt-3 text-sm font-medium text-muted leading-relaxed">
-        Rental <span className="text-ink font-bold">{rental.id}</span> has been officially released to{' '}
+        Rental <span className="text-ink font-bold">{rental.rental_no}</span> has been officially released to{' '}
         <span className="text-ink font-bold">{rental.name}</span>.
       </p>
       <div className="mt-8">
         <button onClick={onReset} className="primary-button w-full">
-          Start New Handoff
+          Start New Release / Return
         </button>
       </div>
     </motion.div>

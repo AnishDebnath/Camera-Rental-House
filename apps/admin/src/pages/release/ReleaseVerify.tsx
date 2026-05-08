@@ -18,6 +18,7 @@ interface Props {
   onClearPhoto: () => void;
   onRelease: () => void;
   onReset: () => void;
+  error?: string | null;
 }
 
 const ReleaseVerify = ({
@@ -31,6 +32,7 @@ const ReleaseVerify = ({
   onClearPhoto,
   onRelease,
   onReset,
+  error,
 }: Props) => {
   const [verifyingProduct, setVerifyingProduct] = useState<any>(null);
   const [isVerifyingUser, setIsVerifyingUser] = useState(false);
@@ -101,6 +103,18 @@ const ReleaseVerify = ({
           onRelease={onRelease}
           onReset={onReset}
         />
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl bg-rose-50 p-4 border border-rose-100"
+          >
+            <p className="text-xs font-bold text-rose-600 leading-relaxed text-center">
+              {error}
+            </p>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

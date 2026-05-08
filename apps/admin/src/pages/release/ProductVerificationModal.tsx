@@ -278,7 +278,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
             </>
           )}
 
-          {status !== 'scanning' && (
+          {(status === 'timeout' || status === 'error') && (
             <button
               onClick={startScanning}
               className="flex w-fit items-center justify-center gap-2 rounded-xl bg-ink h-10 px-6 text-xs font-black text-white hover:bg-slate-900 active:scale-95 transition-all shadow-lg"

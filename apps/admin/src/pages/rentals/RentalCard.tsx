@@ -20,6 +20,7 @@ type Rental = {
   total_price: number;
   status: string;
   products: Product[];
+  handover_proof?: string;
 };
 
 type RentalCardProps = {
@@ -258,6 +259,23 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
                   </div>
                 ))}
               </div>
+              
+              {rental.handover_proof && (
+                <div className="mt-6">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-tertiary">Handover Evidence</h4>
+                    <div className="mx-4 h-px flex-1 bg-line/40" />
+                  </div>
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-line bg-slate-50 shadow-inner group/proof">
+                    <img 
+                      src={rental.handover_proof} 
+                      alt="Handover Proof" 
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover/proof:scale-110" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink/20 to-transparent" />
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-4">
