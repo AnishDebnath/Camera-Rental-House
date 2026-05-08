@@ -87,7 +87,7 @@ const Rentals = () => {
     if (activeTab === 'upcoming') {
       list = list.filter(r => toLocalDate(r.pickup) === filterDate);
     } else if (activeTab === 'returning') {
-      list = list.filter(r => toLocalDate(r.return_date) === filterDate);
+      list = list.filter(r => toLocalDate(r.return_date) === filterDate && !['cancelled', 'failed'].includes(r.status));
     }
 
     // Search filter

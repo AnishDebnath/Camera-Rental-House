@@ -164,8 +164,8 @@ router.get('/counts', async (req: Request, res: Response) => {
 
     const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('rentals').select('products').eq('status', 'active'),
+      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'released'),
+      supabase.from('rentals').select('products').eq('status', 'released'),
       upcomingQuery,
       returningQuery,
     ]);

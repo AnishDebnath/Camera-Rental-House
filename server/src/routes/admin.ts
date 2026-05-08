@@ -454,7 +454,7 @@ router.get('/rentals/active', roleMiddleware(['admin', 'manager', 'staff']), asy
     const { data: rentals, error } = await supabase
       .from('rentals')
       .select('*')
-      .eq('status', 'active')
+      .eq('status', 'released')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
