@@ -68,17 +68,15 @@ const Account = () => {
     return null;
   }
 
-  const allRentals = [...rentals];
-
-  const activeRentals = allRentals.filter((rental) =>
-    (rental.status === 'confirmed' || rental.status === 'released') &&
-    rental.rental_items.some((item) => item.status !== 'returned')
+  const activeRentals = rentals.filter((rental) =>
+    ['confirmed', 'released'].includes(rental.status) ||
+    (rental.products || []).some((item: any) => item.status !== 'returned')
   );
-  const pastRentals = allRentals.filter((rental) =>
-    rental.status === 'cancelled' ||
-    rental.status === 'returned' ||
-    rental.status === 'failed' ||
-    rental.rental_items.every((item) => item.status === 'returned')
+
+  // Group rentals logically
+  const pastRentals = rentals.filter((rental) =>
+    ['returned', 'cancelled', 'failed'].includes(rental.status) ||
+    (rental.products || []).every((item: any) => item.status === 'returned')
   );
 
   const validateDraft = () => {

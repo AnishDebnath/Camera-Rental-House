@@ -48,7 +48,7 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
   };
 
   const productSummary = rental.products.map(p => p.name).join(', ');
-  const totalItems = rental.products.reduce((sum, p) => sum + (p.qty || 1), 0);
+  const totalItems = rental.products.length;
 
   const getDays = (start: string, end: string) => {
     const diff = new Date(end).getTime() - new Date(start).getTime();
@@ -250,11 +250,11 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
                       </div>
                       <div>
                         <p className="text-sm font-bold text-ink">{product.name}</p>
-                        <p className="text-[10px] font-bold text-muted mt-0.5">₹{product.price.toLocaleString()} × {product.qty}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-primary">₹{(product.price * product.qty).toLocaleString()}</p>
+                      <p className="text-sm font-black text-primary">₹{product.price.toLocaleString()}</p>
+                      <p className="text-[10px] font-bold text-muted mt-0.5">₹{product.price.toLocaleString()}/day</p>
                     </div>
                   </div>
                 ))}

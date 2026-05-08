@@ -45,12 +45,12 @@ const ReleaseReturn = () => {
         return_date: rental.event_date,
         status: rental.status,
         handover_proof: rental.handover_proof_url,
-        products: (rental.rental_items || []).map((item: any) => ({
-          id: item.product_id,
-          name: item.products?.name || 'Unknown',
-          image: item.products?.images?.[0] || '',
+        products: (rental.products || []).map((item: any) => ({
+          id: item.id,
+          name: item.name || 'Unknown',
+          image: item.image || '',
           status: item.status,
-          unique_code: item.products?.unique_code
+          unique_code: item.unique_code
         }))
       };
 
@@ -122,12 +122,12 @@ const ReleaseReturn = () => {
         <header className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
-              {activeRental.status === 'released' ? 'Return Gear' : 'Release Gear'}
+              {activeRental.status === 'released' ? 'Return Products' : 'Release Products'}
             </h1>
             <p className="mt-1.5 text-xs font-medium text-muted sm:text-sm">
               {activeRental.status === 'released'
                 ? 'Verify returned products and update inventory.'
-                : 'Verify products and user identity for secure gear handoff.'}
+                : 'Verify products and user identity for secure handover.'}
             </p>
           </div>
         </header>

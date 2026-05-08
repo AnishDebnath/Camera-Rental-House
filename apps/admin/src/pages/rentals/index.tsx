@@ -48,59 +48,29 @@ const Rentals = () => {
   const mappedRentals = useMemo(() => {
     if (!rawRentals.length) return [];
 
-    if (activeTab === 'upcoming') {
-      return rawRentals.map((r: any) => ({
-        id: r.rental_no || r.id.split('-')[0].toUpperCase(),
-        name: r.users?.full_name || 'Guest',
-        user_image: r.users?.avatar_url || '',
-        phone: r.users?.phone || 'N/A',
-        pickup: r.pickup_date,
-        return_date: r.event_date,
-        total_price: r.total_amount || (r.rental_items || []).reduce((sum: number, item: any) => sum + (item.products?.price_per_day || 0) * item.quantity * ((Math.round((new Date(r.event_date).getTime() - new Date(r.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1), 0),
-        status: r.status,
-        products: (r.rental_items || []).map((item: any) => ({
-          id: item.product_id,
-          name: item.products?.name || 'Unknown',
-          price: item.products?.price_per_day || 0,
-          qty: item.quantity,
-          image: item.products?.images?.[0] || '',
+    return rawRentals.map((r: any) => {
+      const rental = r.rentals ? r.rentals : r; // handle wrapped objects just in case
+      const users = r.users || rental.users || {};
+      
+      return {
+        id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
+        name: users.full_name || 'Guest',
+        user_image: users.avatar_url || '',
+        phone: users.phone || 'N/A',
+        pickup: rental.pickup_date,
+        return_date: rental.event_date,
+        total_price: rental.total_amount || 0,
+        status: rental.status,
+        products: (rental.products || []).map((p: any) => ({
+          id: p.id,
+          name: p.name || 'Unknown',
+          price: p.price || 0,
+          qty: p.qty || 1,
+          image: p.image || '',
         })),
-        handover_proof: r.handover_proof_url,
-      }));
-    }
-
-    // For active/past, group by rental_id
-    const grouped = rawRentals.reduce((acc: any, item: any) => {
-      const rental = item.rentals;
-      if (!rental) return acc;
-      
-      if (!acc[rental.id]) {
-        acc[rental.id] = {
-          id: rental.rental_no || rental.id.split('-')[0].toUpperCase(),
-          name: rental.users?.full_name || 'Guest',
-          user_image: rental.users?.avatar_url || '',
-          phone: rental.users?.phone || 'N/A',
-          pickup: rental.pickup_date,
-          return_date: rental.event_date,
-          total_price: rental.total_amount || 0,
-          status: 'released',
-          products: [],
-          handover_proof: rental.handover_proof_url,
-        };
-      }
-      
-      acc[rental.id].products.push({
-        id: item.product_id,
-        name: item.products?.name || 'Unknown',
-        price: item.products?.price_per_day || 0,
-        qty: item.quantity,
-        image: item.products?.images?.[0] || '',
-      });
-      
-      return acc;
-    }, {});
-
-    return Object.values(grouped);
+        handover_proof: rental.handover_proof_url,
+      };
+    });
   }, [rawRentals, activeTab]);
 
 

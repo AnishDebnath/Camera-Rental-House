@@ -28,7 +28,7 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     const monthStart = new Date();
     monthStart.setDate(1);
 
-    const [productsCount, usersCount, activeTodayCount, activeItemsCount, rentalsCount, recentRentals, revenueItems] =
+    const [productsCount, usersCount, activeTodayCount, activeRentals, recentRentals, revenueRentals] =
       await Promise.all([
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('users').select('id', { count: 'exact', head: true }),
@@ -37,29 +37,31 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
           .select('id', { count: 'exact', head: true })
           .eq('pickup_date', today),
         supabase
-          .from('rental_items')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'released'),
+          .from('rentals')
+          .select('products')
+          .eq('status', 'active'),
         supabase
           .from('rentals')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'released'),
-        supabase
-          .from('rentals')
-          .select('*, users(full_name), rental_items(*, products(name, price_per_day))')
+          .select('*, users(full_name)')
           .order('created_at', { ascending: false })
           .limit(10),
         supabase
           .from('rentals')
-          .select('created_at, rental_items(quantity, products(price_per_day))')
+          .select('created_at, products, total_amount')
           .gte('created_at', monthStart.toISOString()),
       ]);
 
-    const revenueThisMonth = (revenueItems.data || []).reduce((sum: number, rental: any) => {
+    const activeItemsCount = (activeRentals.data || []).reduce((sum: number, rental: any) => {
+      return sum + (rental.products || []).reduce((itemSum: number, p: any) => itemSum + (p.qty || 1), 0);
+    }, 0);
+
+    const revenueThisMonth = (revenueRentals.data || []).reduce((sum: number, rental: any) => {
+      // Use pre-calculated total_amount if available, else calculate from products
+      if (rental.total_amount) return sum + Number(rental.total_amount);
       return (
         sum +
-        (rental.rental_items || []).reduce((itemSum: number, item: any) => {
-          return itemSum + Number(item.quantity || 1) * Number(item.products?.price_per_day || 0);
+        (rental.products || []).reduce((itemSum: number, item: any) => {
+          return itemSum + Number(item.qty || 1) * Number(item.price || 0); // Assuming 1 day for simplicity if no total
         }, 0)
       );
     }, 0);
@@ -67,8 +69,8 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     return res.json({
       totalProducts: productsCount.count || 0,
       activeRentalsToday: activeTodayCount.count || 0,
-      totalActiveRentals: rentalsCount.count || 0,
-      totalActiveItems: activeItemsCount.count || 0,
+      totalActiveRentals: activeRentals.data?.length || 0,
+      totalActiveItems: activeItemsCount,
       totalUsers: usersCount.count || 0,
       revenueThisMonth,
       recentRentals: recentRentals.data || [],
@@ -83,7 +85,7 @@ router.get('/users', roleMiddleware(['admin']), async (req: Request, res: Respon
     const search = String(req.query.search || '').trim();
     let query: any = supabase
       .from('users')
-      .select('*, rentals(id, rental_items(quantity, products(price_per_day)))')
+      .select('*, rentals(id, products, total_amount)')
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -100,10 +102,11 @@ router.get('/users', roleMiddleware(['admin']), async (req: Request, res: Respon
 
     const users = (data || []).map((user: any) => {
       const totalSpent = (user.rentals || []).reduce((sum: number, rental: any) => {
+        if (rental.total_amount) return sum + Number(rental.total_amount);
         return (
           sum +
-          (rental.rental_items || []).reduce((itemSum: number, item: any) => {
-            return itemSum + Number(item.quantity || 1) * Number(item.products?.price_per_day || 0);
+          (rental.products || []).reduce((itemSum: number, item: any) => {
+            return itemSum + Number(item.qty || 1) * Number(item.price || 0);
           }, 0)
         );
       }, 0);
@@ -125,7 +128,7 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('*, rentals(*, rental_items(*, products(*)))')
+      .select('*, rentals(*)')
       .eq('id', req.params.id)
       .maybeSingle();
 
@@ -207,15 +210,6 @@ router.delete('/users/:id', roleMiddleware(['admin']), async (req: Request, res:
     const rentalIds = (rentals || []).map((item: any) => item.id);
 
     if (rentalIds.length) {
-      const { error: deleteItemsError } = await supabase
-        .from('rental_items')
-        .delete()
-        .in('rental_id', rentalIds);
-
-      if (deleteItemsError) {
-        throw deleteItemsError;
-      }
-
       const { error: deleteRentalsError } = await supabase
         .from('rentals')
         .delete()
@@ -425,7 +419,7 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), a
   try {
     const { data: rentals, error } = await supabase
       .from('rentals')
-      .select('*, rental_items(*, products(name, unique_code, price_per_day, images))')
+      .select('*')
       .in('status', ['confirmed'])
       .order('pickup_date', { ascending: true });
 
@@ -457,25 +451,25 @@ router.get('/rentals/upcoming', roleMiddleware(['admin', 'manager', 'staff']), a
 
 router.get('/rentals/active', roleMiddleware(['admin', 'manager', 'staff']), async (_req: Request, res: Response) => {
   try {
-    const { data: items, error } = await supabase
-      .from('rental_items')
-      .select('*, rentals(*, rental_items(quantity, products(price_per_day))), products(name, unique_code, price_per_day, images)')
-      .eq('status', 'released')
+    const { data: rentals, error } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('status', 'active')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     // Attach user info manually
-    const userIds = [...new Set((items || []).map((i: any) => i.rentals?.user_id).filter(Boolean))];
+    const userIds = [...new Set((rentals || []).map((r: any) => r.user_id).filter(Boolean))];
     let usersMap: Record<string, any> = {};
     if (userIds.length) {
       const { data: users } = await supabase.from('users').select('id, full_name, phone, avatar_url').in('id', userIds);
       (users || []).forEach((u: any) => { usersMap[u.id] = u; });
     }
 
-    const result = (items || []).map((i: any) => ({
-      ...i,
-      rentals: i.rentals ? { ...i.rentals, users: usersMap[i.rentals.user_id] || null } : null,
+    const result = (rentals || []).map((r: any) => ({
+      ...r,
+      users: usersMap[r.user_id] || null,
     }));
 
     return res.json(result);
@@ -491,7 +485,7 @@ router.get('/rentals/past', roleMiddleware(['admin', 'manager', 'staff']), async
 
     const { data: rentals, count, error } = await supabase
       .from('rentals')
-      .select('*, users(full_name, phone, avatar_url), rental_items(*, products(*))', { count: 'exact' })
+      .select('*, users(full_name, phone, avatar_url)', { count: 'exact' })
       .in('status', ['returned', 'cancelled', 'failed'])
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -515,7 +509,7 @@ router.get('/rentals/:id', roleMiddleware(['admin', 'manager', 'staff']), async 
 
     let query = supabase
       .from('rentals')
-      .select('*, users(*), rental_items(*, products(*))');
+      .select('*, users(*)');
 
     if (isUuid) {
       query = query.eq('id', id);

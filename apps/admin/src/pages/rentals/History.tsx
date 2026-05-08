@@ -36,12 +36,12 @@ const RentalHistory = () => {
       return_date: rental.event_date,
       total_price: rental.total_amount || 0,
       status: rental.status,
-      products: (rental.rental_items || []).map((item: any) => ({
-        id: item.product_id,
-        name: item.products?.name || 'Unknown',
-        price: item.products?.price_per_day || 0,
-        qty: item.quantity,
-        image: item.products?.images?.[0] || '',
+      products: (rental.products || []).map((p: any) => ({
+        id: p.id,
+        name: p.name || 'Unknown',
+        price: p.price || 0,
+        qty: p.qty || 1,
+        image: p.image || '',
       })),
       received_at: rental.received_at,
       created_at: rental.created_at

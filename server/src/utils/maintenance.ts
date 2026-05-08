@@ -38,16 +38,19 @@ export const runRentalMaintenance = async () => {
         continue;
       }
 
-      // 2. Mark items as 'returned' to release stock back to the inventory
-      // Note: 'returned' is used to satisfy DB constraints while making the item available.
+      // 2. We don't need to update rental_items anymore. 
+      // The rental status is 'cancelled', so enrichProduct will not see it as 'confirmed' or 'active' and stock is freed.
+      // But we can also update the products JSONB array status to 'cancelled' for consistency.
+      const { data: currentRental } = await supabase.from('rentals').select('products').eq('id', rental.id).single();
+      const updatedProducts = (currentRental?.products || []).map((p: any) => ({ ...p, status: 'cancelled' }));
+      
       const { error: updateItemsError } = await supabase
-        .from('rental_items')
-        .update({ status: 'returned' })
-        .eq('rental_id', rental.id)
-        .eq('status', 'pending_pickup');
+        .from('rentals')
+        .update({ products: updatedProducts })
+        .eq('id', rental.id);
 
       if (updateItemsError) {
-        console.error(`[Maintenance] Error releasing items for rental ${rental.rental_no}:`, updateItemsError);
+        console.error(`[Maintenance] Error updating products for rental ${rental.rental_no}:`, updateItemsError);
       } else {
         console.log(`[Maintenance] Successfully cancelled rental ${rental.rental_no} and released items.`);
       }

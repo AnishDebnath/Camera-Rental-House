@@ -41,6 +41,24 @@ router.post('/', async (req: Request, res: Response) => {
       return sum + (product?.price_per_day || 0) * (item.quantity || 1) * days;
     }, 0);
     
+    // Fetch full product details for snapshot
+    const { data: fullProducts } = await supabase
+      .from('products')
+      .select('id, name, unique_code, price_per_day, images')
+      .in('id', productIds);
+
+    const productSnapshots = (items || []).map((item: any) => {
+      const p = fullProducts?.find(fp => fp.id === item.productId);
+      return {
+        id: item.productId,
+        name: p?.name || 'Unknown',
+        unique_code: p?.unique_code || 'N/A',
+        price: p?.price_per_day || 0,
+        image: p?.images?.[0] || '',
+        status: 'pending_pickup'
+      };
+    });
+
     const { data: rental, error: rentalError } = await supabase
       .from('rentals')
       .insert({
@@ -51,6 +69,7 @@ router.post('/', async (req: Request, res: Response) => {
         event_date: eventDate,
         status: 'confirmed',
         total_amount: totalAmount,
+        products: productSnapshots
       })
       .select('*')
       .single();
@@ -59,27 +78,8 @@ router.post('/', async (req: Request, res: Response) => {
       throw rentalError;
     }
 
-    const { data: rentalItems, error: itemsError } = await supabase
-      .from('rental_items')
-      .insert(
-        items.map((item: any) => ({
-          rental_id: rentalId,
-          product_id: item.productId,
-          quantity: item.quantity || 1,
-          status: 'pending_pickup',
-        })),
-      )
-      .select('*, products(*)');
-
-    if (itemsError) {
-      throw itemsError;
-    }
-
     console.log('Rental created successfully:', rentalId);
-    return res.status(201).json({
-      ...rental,
-      items: rentalItems || [],
-    });
+    return res.status(201).json(rental);
   } catch (error: any) {
     console.error('RENTAL CREATION ERROR:', error);
     return res.status(500).json({ message: error.message || 'Unable to create rental.' });
@@ -90,7 +90,7 @@ router.get('/my', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('rentals')
-      .select('*, rental_items(*, products(*))')
+      .select('*')
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false });
 

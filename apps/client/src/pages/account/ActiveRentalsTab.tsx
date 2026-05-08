@@ -35,7 +35,7 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
       ) : (
         <div className="grid gap-3 lg:grid-cols-2 md:gap-4">
           {activeRentals.map((rental) => {
-            const isReleased = rental.rental_items.some(
+            const isReleased = (rental.products || []).some(
               (item: any) => item.status === 'released',
             );
 
@@ -84,12 +84,12 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
 
                 <div className="flex-1 space-y-4 border-t border-slate-200/80 pt-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {rental.rental_items.map((item: any, idx: number) => (
+                    {(rental.products || []).map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-3.5 rounded-2xl bg-white/40 p-2.5 border border-white/40 shadow-sm">
                         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line/40 bg-white/50">
-                          {item.products?.images?.[0] ? (
+                          {item.image ? (
                             <img
-                              src={item.products.images[0]}
+                              src={item.image}
                               alt=""
                               className="h-full w-full object-cover"
                             />
@@ -101,10 +101,10 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs md:text-sm font-bold text-ink leading-tight">
-                            {item.products?.name || 'Unknown Product'}
+                            {item.name || 'Unknown Product'}
                           </p>
                           <p className="text-[10px] md:text-xs font-medium text-muted mt-1 flex items-center gap-1.5">
-                            <span className="inline-block px-1.5 py-0.5 rounded-md bg-slate-100 font-bold text-slate-500">{item.products?.unique_code || 'N/A'}</span>
+                            <span className="inline-block px-1.5 py-0.5 rounded-md bg-slate-100 font-bold text-slate-500">{item.unique_code || 'N/A'}</span>
                           </p>
                         </div>
                       </div>
@@ -116,12 +116,12 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                     <div className="flex items-center justify-between rounded-xl bg-white/60 px-4 py-3 border border-white backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
                       <div className="space-y-0.5">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Units</p>
-                        <p className="text-xs md:text-sm font-bold text-ink">{rental.rental_items.length} Items</p>
+                        <p className="text-xs md:text-sm font-bold text-ink">{(rental.products || []).length} Items</p>
                       </div>
                       <div className="space-y-0.5 text-right">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Total Amount</p>
                         <p className="text-base md:text-lg font-black tracking-tight text-primary">
-                          ₹{(rental.total_amount || rental.rental_items.reduce((sum: number, item: any) => sum + (item.products?.price_per_day || 0) * (item.quantity || 1) * ((Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1), 0)).toLocaleString()}
+                          ₹{(rental.total_amount || (rental.products || []).reduce((sum: number, item: any) => sum + (item.price || 0) * (item.qty || 1) * ((Math.round((new Date(rental.event_date).getTime() - new Date(rental.pickup_date).getTime()) / (1000 * 60 * 60 * 24)) + 1) || 1), 0)).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -135,8 +135,10 @@ const ActiveRentalsTab = ({ activeRentals }: ActiveRentalsTabProps) => {
                               <span className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
                               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Released By</p>
                             </div>
-                            <p className="text-xs md:text-sm font-bold text-slate-800">{rental.released_by || 'Staff Member'}</p>
-                            <p className="text-[10px] md:text-xs font-medium text-slate-400">{rental.released_at ? formatDate(rental.released_at) : formatDate(rental.pickup_date)}</p>
+                            <p className="text-xs md:text-sm font-bold text-slate-800">{rental.released_by_staff_name || 'Staff Member'}</p>
+                            <p className="text-[10px] md:text-xs font-medium text-slate-400">
+                              {rental.released_at ? `${formatDate(rental.released_at)} at ${new Date(rental.released_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'N/A'}
+                            </p>
                           </div>
                         ) : (
                           <div className="space-y-1">

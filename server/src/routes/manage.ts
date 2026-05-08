@@ -13,124 +13,7 @@ const extractPublicId = (url: string | null): string | null => {
 
 const router = express.Router();
 
-interface FindItemProps {
-  uniqueCode?: string;
-  productId?: string;
-  expectedStatuses: string[];
-}
 
-const findItemByProduct = async ({ uniqueCode, productId, expectedStatuses }: FindItemProps) => {
-  let productQuery = supabase.from('products').select('id, name, unique_code').limit(1);
-
-  if (productId) {
-    productQuery = productQuery.eq('id', productId);
-  } else if (uniqueCode) {
-    productQuery = productQuery.eq('unique_code', uniqueCode);
-  }
-
-  const { data: product, error: productError } = await productQuery.maybeSingle();
-
-  if (productError) {
-    throw productError;
-  }
-
-  if (!product) {
-    return null;
-  }
-
-  const { data: item, error: itemError } = await supabase
-    .from('rental_items')
-    .select('*, rentals(*, users(*)), products(*)')
-    .eq('product_id', product.id)
-    .in('status', expectedStatuses)
-    .limit(1)
-    .maybeSingle();
-
-  if (itemError) {
-    throw itemError;
-  }
-
-  return item as any;
-};
-
-router.post('/release', async (req: Request, res: Response) => {
-  try {
-    const item = await findItemByProduct({
-      uniqueCode: req.body.uniqueCode,
-      productId: req.body.productId,
-      expectedStatuses: ['pending_pickup'],
-    });
-
-    if (!item) {
-      return res.status(404).json({
-        message: 'No pending pickup record was found for this product.',
-      });
-    }
-
-    const staffId = (req.user as any)?.id || null;
-    const staffName = (req.user as any)?.fullName || (req.user as any)?.username || null;
-
-    const { data, error } = await supabase
-      .from('rental_items')
-      .update({
-        status: 'released',
-        released_by_staff_id: staffId,
-        released_by_staff_name: staffName,
-        released_at: new Date().toISOString(),
-      })
-      .eq('id', item.id)
-      .select('*, rentals(*, users(*)), products(*)')
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    const rentalItem = data as any;
-    return res.json({
-      message: 'Product released successfully.',
-      rentalItem,
-      user: rentalItem.rentals.users,
-      releasedBy: staffName,
-    });
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message || 'Unable to release product.' });
-  }
-});
-
-router.post('/return', async (req: Request, res: Response) => {
-  try {
-    const item = await findItemByProduct({
-      uniqueCode: req.body.uniqueCode,
-      productId: req.body.productId,
-      expectedStatuses: ['released'],
-    });
-
-    if (!item) {
-      return res.status(404).json({
-        message: 'No released item was found for this product.',
-      });
-    }
-
-    const { data, error } = await supabase
-      .from('rental_items')
-      .update({ status: 'returned' })
-      .eq('id', item.id)
-      .select('*, rentals(*, users(*)), products(*)')
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return res.json({
-      message: 'Product returned successfully.',
-      rentalItem: data,
-    });
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message || 'Unable to return product.' });
-  }
-});
 
 router.post('/bulk-release', async (req: Request, res: Response) => {
   try {
@@ -149,34 +32,14 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
     
     // Check if extra columns exist or just try-catch them
     // For now, we try to include them but handle the specific "column not found" error
-    const { data, error } = await supabase
-      .from('rental_items')
-      .update({
-        status: 'released',
-        released_by_staff_id: staffId,
-        released_by_staff_name: staffName,
-        released_at: new Date().toISOString(),
-      })
-      .eq('rental_id', rentalId)
-      .in('product_id', productIds)
-      .select('*, products(*)');
+    // Fetch current rental to update products array
+    const { data: rental, error: fetchError } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('id', rentalId)
+      .single();
 
-    if (error) {
-      if (error.message?.includes('column') && error.message?.includes('not found')) {
-        console.warn('[Bulk Release] Extra columns missing, falling back to status-only update.');
-        const fallback = await supabase
-          .from('rental_items')
-          .update({ status: 'released' })
-          .eq('rental_id', rentalId)
-          .in('product_id', productIds)
-          .select('*, products(*)');
-        if (fallback.error) throw fallback.error;
-        // Proceed with fallback data
-      } else {
-        console.error('[Bulk Release] rental_items update error:', error);
-        throw error;
-      }
-    }
+    if (fetchError || !rental) throw fetchError || new Error('Rental not found');
 
     // Handle Proof Photo
     let proofUrl = null;
@@ -184,12 +47,7 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
       try {
         const base64Data = proofPhoto.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Data, 'base64');
-        
-        const processed = await processImage(buffer, {
-          maxWidth: 1200,
-          quality: 80
-        });
-
+        const processed = await processImage(buffer, { maxWidth: 1200, quality: 80 });
         proofUrl = await uploadFile({
           buffer: processed.buffer,
           key: `proof-${rentalId}-${Date.now()}.jpg`,
@@ -201,34 +59,31 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
       }
     }
 
-    // Update parent rental status to released
-    try {
-      const updateData: any = { status: 'released' };
-      if (proofUrl) {
-        updateData.handover_proof_url = proofUrl;
+    const now = new Date().toISOString();
+    const updatedProducts = (rental.products || []).map((p: any) => {
+      if (productIds.includes(p.id)) {
+        return { ...p, status: 'released' };
       }
+      return p;
+    });
 
-      console.log('[Bulk Release] Updating rental table:', { rentalId, updateData });
-      const { error: rentalError } = await supabase
-        .from('rentals')
-        .update(updateData)
-        .eq('id', rentalId);
+    const allReleased = updatedProducts.every((p: any) => p.status === 'released');
 
-      if (rentalError) {
-        if (rentalError.message?.includes('column') && rentalError.message?.includes('not found')) {
-          console.warn('[Bulk Release] handover_proof_url missing, falling back to status-only.');
-          await supabase.from('rentals').update({ status: 'released' }).eq('id', rentalId);
-        } else {
-          throw rentalError;
-        }
-      }
-    } catch (rentalUpdateErr) {
-      console.error('[Bulk Release] Parent rental update failed:', rentalUpdateErr);
-    }
+    const { error: updateError } = await supabase
+      .from('rentals')
+      .update({
+        products: updatedProducts,
+        status: allReleased ? 'active' : rental.status,
+        released_at: now,
+        released_by_staff_name: staffName,
+        handover_proof_url: proofUrl || rental.handover_proof_url
+      })
+      .eq('id', rentalId);
+
+    if (updateError) throw updateError;
 
     return res.json({
       message: 'Items released successfully.',
-      items: data || [],
       proofUrl
     });
   } catch (error: any) {
@@ -243,72 +98,52 @@ router.post('/bulk-return', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Rental ID and array of Product IDs are required.' });
     }
 
-    // Try update with received_at
-    let { data, error } = await supabase
-      .from('rental_items')
-      .update({ 
-        status: 'returned',
-        received_at: new Date().toISOString()
+    const staffId = (req.user as any)?.id || null;
+    const staffName = (req.user as any)?.fullName || (req.user as any)?.username || null;
+
+    // Fetch current rental to update products array
+    const { data: rental, error: fetchError } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('id', rentalId)
+      .single();
+
+    if (fetchError || !rental) throw fetchError || new Error('Rental not found');
+
+    const now = new Date().toISOString();
+    const updatedProducts = (rental.products || []).map((p: any) => {
+      if (productIds.includes(p.id)) {
+        return { ...p, status: 'returned' };
+      }
+      return p;
+    });
+
+    const allReturned = updatedProducts.every((p: any) => p.status === 'returned');
+
+    // Handle Proof Photo Deletion if all returned
+    if (allReturned && rental.handover_proof_url) {
+      const publicId = extractPublicId(rental.handover_proof_url);
+      if (publicId) {
+        console.log(`[Bulk Return] Deleting handover proof: ${publicId}`);
+        await deleteFile({ key: publicId }).catch(err => console.error('Cloudinary delete fail:', err));
+      }
+    }
+
+    const { error: updateError } = await supabase
+      .from('rentals')
+      .update({
+        products: updatedProducts,
+        status: allReturned ? 'returned' : rental.status,
+        received_at: now,
+        received_by_staff_name: staffName,
+        handover_proof_url: allReturned ? null : rental.handover_proof_url
       })
-      .eq('rental_id', rentalId)
-      .in('product_id', productIds)
-      .select('*, products(*)');
+      .eq('id', rentalId);
 
-    if (error && error.message?.includes('column') && error.message?.includes('not found')) {
-      console.warn('[Bulk Return] received_at missing, falling back to status-only.');
-      const fallback = await supabase
-        .from('rental_items')
-        .update({ status: 'returned' })
-        .eq('rental_id', rentalId)
-        .in('product_id', productIds)
-        .select('*, products(*)');
-      data = fallback.data;
-      error = fallback.error;
-    }
-
-    if (error) throw error;
-
-    // Check if all items for this rental are now returned
-    const { data: allItems } = await supabase
-      .from('rental_items')
-      .select('status')
-      .eq('rental_id', rentalId);
-
-    const allReturned = (allItems || []).every(item => item.status === 'returned');
-    if (allReturned) {
-      // Fetch handover proof URL before updating
-      const { data: rentalData } = await supabase
-        .from('rentals')
-        .select('handover_proof_url')
-        .eq('id', rentalId)
-        .single();
-
-      const { error: rentalError } = await supabase
-        .from('rentals')
-        .update({ 
-          status: 'returned',
-          received_at: new Date().toISOString(),
-          handover_proof_url: null // Clear the proof link
-        })
-        .eq('id', rentalId);
-      
-      if (rentalError && rentalError.message?.includes('column')) {
-         await supabase.from('rentals').update({ status: 'returned', handover_proof_url: null }).eq('id', rentalId);
-      }
-
-      // Delete from Cloudinary if exists
-      if (rentalData?.handover_proof_url) {
-        const publicId = extractPublicId(rentalData.handover_proof_url);
-        if (publicId) {
-          console.log(`[Bulk Return] Deleting handover proof: ${publicId}`);
-          await deleteFile({ key: publicId }).catch(err => console.error('Cloudinary delete fail:', err));
-        }
-      }
-    }
+    if (updateError) throw updateError;
 
     return res.json({
-      message: `${data?.length || 0} items returned successfully.`,
-      items: data || [],
+      message: `${productIds.length} items returned successfully.`
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to return items.' });
@@ -327,18 +162,22 @@ router.get('/counts', async (req: Request, res: Response) => {
       returningQuery = returningQuery.eq('event_date', filterDate);
     }
 
-    const [productsCount, activeRentalsCount, activeItemsCount, upcomingCount, returningCount] = await Promise.all([
+    const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'released'),
-      supabase.from('rental_items').select('id', { count: 'exact', head: true }).eq('status', 'released'),
+      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('rentals').select('products').eq('status', 'active'),
       upcomingQuery,
       returningQuery,
     ]);
 
+    const activeItemsCount = (activeRentalsData.data || []).reduce((sum: number, r: any) => {
+      return sum + (r.products || []).reduce((itemSum: number, p: any) => itemSum + (p.qty || 1), 0);
+    }, 0);
+
     return res.json({
       totalProducts: productsCount.count || 0,
       totalActiveRentals: activeRentalsCount.count || 0,
-      totalActiveItems: activeItemsCount.count || 0,
+      totalActiveItems: activeItemsCount,
       upcoming: upcomingCount.count || 0,
       active: activeRentalsCount.count || 0,
       returning: returningCount.count || 0,
