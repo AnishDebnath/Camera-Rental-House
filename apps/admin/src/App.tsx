@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/products';
 import ProductForm from './pages/products/ProductForm';
 import Users from './pages/users';
-import UserDetail from './pages/UserDetail';
+import UserDetail from './pages/users/UserDetail';
 import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';

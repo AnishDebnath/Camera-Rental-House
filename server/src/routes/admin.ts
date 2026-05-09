@@ -140,23 +140,22 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const [aadhaarSignedUrl, voterSignedUrl] = await Promise.all([
-      data.aadhaar_doc_url
-        ? getSignedUrl({
-          key: extractPublicId(data.aadhaar_doc_url) as string,
-        })
-        : null,
-      data.voter_doc_url
-        ? getSignedUrl({
-          key: extractPublicId(data.voter_doc_url) as string,
-        })
-        : null,
-    ]);
+    const totalSpent = (data.rentals || []).reduce((sum: number, rental: any) => {
+      if (rental.total_amount) return sum + Number(rental.total_amount);
+      return (
+        sum +
+        (rental.products || []).reduce((itemSum: number, item: any) => {
+          return itemSum + Number(item.qty || 1) * Number(item.price || 0);
+        }, 0)
+      );
+    }, 0);
 
     return res.json({
       ...data,
-      aadhaar_signed_url: aadhaarSignedUrl,
-      voter_signed_url: voterSignedUrl,
+      totalRentals: data.rentals?.length || 0,
+      totalSpent,
+      aadhaar_signed_url: data.aadhaar_doc_url,
+      voter_signed_url: data.voter_doc_url,
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch user details.' });
