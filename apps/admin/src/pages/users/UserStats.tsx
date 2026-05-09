@@ -3,21 +3,28 @@ type UserStatsProps = {
   activeUsers: number;
 };
 
-const UserStats = ({ totalUsers, activeUsers }: UserStatsProps) => (
-  <section className="grid gap-3 md:grid-cols-3">
-    <article className="rounded-card border border-white/70 bg-sky-50 p-4 shadow-card">
-      <p className="text-sm font-bold text-ink">Total Customers</p>
-      <p className="mt-3 text-3xl font-bold text-ink">{totalUsers}</p>
-    </article>
-    <article className="rounded-card border border-white/70 bg-emerald-50 p-4 shadow-card">
-      <p className="text-sm font-bold text-ink">Verified</p>
-      <p className="mt-3 text-3xl font-bold text-ink">{activeUsers}</p>
-    </article>
-    <article className="rounded-card border border-white/70 bg-amber-50 p-4 shadow-card">
-      <p className="text-sm font-bold text-ink">Needs Review</p>
-      <p className="mt-3 text-3xl font-bold text-ink">{totalUsers - activeUsers}</p>
-    </article>
-  </section>
-);
+const UserStats = ({ totalUsers, activeUsers }: UserStatsProps) => {
+  const stats = [
+    { label: 'Total Customers', value: totalUsers, tone: 'bg-sky-50' },
+    { label: 'Verified', value: activeUsers, tone: 'bg-emerald-50' },
+    { label: 'Needs Review', value: totalUsers - activeUsers, tone: 'bg-amber-50' },
+  ];
+
+  return (
+    <section className="grid grid-cols-3 gap-2 sm:gap-4">
+      {stats.map((item) => (
+        <article
+          key={item.label}
+          className={`flex flex-col items-center justify-between rounded-card border border-white/70 p-3 text-center shadow-card sm:p-4 ${item.tone}`}
+        >
+          <p className="flex min-h-[24px] items-center text-[9px] font-bold uppercase tracking-wider text-tertiary sm:text-xs">
+            {item.label}
+          </p>
+          <p className="mt-1 text-2xl font-bold text-ink sm:mt-2 sm:text-3xl">{item.value}</p>
+        </article>
+      ))}
+    </section>
+  );
+};
 
 export default UserStats;

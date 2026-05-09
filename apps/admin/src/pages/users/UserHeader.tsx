@@ -1,7 +1,9 @@
 const UserHeader = () => (
-  <div>
-    <h1 className="text-3xl font-bold tracking-tight text-ink">Customers</h1>
-    <p className="mt-2 text-sm font-medium text-muted">Search and manage customer verification records.</p>
+  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="min-w-0">
+      <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">Platform Users</h1>
+      <p className="mt-1 text-xs font-medium text-muted sm:text-sm">Manage users profiles, verification documents, and rental history.</p>
+    </div>
   </div>
 );
 

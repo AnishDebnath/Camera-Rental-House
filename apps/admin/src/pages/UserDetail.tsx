@@ -1,16 +1,44 @@
-import { Ban, Trash2, UserRoundCheck } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Ban, Trash2, UserRoundCheck, Loader2 } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { adminUsers } from '../data/mockAdmin';
+import axiosInstance from '../api/axiosInstance';
+import { useToast } from '@camera-rental-house/ui';
 
 const UserDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const user = useMemo(() => adminUsers.find((item) => item.id === id) || adminUsers[0], [id]);
-  const [blocked, setBlocked] = useState(user.is_blocked);
+  const { addToast } = useToast();
+  
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [blocked, setBlocked] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
-  if (deleted) {
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axiosInstance.get(`/admin/users/${id}`);
+        setUser(response.data);
+        setBlocked(response.data.is_blocked || false);
+      } catch (error) {
+        addToast({ title: 'Error', message: 'Failed to fetch user details.', tone: 'error' });
+        navigate('/users');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchUser();
+  }, [id, addToast, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (deleted || !user) {
     return (
       <div className="admin-shell py-6">
         <div className="card-surface space-y-4 p-6">
@@ -44,9 +72,9 @@ const UserDetail = () => {
 
         <div className="grid gap-3 md:grid-cols-3">
           {[
-            { label: 'Phone', value: user.phone, tone: 'bg-sky-50' },
-            { label: 'Email', value: user.email, tone: 'bg-emerald-50' },
-            { label: 'Joined', value: user.created_at, tone: 'bg-amber-50' },
+            { label: 'Phone', value: user.phone || 'N/A', tone: 'bg-sky-50' },
+            { label: 'Email', value: user.email || 'N/A', tone: 'bg-emerald-50' },
+            { label: 'Joined', value: user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A', tone: 'bg-amber-50' },
           ].map((item) => (
             <div key={item.label} className={`rounded-card p-4 text-sm font-medium text-muted ${item.tone}`}>
               {item.label}
@@ -59,11 +87,19 @@ const UserDetail = () => {
       <section className="grid gap-4 md:grid-cols-2">
         <div className="card-surface p-5 md:p-6">
           <p className="mb-3 text-sm font-bold text-ink">Aadhaar Copy</p>
-          <img src={user.aadhaar_signed_url} alt="Aadhaar" className="w-full rounded-card border border-line object-cover shadow-sm" />
+          {user.aadhaar_signed_url ? (
+            <img src={user.aadhaar_signed_url} alt="Aadhaar" className="w-full rounded-card border border-line object-cover shadow-sm" />
+          ) : (
+            <p className="text-sm font-medium text-muted">Not uploaded</p>
+          )}
         </div>
         <div className="card-surface p-5 md:p-6">
           <p className="mb-3 text-sm font-bold text-ink">Voter Card Copy</p>
-          <img src={user.voter_signed_url} alt="Voter card" className="w-full rounded-card border border-line object-cover shadow-sm" />
+          {user.voter_signed_url ? (
+            <img src={user.voter_signed_url} alt="Voter card" className="w-full rounded-card border border-line object-cover shadow-sm" />
+          ) : (
+            <p className="text-sm font-medium text-muted">Not uploaded</p>
+          )}
         </div>
       </section>
 
