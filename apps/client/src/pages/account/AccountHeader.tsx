@@ -1,4 +1,4 @@
-import { UserRound, Phone, IdCard, CheckCircle2, LogOut, QrCode } from 'lucide-react';
+import { UserRound, Phone, IdCard, CheckCircle2, LogOut, QrCode, Loader2 } from 'lucide-react';
 import { User } from '../../store/AuthContext';
 
 interface AccountHeaderProps {
@@ -44,10 +44,17 @@ const AccountHeader = ({ user, onSignOut, onOpenQr }: AccountHeaderProps) => {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-success">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Verified
-              </span>
+              {user.isVerified ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-success">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Verified
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/20 bg-warning/10 px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-warning">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Review Pending
+                </span>
+              )}
               <button
                 type="button"
                 onClick={onSignOut}

@@ -134,16 +134,30 @@ const Checkout = () => {
           )}
 
           {step === 2 && (
-            <OrderSummaryStep
-              key="step2"
-              items={items}
-              totalDays={totalDays}
-              subtotal={subtotal}
-              totalCost={totalCost}
-              loading={loading}
-              onPrev={() => setStep(1)}
-              onConfirm={handleConfirm}
-            />
+            <div className="space-y-6">
+              {!user.isVerified && (
+                <div className="rounded-2xl bg-warning/5 border border-warning/20 p-5 flex items-start gap-4">
+                  <AlertCircle className="h-6 w-6 text-warning shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-ink">Verification Pending</p>
+                    <p className="text-xs font-medium text-muted leading-relaxed">
+                      Your account is currently under review by our team. You can browse and add items to your cart, but you'll be able to confirm rentals once your account is verified.
+                    </p>
+                  </div>
+                </div>
+              )}
+              <OrderSummaryStep
+                key="step2"
+                items={items}
+                totalDays={totalDays}
+                subtotal={subtotal}
+                totalCost={totalCost}
+                loading={loading}
+                onPrev={() => setStep(1)}
+                onConfirm={handleConfirm}
+                disabled={!user.isVerified}
+              />
+            </div>
           )}
         </AnimatePresence>
       </main>

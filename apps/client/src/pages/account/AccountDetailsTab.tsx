@@ -8,6 +8,7 @@ interface AccountDetailsTabProps {
   draft: User;
   editing: boolean;
   loading: boolean;
+  hasActiveRentals: boolean;
   onSetEditing: (val: any) => void;
   onDraftChange: (key: string, value: string) => void;
   onSave: () => void;
@@ -18,6 +19,7 @@ const AccountDetailsTab = ({
   draft, 
   editing, 
   loading, 
+  hasActiveRentals,
   onSetEditing, 
   onDraftChange, 
   onSave,
@@ -98,10 +100,25 @@ const AccountDetailsTab = ({
     const displayMessage = errors.general || errorValues[0];
 
     return (
-      <div className="mb-6 p-4 rounded-2xl bg-danger/5 border border-danger/10 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-        <AlertCircle className="h-5 w-5 text-danger shrink-0" />
-        <div className="text-xs font-bold text-danger leading-tight">
+      <div className="mb-6 rounded-2xl bg-danger/5 border border-danger/20 p-4 flex items-start gap-3">
+        <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+        <p className="text-sm font-medium text-danger leading-relaxed">
           {displayMessage}
+        </p>
+      </div>
+    );
+  };
+
+  const ActiveRentalWarning = () => {
+    if (!hasActiveRentals) return null;
+    return (
+      <div className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
+        <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="text-sm font-bold text-amber-900">Active Rentals Detected</p>
+          <p className="text-xs font-medium text-amber-700 leading-relaxed">
+            You cannot update your profile details while you have ongoing rentals. Please return all gear before making changes.
+          </p>
         </div>
       </div>
     );
@@ -109,6 +126,8 @@ const AccountDetailsTab = ({
 
   return (
     <section className="animate-fade-up space-y-4 md:space-y-6">
+      <ErrorMessage />
+      <ActiveRentalWarning />
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between border-b border-line/40 pb-3 px-4">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-ink">Account Details</h2>
@@ -118,8 +137,9 @@ const AccountDetailsTab = ({
         </div>
         <button
           type="button"
+          disabled={hasActiveRentals}
           onClick={() => onSetEditing((c: any) => !c)}
-          className={`flex h-[2.25rem] md:h-[2.5rem] w-fit items-center justify-center rounded-xl px-4 md:px-5 text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 shadow-sm ${
+          className={`flex h-[2.25rem] md:h-[2.5rem] w-fit items-center justify-center rounded-xl px-4 md:px-5 text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 shadow-sm disabled:opacity-50 ${
             editing 
               ? 'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20' 
               : 'bg-white text-ink hover:text-primary hover:shadow-md border border-white/60'

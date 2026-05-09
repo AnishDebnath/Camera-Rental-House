@@ -12,7 +12,12 @@ const UserDetail = () => {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [blocked, setBlocked] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [changedFields, setChangedFields] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [deleted, setDeleted] = useState(false);
+
+  const isChanged = (field: string) => !verified && changedFields.includes(field);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -20,6 +25,8 @@ const UserDetail = () => {
         const response = await axiosInstance.get(`/admin/users/${id}`);
         setUser(response.data);
         setBlocked(response.data.is_blocked || false);
+        setVerified(response.data.is_verified || false);
+        setChangedFields(response.data.changed_fields || []);
       } catch (error) {
         addToast({ title: 'Error', message: 'Failed to fetch user details.', tone: 'error' });
         navigate('/users');
@@ -29,6 +36,33 @@ const UserDetail = () => {
     };
     if (id) fetchUser();
   }, [id, addToast, navigate]);
+
+  const handleVerify = async () => {
+    setIsUpdating(true);
+    try {
+      await axiosInstance.put(`/admin/users/${id}/verify`);
+      setVerified(true);
+      setChangedFields([]);
+      addToast({ title: 'Success', message: 'User verified successfully.', tone: 'success' });
+    } catch (error) {
+      addToast({ title: 'Error', message: 'Failed to verify user.', tone: 'error' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleBlock = async () => {
+    setIsUpdating(true);
+    try {
+      await axiosInstance.put(`/admin/users/${id}/block`);
+      setBlocked(!blocked);
+      addToast({ title: 'Success', message: `User ${blocked ? 'unblocked' : 'blocked'} successfully.`, tone: 'success' });
+    } catch (error) {
+      addToast({ title: 'Error', message: 'Failed to update block status.', tone: 'error' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -67,11 +101,14 @@ const UserDetail = () => {
         </button>
 
         <span
-          className={`md:hidden inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[10px] font-bold shadow-sm ${blocked ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'
-            }`}
+          className={`md:hidden inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[10px] font-bold shadow-sm ${
+            blocked ? 'bg-danger/10 text-danger' : 
+            !verified ? 'bg-warning/10 text-warning' : 
+            'bg-success/10 text-success'
+          }`}
         >
-          {blocked ? <Ban className="h-3.5 w-3.5" /> : <UserRoundCheck className="h-3.5 w-3.5" />}
-          <span className="leading-none uppercase tracking-wider">{blocked ? 'Review Required' : 'Active'}</span>
+          {blocked ? <Ban className="h-3.5 w-3.5" /> : !verified ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+          <span className="leading-none uppercase tracking-wider">{blocked ? 'Blocked' : !verified ? 'Review Pending' : 'Verified'}</span>
         </span>
       </div>
 
@@ -79,14 +116,25 @@ const UserDetail = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-stretch gap-4 h-16">
             {user.avatar_url ? (
-              <img src={user.avatar_url} alt={user.full_name} className="h-full aspect-square shrink-0 rounded-xl object-cover shadow-sm border border-line" />
+              <img
+                src={user.avatar_url}
+                alt={user.full_name}
+                className={`h-full aspect-square shrink-0 rounded-xl object-cover shadow-sm border-2 transition-all ${isChanged('avatar_url') ? 'border-amber-400 ring-2 ring-amber-400/40' : 'border-white'}`}
+              />
             ) : (
-              <span className="flex h-full aspect-square shrink-0 items-center justify-center rounded-xl bg-primary-light text-xl font-bold text-ink shadow-sm">
+              <span className={`flex h-full aspect-square shrink-0 items-center justify-center rounded-xl bg-primary-light text-xl font-bold text-ink shadow-sm transition-all ${isChanged('avatar_url') ? 'ring-2 ring-amber-400' : ''}`}>
                 {user.full_name?.split(' ').map((part: string) => part[0]).slice(0, 2).join('')}
               </span>
             )}
             <div className="flex flex-col justify-between py-0.5">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink leading-none">{user.full_name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight text-ink leading-none transition-all ${isChanged('full_name') ? 'text-amber-600' : ''}`}>{user.full_name}</h1>
+                {isChanged('full_name') && (
+                  <span className="inline-flex items-center rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white animate-pulse">
+                    Changed
+                  </span>
+                )}
+              </div>
               <div className="flex items-center">
                 <div className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-2.5 py-1 text-primary shadow-sm">
                   <IdCard className="h-3.5 w-3.5 shrink-0" />
@@ -97,11 +145,14 @@ const UserDetail = () => {
           </div>
 
           <span
-            className={`hidden md:inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-bold ${blocked ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'
-              }`}
+            className={`hidden md:inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-bold ${
+              blocked ? 'bg-danger/10 text-danger' : 
+              !verified ? 'bg-warning/10 text-warning' : 
+              'bg-success/10 text-success'
+            }`}
           >
-            {blocked ? <Ban className="h-4 w-4" /> : <UserRoundCheck className="h-4 w-4" />}
-            <span className="leading-none uppercase tracking-wider">{blocked ? 'Review Required' : 'Active'}</span>
+            {blocked ? <Ban className="h-4 w-4" /> : !verified ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+            <span className="leading-none uppercase tracking-wider">{blocked ? 'Blocked' : !verified ? 'Review Pending' : 'Verified'}</span>
           </span>
         </div>
       </section>
@@ -115,11 +166,16 @@ const UserDetail = () => {
           <div className="space-y-3">
             <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
               {[
-                { label: 'Phone', value: user.phone || 'N/A', tone: 'bg-sky-50', Icon: Phone, iconColor: 'text-sky-600' },
-                { label: 'Email', value: user.email || 'N/A', tone: 'bg-emerald-50', Icon: Mail, iconColor: 'text-emerald-600' },
-                { label: 'Joined', value: user.created_at ? `${String(new Date(user.created_at).getDate()).padStart(2, '0')}-${String(new Date(user.created_at).getMonth() + 1).padStart(2, '0')}-${new Date(user.created_at).getFullYear()}` : 'N/A', tone: 'bg-amber-50', Icon: Calendar, iconColor: 'text-amber-600' },
+                { label: 'Phone', value: user.phone || 'N/A', tone: 'bg-sky-50', Icon: Phone, iconColor: 'text-sky-600', field: 'phone' },
+                { label: 'Email', value: user.email || 'N/A', tone: 'bg-emerald-50', Icon: Mail, iconColor: 'text-emerald-600', field: 'email' },
+                { label: 'Joined', value: user.created_at ? `${String(new Date(user.created_at).getDate()).padStart(2, '0')}-${String(new Date(user.created_at).getMonth() + 1).padStart(2, '0')}-${new Date(user.created_at).getFullYear()}` : 'N/A', tone: 'bg-amber-50', Icon: Calendar, iconColor: 'text-amber-600', field: '' },
               ].map((item) => (
-                <div key={item.label} className={`rounded-card p-4 text-sm font-medium text-muted ${item.tone}`}>
+                <div key={item.label} className={`relative rounded-card p-4 text-sm font-medium text-muted transition-all ${item.tone} ${isChanged(item.field) ? 'ring-2 ring-amber-400 ring-offset-1' : ''}`}>
+                  {isChanged(item.field) && (
+                    <span className="absolute -top-2 right-2 inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white animate-pulse">
+                      Changed
+                    </span>
+                  )}
                   <div className="flex items-center gap-2">
                     <item.Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
                     <span className="text-xs font-bold uppercase tracking-wider">{item.label}</span>
@@ -151,10 +207,14 @@ const UserDetail = () => {
             <h2 className="text-lg font-bold text-ink">Identity Verification</h2>
           </div>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-            <div className="rounded-card border border-line bg-white p-4 flex flex-col gap-4">
+            <div className={`rounded-card border p-4 flex flex-col gap-4 bg-white transition-all ${isChanged('aadhaar_no') || isChanged('aadhaar_doc_url') ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-line'}`}>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">Aadhaar Card</p>
-                <span className="text-[9px] font-bold text-tertiary uppercase tracking-widest px-2 py-0.5 rounded border border-black/5 bg-slate-50">Document</span>
+                {(isChanged('aadhaar_no') || isChanged('aadhaar_doc_url')) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white animate-pulse">
+                    Changed
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -185,10 +245,14 @@ const UserDetail = () => {
               </div>
             </div>
 
-            <div className="rounded-card border border-line bg-white p-4 flex flex-col gap-4">
+            <div className={`rounded-card border p-4 flex flex-col gap-4 bg-white transition-all ${isChanged('voter_no') || isChanged('voter_doc_url') ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-line'}`}>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">Voter ID</p>
-                <span className="text-[9px] font-bold text-tertiary uppercase tracking-widest px-2 py-0.5 rounded border border-black/5 bg-slate-50">Document</span>
+                {(isChanged('voter_no') || isChanged('voter_doc_url')) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white animate-pulse">
+                    Changed
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -273,17 +337,30 @@ const UserDetail = () => {
       </div>
 
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        {!verified && !blocked && (
+          <button
+            type="button"
+            onClick={handleVerify}
+            disabled={isUpdating}
+            className="pill-button border border-success/20 bg-success/10 text-success hover:bg-success hover:text-white disabled:opacity-50 sm:col-span-2"
+          >
+            <UserRoundCheck className="mr-2 h-4 w-4" />
+            Verify Account
+          </button>
+        )}
         <button
           type="button"
-          onClick={() => setBlocked((current) => !current)}
-          className="pill-button border border-warning/20 bg-warning/10 text-warning hover:bg-warning hover:text-white"
+          onClick={handleBlock}
+          disabled={isUpdating}
+          className={`pill-button border ${blocked ? 'border-success/20 bg-success/10 text-success hover:bg-success' : 'border-warning/20 bg-warning/10 text-warning hover:bg-warning'} hover:text-white disabled:opacity-50`}
         >
           {blocked ? 'Unblock User' : 'Block User'}
         </button>
         <button
           type="button"
           onClick={() => setDeleted(true)}
-          className="pill-button border border-danger/20 bg-danger/5 text-danger hover:bg-danger hover:text-white"
+          disabled={isUpdating}
+          className="pill-button border border-danger/20 bg-danger/5 text-danger hover:bg-danger hover:text-white disabled:opacity-50"
         >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete User

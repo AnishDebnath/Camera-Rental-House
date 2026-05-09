@@ -28,10 +28,11 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     const monthStart = new Date();
     monthStart.setDate(1);
 
-    const [productsCount, usersCount, activeTodayCount, activeRentals, recentRentals, revenueRentals] =
+    const [productsCount, usersCount, pendingUsersCount, activeTodayCount, activeRentals, recentRentals, revenueRentals] =
       await Promise.all([
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('users').select('id', { count: 'exact', head: true }).not('is_verified', 'is', true).not('is_blocked', 'is', true),
         supabase
           .from('rentals')
           .select('id', { count: 'exact', head: true })
@@ -72,6 +73,7 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
       totalActiveRentals: activeRentals.data?.length || 0,
       totalActiveItems: activeItemsCount,
       totalUsers: usersCount.count || 0,
+      pendingUsersCount: pendingUsersCount.count || 0,
       revenueThisMonth,
       recentRentals: recentRentals.data || [],
     });
@@ -192,6 +194,25 @@ router.put('/users/:id/block', roleMiddleware(['admin']), async (req: Request, r
     return res.json(data);
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to update user.' });
+  }
+});
+
+router.put('/users/:id/verify', roleMiddleware(['admin']), async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_verified: true, changed_fields: [] })
+      .eq('id', req.params.id)
+      .select('*')
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return res.json(data);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to verify user.' });
   }
 });
 

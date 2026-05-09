@@ -26,10 +26,11 @@ const Sidebar = ({ open, onClose }) => {
   const { pathname } = useLocation();
   const role = getAuthRole();
   const isStaff = role === 'staff';
-  const [counts, setCounts] = useState<{ products: number; rentals: number; users: number }>({
+  const [counts, setCounts] = useState<{ products: number; rentals: number; users: number; pendingUsers: number }>({
     products: 0,
     rentals: 0,
     users: 0,
+    pendingUsers: 0,
   });
 
   useEffect(() => {
@@ -37,11 +38,21 @@ const Sidebar = ({ open, onClose }) => {
       try {
         const endpoint = isStaff ? '/manage/counts' : '/admin/dashboard';
         const { data } = await axiosInstance.get(endpoint);
-        
+
+        // Fetch pending users count directly from users list (same logic as stats page)
+        let pendingUsers = 0;
+        if (!isStaff) {
+          try {
+            const { data: users } = await axiosInstance.get('/admin/users');
+            pendingUsers = users.filter((u: any) => !u.is_verified && !u.is_blocked).length;
+          } catch (_) {}
+        }
+
         setCounts({
-          products: data.totalActiveItems || 0,
-          rentals: data.totalActiveRentals || 0,
-          users: data.totalUsers || 0,
+          products: Number(data.totalActiveItems || 0),
+          rentals: Number(data.totalActiveRentals || 0),
+          users: Number(data.totalUsers || 0),
+          pendingUsers,
         });
       } catch (err) {
         console.error('Sidebar counts fetch fail:', err);
@@ -61,24 +72,24 @@ const Sidebar = ({ open, onClose }) => {
     {
       title: 'Inventory & Operations',
       items: [
-        { 
-          label: 'Products', 
-          href: '/products', 
-          icon: Package, 
-          adminOnly: true, 
-          count: counts.products > 0 ? String(counts.products) : undefined 
+        {
+          label: 'Products',
+          href: '/products',
+          icon: Package,
+          adminOnly: true,
+          count: counts.products > 0 ? String(counts.products) : undefined
         },
-        { 
-          label: 'Rentals', 
-          href: '/rentals', 
-          icon: CalendarClock, 
-          count: counts.rentals > 0 ? String(counts.rentals) : undefined 
+        {
+          label: 'Rentals',
+          href: '/rentals',
+          icon: CalendarClock,
+          count: counts.rentals > 0 ? String(counts.rentals) : undefined
         },
-        { 
-          label: 'Rental History', 
-          href: '/rentals/history', 
+        {
+          label: 'Rental History',
+          href: '/rentals/history',
           icon: History,
-          adminOnly: true 
+          adminOnly: true
         },
         { label: 'Release / Return', href: '/release', icon: ScanLine },
       ],
@@ -87,12 +98,12 @@ const Sidebar = ({ open, onClose }) => {
       title: 'Partners & People',
       items: [
         { label: 'Production Houses', href: '/houses', icon: Building2 },
-        { 
-          label: 'Platform Users', 
-          href: '/users', 
-          icon: Users, 
-          adminOnly: true, 
-          count: counts.users > 0 ? String(counts.users) : undefined 
+        {
+          label: 'Platform Users',
+          href: '/users',
+          icon: Users,
+          adminOnly: true,
+          count: counts.pendingUsers > 0 ? String(counts.pendingUsers) : undefined
         },
         { label: 'Team Members', href: '/staff', icon: UserCog, adminOnly: true },
       ],
@@ -165,7 +176,7 @@ const Sidebar = ({ open, onClose }) => {
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
                     let active = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
-                    
+
                     // Special case: /rentals should not be active if we are in /rentals/history
                     if (item.href === '/rentals' && pathname.startsWith('/rentals/history')) {
                       active = false;
@@ -187,8 +198,12 @@ const Sidebar = ({ open, onClose }) => {
                         {item.count && (
                           <span
                             className={clsx(
-                              'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-black',
-                              active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500',
+                              'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-black tabular-nums leading-none text-center shrink-0',
+                              active
+                                ? 'bg-white/20 text-white'
+                                : item.label === 'Platform Users'
+                                  ? 'bg-rose-500 text-white'
+                                  : 'bg-slate-100 text-slate-500',
                             )}
                           >
                             {item.count}

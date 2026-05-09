@@ -26,6 +26,7 @@ export interface User {
   instagram?: string;
   youtube?: string;
   role: string;
+  isVerified: boolean;
   createdAt?: string;
 }
 

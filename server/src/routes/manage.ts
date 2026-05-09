@@ -162,12 +162,13 @@ router.get('/counts', async (req: Request, res: Response) => {
       returningQuery = returningQuery.eq('event_date', filterDate);
     }
 
-    const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount] = await Promise.all([
+    const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount, pendingUsersCount] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
       supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'released'),
       supabase.from('rentals').select('products').eq('status', 'released'),
       upcomingQuery,
       returningQuery,
+      supabase.from('users').select('id', { count: 'exact', head: true }).not('is_verified', 'is', true).not('is_blocked', 'is', true),
     ]);
 
     const activeItemsCount = (activeRentalsData.data || []).reduce((sum: number, r: any) => {
@@ -181,6 +182,7 @@ router.get('/counts', async (req: Request, res: Response) => {
       upcoming: upcomingCount.count || 0,
       active: activeRentalsCount.count || 0,
       returning: returningCount.count || 0,
+      pendingUsersCount: pendingUsersCount.count || 0,
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch counts.' });

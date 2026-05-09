@@ -9,6 +9,7 @@ import UserCard from './UserCard';
 
 const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
@@ -27,17 +28,29 @@ const Users = () => {
     fetchUsers();
   }, [addToast]);
   
-  const activeUsers = users.filter((user) => !user.is_blocked).length;
+  const totalUsers = users.length;
+  const verifiedUsers = users.filter((u) => u.is_verified && !u.is_blocked).length;
+  const pendingUsers = users.filter((u) => !u.is_verified && !u.is_blocked).length;
 
   const filteredUsers = useMemo(() => {
-    if (!searchTerm) return users;
+    let result = users;
+
+    // Status Filter
+    if (statusFilter === 'verified') {
+      result = result.filter(u => u.is_verified && !u.is_blocked);
+    } else if (statusFilter === 'review') {
+      result = result.filter(u => !u.is_verified && !u.is_blocked);
+    }
+
+    // Search Filter
+    if (!searchTerm) return result;
     const lowerQuery = searchTerm.toLowerCase();
-    return users.filter((user) => 
+    return result.filter((user) => 
       user.full_name?.toLowerCase().includes(lowerQuery) ||
       user.email?.toLowerCase().includes(lowerQuery) ||
       user.phone?.includes(lowerQuery)
     );
-  }, [searchTerm, users]);
+  }, [searchTerm, statusFilter, users]);
 
   if (isLoading) {
     return (
@@ -50,8 +63,17 @@ const Users = () => {
   return (
     <div className="admin-shell space-y-5 py-6">
       <UserHeader />
-      <UserStats totalUsers={users.length} activeUsers={activeUsers} />
-      <UserFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <UserStats 
+        totalUsers={totalUsers} 
+        verifiedUsers={verifiedUsers} 
+        pendingUsers={pendingUsers} 
+      />
+      <UserFilters 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm} 
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
       <UserCard users={filteredUsers} />
     </div>
   );

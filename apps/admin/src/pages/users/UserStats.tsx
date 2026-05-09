@@ -1,13 +1,14 @@
 type UserStatsProps = {
   totalUsers: number;
-  activeUsers: number;
+  verifiedUsers: number;
+  pendingUsers: number;
 };
 
-const UserStats = ({ totalUsers, activeUsers }: UserStatsProps) => {
+const UserStats = ({ totalUsers, verifiedUsers, pendingUsers }: UserStatsProps) => {
   const stats = [
     { label: 'Total Customers', value: totalUsers, tone: 'bg-sky-50' },
-    { label: 'Verified', value: activeUsers, tone: 'bg-emerald-50' },
-    { label: 'Needs Review', value: totalUsers - activeUsers, tone: 'bg-amber-50' },
+    { label: 'Verified', value: verifiedUsers, tone: 'bg-emerald-50' },
+    { label: 'Needs Review', value: pendingUsers, tone: 'bg-amber-50' },
   ];
 
   return (

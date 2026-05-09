@@ -274,8 +274,9 @@ router.post(
           instagram: req.body.instagram || null,
           youtube: req.body.youtube || null,
           user_qr_base64: userQrBase64,
+          is_verified: false,
         })
-        .select('id, member_id, full_name, phone, email, avatar_url, user_qr_base64, aadhaar_no, aadhaar_doc_url, voter_no, voter_doc_url, created_at')
+        .select('id, member_id, full_name, phone, email, avatar_url, user_qr_base64, aadhaar_no, aadhaar_doc_url, voter_no, voter_doc_url, is_verified, created_at')
         .single();
 
       if (error) {
@@ -298,6 +299,7 @@ router.post(
           aadhaarDocUrl: data.aadhaar_doc_url,
           voterNo: data.voter_no,
           voterDocUrl: data.voter_doc_url,
+          isVerified: data.is_verified,
           createdAt: data.created_at,
         },
         accessToken: tokens.accessToken,
@@ -593,6 +595,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
         youtube: user.youtube,
         avatarUrl: user.avatar_url,
         userQrBase64: user.user_qr_base64,
+        isVerified: user.is_verified,
         createdAt: user.created_at,
       },
     });
@@ -744,7 +747,29 @@ router.patch(
         });
       }
 
-      // NOTE: user_qr_base64 and member_id are immutable — never regenerated after signup.
+      // Reset verification only if sensitive fields actually changed value
+      const sensitiveFields = ['full_name', 'phone', 'email', 'aadhaar_no', 'voter_no', 'aadhaar_doc_url', 'voter_doc_url', 'avatar_url'];
+      
+      // Normalize function — applies same transformation to both stored and new values
+      const normalize = (val: any, key: string): string => {
+        const str = String(val ?? '').trim();
+        if (key === 'phone' || key === 'aadhaar_no') return str.replace(/\D/g, '');
+        if (key === 'email') return str.toLowerCase();
+        if (key === 'voter_no') return str.toUpperCase();
+        return str;
+      };
+
+      const changedSensitiveFields = Object.keys(updates).filter(key => {
+        if (!sensitiveFields.includes(key)) return false;
+        // Doc URLs are new uploads — always count as changed
+        if (key === 'aadhaar_doc_url' || key === 'voter_doc_url' || key === 'avatar_url') return true;
+        // Normalize both sides before comparing
+        return normalize(updates[key], key) !== normalize(user[key], key);
+      });
+      if (changedSensitiveFields.length > 0) {
+        updates.is_verified = false;
+        updates.changed_fields = changedSensitiveFields;
+      }
 
       // 4. Update Database if there are changes
       if (Object.keys(updates).length > 0) {
@@ -774,6 +799,7 @@ router.patch(
             youtube: updatedUser.youtube,
             avatarUrl: updatedUser.avatar_url,
             userQrBase64: updatedUser.user_qr_base64,
+            isVerified: updatedUser.is_verified,
             createdAt: updatedUser.created_at,
           },
         });
@@ -797,6 +823,7 @@ router.patch(
           youtube: user.youtube,
           avatarUrl: user.avatar_url,
           userQrBase64: user.user_qr_base64,
+          isVerified: user.is_verified,
           createdAt: user.created_at,
         },
       });

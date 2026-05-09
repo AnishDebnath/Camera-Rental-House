@@ -1,4 +1,4 @@
-import { ShieldCheck, UserRoundCheck, Eye } from 'lucide-react';
+import { ShieldCheck, UserRoundCheck, Eye, Ban, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/DataTable';
 
@@ -17,8 +17,8 @@ const UserCard = ({ users }: UserCardProps) => (
   <DataTable
     columns={[
       {
-        key: 'customer',
-        label: 'Customer',
+        key: 'user',
+        label: 'User',
         render: (row) => (
           <div className="flex items-center gap-3">
             {row.avatar_url ? (
@@ -65,11 +65,14 @@ const UserCard = ({ users }: UserCardProps) => (
         label: 'Status',
         render: (row) => (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-xs font-bold ${row.is_blocked ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'
-              }`}
+            className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
+              row.is_blocked ? 'bg-danger/10 text-danger' : 
+              !row.is_verified ? 'bg-warning/10 text-warning' : 
+              'bg-success/10 text-success'
+            }`}
           >
-            {row.is_blocked ? <ShieldCheck className="h-3.5 w-3.5" /> : <UserRoundCheck className="h-3.5 w-3.5" />}
-            {row.is_blocked ? 'Review' : 'Active'}
+            {row.is_blocked ? <Ban className="h-3.5 w-3.5" /> : !row.is_verified ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+            {row.is_blocked ? 'Blocked' : !row.is_verified ? 'Pending' : 'Verified'}
           </span>
         ),
       },
@@ -77,8 +80,8 @@ const UserCard = ({ users }: UserCardProps) => (
         key: 'actions',
         label: 'View Profile',
         render: (row) => (
-          <Link 
-            to={`/users/${row.id}`} 
+          <Link
+            to={`/users/${row.id}`}
             className="flex h-10 w-fit items-center justify-center rounded-card border border-line bg-white px-4 text-sm font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
           >
             <Eye className="mr-2 h-4 w-4 text-muted transition group-hover:text-white" />
@@ -105,9 +108,13 @@ const UserCard = ({ users }: UserCardProps) => (
               <span className="text-[10px] font-medium text-tertiary truncate">{row.phone}</span>
             </div>
           </div>
-          <span className={`shrink-0 inline-flex items-center gap-1 rounded-pill px-2 py-1 text-[10px] font-bold ${row.is_blocked ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}>
-            {row.is_blocked ? <ShieldCheck className="h-3 w-3" /> : <UserRoundCheck className="h-3 w-3" />}
-            {row.is_blocked ? 'Review' : 'Active'}
+          <span className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+            row.is_blocked ? 'bg-danger/10 text-danger' : 
+            !row.is_verified ? 'bg-warning/10 text-warning' : 
+            'bg-success/10 text-success'
+          }`}>
+            {row.is_blocked ? <Ban className="h-3 w-3" /> : !row.is_verified ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3 w-3" />}
+            {row.is_blocked ? 'Blocked' : !row.is_verified ? 'Pending' : 'Verified'}
           </span>
         </div>
 
@@ -122,8 +129,8 @@ const UserCard = ({ users }: UserCardProps) => (
           </div>
         </div>
 
-        <Link 
-          to={`/users/${row.id}`} 
+        <Link
+          to={`/users/${row.id}`}
           className="flex h-10 w-full items-center justify-center rounded-card border border-line bg-white px-4 text-sm font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
         >
           <Eye className="mr-2 h-4 w-4 text-muted transition group-hover:text-white" />

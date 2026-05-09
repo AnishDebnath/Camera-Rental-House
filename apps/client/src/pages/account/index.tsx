@@ -181,6 +181,7 @@ const Account = () => {
                 draft={draft}
                 editing={editing}
                 loading={loading}
+                hasActiveRentals={activeRentals.length > 0}
                 onSetEditing={(val) => {
                   const nextValue = typeof val === 'function' ? val(editing) : val;
                   if (!nextValue) setDraft(user);

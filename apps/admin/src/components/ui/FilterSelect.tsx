@@ -33,7 +33,7 @@ const FilterSelect = ({ options, value, onChange, placeholder }: FilterSelectPro
   }, []);
 
   return (
-    <div className="relative inline-block w-full sm:w-auto" ref={containerRef}>
+    <div className="relative inline-block w-full" ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

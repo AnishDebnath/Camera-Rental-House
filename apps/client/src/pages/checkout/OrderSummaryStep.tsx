@@ -11,9 +11,10 @@ interface OrderSummaryStepProps {
   loading: boolean;
   onPrev: () => void;
   onConfirm: () => void;
+  disabled?: boolean;
 }
 
-const OrderSummaryStep = ({ items, totalDays, subtotal, totalCost, loading, onPrev, onConfirm }: OrderSummaryStepProps) => {
+const OrderSummaryStep = ({ items, totalDays, subtotal, totalCost, loading, onPrev, onConfirm, disabled }: OrderSummaryStepProps) => {
   return (
     <motion.section
       initial={{ x: 20, opacity: 0 }}
@@ -108,6 +109,7 @@ const OrderSummaryStep = ({ items, totalDays, subtotal, totalCost, loading, onPr
             <LoadingButton
               loading={loading}
               onClick={onConfirm}
+              disabled={disabled}
               className="!h-14 !text-sm !font-bold !rounded-2xl shadow-xl shadow-primary/20"
             >
               Confirm & Reserve Rent
