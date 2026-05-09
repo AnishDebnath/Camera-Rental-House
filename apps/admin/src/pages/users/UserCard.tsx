@@ -1,4 +1,4 @@
-import { ShieldCheck, UserRoundCheck } from 'lucide-react';
+import { ShieldCheck, UserRoundCheck, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/DataTable';
 
@@ -57,7 +57,7 @@ const UserCard = ({ users }: UserCardProps) => (
       },
       {
         key: 'totalSpent',
-        label: 'Total Amount',
+        label: 'Total Spent',
         render: (row) => <span className="font-bold text-ink">{formatCurrency(row.totalSpent)}</span>,
       },
       {
@@ -75,9 +75,13 @@ const UserCard = ({ users }: UserCardProps) => (
       },
       {
         key: 'actions',
-        label: 'View',
+        label: 'View Profile',
         render: (row) => (
-          <Link to={`/users/${row.id}`} className="secondary-button min-h-10 px-4 py-2">
+          <Link 
+            to={`/users/${row.id}`} 
+            className="flex h-10 w-fit items-center justify-center rounded-card border border-line bg-white px-4 text-sm font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
+          >
+            <Eye className="mr-2 h-4 w-4 text-muted transition group-hover:text-white" />
             View
           </Link>
         ),
@@ -118,7 +122,11 @@ const UserCard = ({ users }: UserCardProps) => (
           </div>
         </div>
 
-        <Link to={`/users/${row.id}`} className="secondary-button w-full min-h-10">
+        <Link 
+          to={`/users/${row.id}`} 
+          className="flex h-10 w-full items-center justify-center rounded-card border border-line bg-white px-4 text-sm font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
+        >
+          <Eye className="mr-2 h-4 w-4 text-muted transition group-hover:text-white" />
           View Full Profile
         </Link>
       </article>
