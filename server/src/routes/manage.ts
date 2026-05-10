@@ -15,6 +15,27 @@ const router = express.Router();
 
 
 
+router.get('/me', async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { data: staff, error } = await supabase
+      .from('staff_accounts')
+      .select('id, username, full_name, role, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (error || !staff) {
+      return res.status(404).json({ message: 'Staff profile not found.' });
+    }
+
+    return res.json(staff);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch profile.' });
+  }
+});
+
 router.post('/bulk-release', async (req: Request, res: Response) => {
   try {
     const { rentalId, productIds, proofPhoto } = req.body;

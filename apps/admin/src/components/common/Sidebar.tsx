@@ -44,6 +44,7 @@ const Sidebar = ({ open, onClose }) => {
   const role = getAuthRole();
   const user = getAuthUser();
   const isStaff = role === 'staff';
+  const [staffProfile, setStaffProfile] = useState<{ full_name?: string; avatar_url?: string; role?: string } | null>(null);
   const [counts, setCounts] = useState<{ products: number; rentals: number; users: number; pendingUsers: number }>({
     products: 0,
     rentals: 0,
@@ -52,6 +53,15 @@ const Sidebar = ({ open, onClose }) => {
   });
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await axiosInstance.get('/manage/me');
+        setStaffProfile(data);
+      } catch (err) {
+        console.error('Failed to fetch staff profile:', err);
+      }
+    };
+
     const fetchCounts = async () => {
       try {
         const endpoint = isStaff ? '/manage/counts' : '/admin/dashboard';
@@ -63,7 +73,7 @@ const Sidebar = ({ open, onClose }) => {
           try {
             const { data: users } = await axiosInstance.get('/admin/users');
             pendingUsers = users.filter((u: any) => !u.is_verified && !u.is_blocked).length;
-          } catch (_) {}
+          } catch (_) { }
         }
 
         setCounts({
@@ -78,6 +88,7 @@ const Sidebar = ({ open, onClose }) => {
     };
 
     fetchCounts();
+    fetchProfile();
   }, [isStaff]);
 
   const menuGroups = [
@@ -166,20 +177,20 @@ const Sidebar = ({ open, onClose }) => {
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
           <div className="relative h-11 w-11 shrink-0">
             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-100 to-sky-100 text-sm font-bold text-ink border border-white/40">
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} className="h-full w-full object-cover" />
+              {staffProfile?.avatar_url || user?.avatarUrl ? (
+                <img src={staffProfile?.avatar_url || user?.avatarUrl} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
               ) : (
-                user?.fullName?.charAt(0) || 'A'
+                (staffProfile?.full_name || user?.fullName || user?.full_name)?.charAt(0) || 'A'
               )}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
           </div>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-sm font-bold text-ink">
-              {user?.fullName || (isStaff ? 'Counter Staff' : 'Admin Manager')}
+              {staffProfile?.full_name || user?.fullName || user?.full_name || (isStaff ? 'Counter Staff' : 'Admin Manager')}
             </p>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted/80">
-              {isStaff ? 'Store Counter' : 'Store Manager'}
+              {staffProfile?.role || user?.role || role}
             </p>
           </div>
         </div>
