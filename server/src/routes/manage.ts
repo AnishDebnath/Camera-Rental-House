@@ -155,17 +155,21 @@ router.get('/counts', async (req: Request, res: Response) => {
     const filterDate = req.query.date as string;
     
     let upcomingQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'confirmed');
-    let returningQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'released');
+    let returningQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['active', 'released']);
     
     if (filterDate) {
-      upcomingQuery = upcomingQuery.eq('pickup_date', filterDate);
-      returningQuery = returningQuery.eq('event_date', filterDate);
+      upcomingQuery = upcomingQuery
+        .gte('pickup_date', `${filterDate}T00:00:00`)
+        .lt('pickup_date', `${filterDate}T23:59:59.999`);
+      returningQuery = returningQuery
+        .gte('event_date', `${filterDate}T00:00:00`)
+        .lt('event_date', `${filterDate}T23:59:59.999`);
     }
 
     const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount, pendingUsersCount] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'released'),
-      supabase.from('rentals').select('products').eq('status', 'released'),
+      supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['active', 'released']),
+      supabase.from('rentals').select('products').in('status', ['active', 'released']),
       upcomingQuery,
       returningQuery,
       supabase.from('users').select('id', { count: 'exact', head: true }).not('is_verified', 'is', true).not('is_blocked', 'is', true),

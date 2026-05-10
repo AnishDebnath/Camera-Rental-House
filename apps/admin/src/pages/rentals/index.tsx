@@ -121,12 +121,30 @@ const Rentals = () => {
   }, [rawRentals, filterDate]);
 
   const counts = useMemo(() => {
-    return {
-      upcoming: apiCounts.upcoming,
-      active: apiCounts.active,
-      returning: apiCounts.returning,
+    const toLocalDate = (iso: string) => {
+      const d = new Date(iso);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     };
-  }, [apiCounts]);
+
+    // For date-sensitive tabs, count from the already-loaded list (avoids backend date issues).
+    // For 'active' (no date filter), use the API count.
+    const upcomingCount = activeTab === 'upcoming'
+      ? mappedRentals.filter(r => toLocalDate(r.pickup) === filterDate).length
+      : apiCounts.upcoming;
+
+    const returningCount = activeTab === 'returning'
+      ? mappedRentals.filter(r =>
+          toLocalDate(r.return_date) === filterDate &&
+          !['cancelled', 'failed', 'returned'].includes(r.status)
+        ).length
+      : apiCounts.returning;
+
+    return {
+      upcoming: upcomingCount,
+      active: apiCounts.active,
+      returning: returningCount,
+    };
+  }, [apiCounts, mappedRentals, activeTab, filterDate]);
 
   const shiftDate = (days: number) => {
     const [y, m, d] = filterDate.split('-').map(Number);

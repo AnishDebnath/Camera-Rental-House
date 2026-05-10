@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ScanLine, PackageCheck } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { useLenis } from '@camera-rental-house/ui';
 
 interface Props {
   product: any;
@@ -14,6 +15,17 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerId = 'qr-reader-container';
+  const lenis = useLenis();
+
+  // Handle scroll locking
+  useEffect(() => {
+    lenis?.stop();
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      lenis?.start();
+      document.documentElement.style.overflow = '';
+    };
+  }, [lenis]);
 
   const stopScanner = async () => {
     if (scannerRef.current && scannerRef.current.isScanning) {
@@ -141,7 +153,7 @@ const ProductVerificationModal = ({ product, onClose, onVerify }: Props) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
