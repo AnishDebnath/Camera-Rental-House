@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 import { useToast } from '@camera-rental-house/ui';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 
 const UserDetail = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const UserDetail = () => {
   const [changedFields, setChangedFields] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [confirmType, setConfirmType] = useState<'block' | 'delete' | 'verify' | null>(null);
 
   const isChanged = (field: string) => !verified && changedFields.includes(field);
 
@@ -44,6 +46,7 @@ const UserDetail = () => {
       setVerified(true);
       setChangedFields([]);
       addToast({ title: 'Success', message: 'User verified successfully.', tone: 'success' });
+      setConfirmType(null);
     } catch (error) {
       addToast({ title: 'Error', message: 'Failed to verify user.', tone: 'error' });
     } finally {
@@ -57,11 +60,32 @@ const UserDetail = () => {
       await axiosInstance.put(`/admin/users/${id}/block`);
       setBlocked(!blocked);
       addToast({ title: 'Success', message: `User ${blocked ? 'unblocked' : 'blocked'} successfully.`, tone: 'success' });
+      setConfirmType(null);
     } catch (error) {
       addToast({ title: 'Error', message: 'Failed to update block status.', tone: 'error' });
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleDelete = async () => {
+    setIsUpdating(true);
+    try {
+      await axiosInstance.delete(`/admin/users/${id}`);
+      setDeleted(true);
+      addToast({ title: 'Success', message: 'User deleted successfully.', tone: 'success' });
+    } catch (error) {
+      addToast({ title: 'Error', message: 'Failed to delete user.', tone: 'error' });
+    } finally {
+      setIsUpdating(false);
+      setConfirmType(null);
+    }
+  };
+
+  const onConfirmAction = () => {
+    if (confirmType === 'verify') handleVerify();
+    if (confirmType === 'block') handleBlock();
+    if (confirmType === 'delete') handleDelete();
   };
 
   if (isLoading) {
@@ -101,11 +125,10 @@ const UserDetail = () => {
         </button>
 
         <span
-          className={`md:hidden inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[10px] font-bold shadow-sm ${
-            blocked ? 'bg-danger/10 text-danger' : 
-            !verified ? 'bg-warning/10 text-warning' : 
-            'bg-success/10 text-success'
-          }`}
+          className={`md:hidden inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[10px] font-bold shadow-sm ${blocked ? 'bg-danger/10 text-danger' :
+              !verified ? 'bg-warning/10 text-warning' :
+                'bg-success/10 text-success'
+            }`}
         >
           {blocked ? <Ban className="h-3.5 w-3.5" /> : !verified ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
           <span className="leading-none uppercase tracking-wider">{blocked ? 'Blocked' : !verified ? 'Review Pending' : 'Verified'}</span>
@@ -126,11 +149,13 @@ const UserDetail = () => {
                 {user.full_name?.split(' ').map((part: string) => part[0]).slice(0, 2).join('')}
               </span>
             )}
-            <div className="flex flex-col justify-between py-0.5">
-              <div className="flex items-center gap-2">
-                <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight text-ink leading-none transition-all ${isChanged('full_name') ? 'text-amber-600' : ''}`}>{user.full_name}</h1>
+            <div className="flex flex-col justify-center gap-1.5 py-0.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className={`text-xl sm:text-2xl font-black tracking-tight text-ink leading-none transition-all ${isChanged('full_name') ? 'text-amber-600' : ''}`}>
+                  {user.full_name}
+                </h1>
                 {isChanged('full_name') && (
-                  <span className="inline-flex items-center rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white animate-pulse">
+                  <span className="inline-flex items-center rounded-full bg-amber-400 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-white animate-pulse shadow-sm">
                     Changed
                   </span>
                 )}
@@ -145,11 +170,10 @@ const UserDetail = () => {
           </div>
 
           <span
-            className={`hidden md:inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-bold ${
-              blocked ? 'bg-danger/10 text-danger' : 
-              !verified ? 'bg-warning/10 text-warning' : 
-              'bg-success/10 text-success'
-            }`}
+            className={`hidden md:inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-bold ${blocked ? 'bg-danger/10 text-danger' :
+                !verified ? 'bg-warning/10 text-warning' :
+                  'bg-success/10 text-success'
+              }`}
           >
             {blocked ? <Ban className="h-4 w-4" /> : !verified ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
             <span className="leading-none uppercase tracking-wider">{blocked ? 'Blocked' : !verified ? 'Review Pending' : 'Verified'}</span>
@@ -340,7 +364,7 @@ const UserDetail = () => {
         {!verified && !blocked && (
           <button
             type="button"
-            onClick={handleVerify}
+            onClick={() => setConfirmType('verify')}
             disabled={isUpdating}
             className="pill-button border border-success/20 bg-success/10 text-success hover:bg-success hover:text-white disabled:opacity-50 sm:col-span-2"
           >
@@ -350,7 +374,7 @@ const UserDetail = () => {
         )}
         <button
           type="button"
-          onClick={handleBlock}
+          onClick={() => setConfirmType('block')}
           disabled={isUpdating}
           className={`pill-button border ${blocked ? 'border-success/20 bg-success/10 text-success hover:bg-success' : 'border-warning/20 bg-warning/10 text-warning hover:bg-warning'} hover:text-white disabled:opacity-50`}
         >
@@ -358,7 +382,7 @@ const UserDetail = () => {
         </button>
         <button
           type="button"
-          onClick={() => setDeleted(true)}
+          onClick={() => setConfirmType('delete')}
           disabled={isUpdating}
           className="pill-button border border-danger/20 bg-danger/5 text-danger hover:bg-danger hover:text-white disabled:opacity-50"
         >
@@ -366,7 +390,31 @@ const UserDetail = () => {
           Delete User
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmType !== null}
+        onClose={() => setConfirmType(null)}
+        onConfirm={onConfirmAction}
+        loading={isUpdating}
+        tone={confirmType === 'delete' ? 'danger' : confirmType === 'block' ? 'warning' : 'success'}
+        title={
+          confirmType === 'delete' ? 'Delete User?' :
+            confirmType === 'block' ? (blocked ? 'Unblock User?' : 'Block User?') :
+              'Verify User?'
+        }
+        message={
+          confirmType === 'delete' ? 'This action is permanent and will remove all user data and rental history. Are you sure?' :
+            confirmType === 'block' ? (blocked ? 'This will allow the user to log in and rent gear again.' : 'This will prevent the user from logging in or placing new rentals.') :
+              'This will mark the user as verified and allow them to rent gear. Have you verified their documents?'
+        }
+        confirmLabel={
+          confirmType === 'delete' ? 'Delete Permanently' :
+            confirmType === 'block' ? (blocked ? 'Unblock' : 'Block User') :
+              'Verify & Accept'
+        }
+      />
     </div>
+
   );
 };
 

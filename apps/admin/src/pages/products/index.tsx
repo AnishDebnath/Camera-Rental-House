@@ -9,6 +9,7 @@ import ProductStats from './ProductStats';
 import ProductFilters from './ProductFilters';
 import ProductCard from './ProductCard';
 import QRLabelModal from './QRLabelModal';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -28,6 +29,8 @@ const Products = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedQrProduct, setSelectedQrProduct] = useState<any>(null);
   const [loadingQrId, setLoadingQrId] = useState<string | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!showFilters) setIsExpanded(false);
@@ -77,14 +80,17 @@ const Products = () => {
     }
   };
 
-  const handleDelete = async (row: any) => {
-    if (window.confirm(`Are you sure you want to delete ${row.name}?`)) {
-      try {
-        await axiosInstance.delete(`/admin/products/${row.id}`);
-        setRows((current) => current.filter((item) => item.id !== row.id));
-      } catch (err) {
-        alert('Failed to delete product.');
-      }
+  const handleDeleteConfirm = async () => {
+    if (!deletingProduct) return;
+    try {
+      setIsDeleting(true);
+      await axiosInstance.delete(`/admin/products/${deletingProduct.id}`);
+      setRows((current) => current.filter((item) => item.id !== deletingProduct.id));
+      setDeletingProduct(null);
+    } catch (err) {
+      alert('Failed to delete product.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -162,7 +168,7 @@ const Products = () => {
               isLoading={isLoading}
               loadingQrId={loadingQrId}
               handleShowQr={handleShowQr}
-              handleDelete={handleDelete}
+              handleDelete={(row: any) => setDeletingProduct(row)}
               formatCurrency={formatCurrency}
             />
           </>
@@ -179,6 +185,17 @@ const Products = () => {
           onClose={() => setSelectedQrProduct(null)} 
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!deletingProduct}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={isDeleting}
+        tone="danger"
+        title="Delete Product?"
+        message={`This will permanently remove ${deletingProduct?.name} from the inventory. This action cannot be undone.`}
+        confirmLabel="Delete Product"
+      />
     </div>
   );
 };

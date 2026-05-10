@@ -19,11 +19,28 @@ import { getAuthRole, clearAdminSession } from '../../../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
 import axiosInstance from '../../api/axiosInstance';
 import logo from '@camera-rental-house/ui/assets/logo.png';
+import { useLenis } from '@camera-rental-house/ui';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
 const Sidebar = ({ open, onClose }) => {
   const { pathname } = useLocation();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (open) {
+      lenis?.stop();
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      lenis?.start();
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      lenis?.start();
+      document.documentElement.style.overflow = '';
+    };
+  }, [open, lenis]);
+
   const role = getAuthRole();
   const isStaff = role === 'staff';
   const [counts, setCounts] = useState<{ products: number; rentals: number; users: number; pendingUsers: number }>({
@@ -120,7 +137,7 @@ const Sidebar = ({ open, onClose }) => {
     <>
       <div
         className={clsx(
-          'z-40 bg-slate-950/25 backdrop-blur-sm transition xl:hidden',
+          'z-40 bg-slate-950/30 backdrop-blur-sm transition xl:hidden',
           open ? 'fixed inset-0 pointer-events-auto opacity-100' : 'hidden pointer-events-none opacity-0',
         )}
         onClick={onClose}

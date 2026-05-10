@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { User, Calendar as CalendarIcon, ShoppingBag } from 'lucide-react';
+import { User, Calendar as CalendarIcon, ShoppingBag, AlertCircle } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { differenceInDays } from 'date-fns';
 
