@@ -107,7 +107,12 @@ const Login = () => {
           token: data.accessToken,
           role: data.user.role,
           next: nextPath,
-          welcome: 'true'
+          welcome: 'true',
+          user: btoa(JSON.stringify({
+            fullName: data.user.fullName,
+            avatarUrl: data.user.avatarUrl,
+            username: data.user.username
+          }))
         });
         
         window.location.replace(`${adminAppUrl}/auth-redirect?${params.toString()}`);

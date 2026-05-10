@@ -20,6 +20,7 @@ import {
   ADMIN_TOKEN_STORAGE_KEY,
   isValidRole,
   saveAuthSession,
+  saveAuthUser,
 } from '../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../packages/auth/appUrls';
 import { useToast, ScrollToTop, PageTransition } from '@camera-rental-house/ui';
@@ -59,6 +60,7 @@ const AuthRedirect = () => {
     const role = params.get('role');
     const next = params.get('next');
     const welcome = params.get('welcome');
+    const userParam = params.get('user');
 
     if (welcome === 'true' && !toastShownRef.current) {
       toastShownRef.current = true;
@@ -71,6 +73,14 @@ const AuthRedirect = () => {
 
     if (token && isValidRole(role)) {
       saveAuthSession(token, role);
+      if (userParam) {
+        try {
+          const userData = JSON.parse(atob(userParam));
+          saveAuthUser(userData);
+        } catch (e) {
+          console.error('Failed to parse user data:', e);
+        }
+      }
       navigate('/', { replace: true });
       return;
     }

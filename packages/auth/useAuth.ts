@@ -6,9 +6,11 @@ export const saveAuthSession = (token: string, role: AppRole) => {
   localStorage.setItem(ADMIN_ROLE_STORAGE_KEY, role);
 };
 
-export const clearAuthSession = () => {
-  localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
-  localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
-  localStorage.removeItem('camera_rental_house_user');
-  localStorage.removeItem('accessToken');
+export const saveAuthUser = (user: any) => {
+  localStorage.setItem('camera_rental_house_user', JSON.stringify(user));
+};
+
+export const getAuthUser = () => {
+  const stored = localStorage.getItem('camera_rental_house_user');
+  return stored ? JSON.parse(stored) : null;
 };

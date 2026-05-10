@@ -15,7 +15,7 @@ import {
   History,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { getAuthRole, clearAdminSession } from '../../../../../packages/auth';
+import { getAuthRole, getAuthUser, clearAdminSession } from '../../../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
 import axiosInstance from '../../api/axiosInstance';
 import logo from '@camera-rental-house/ui/assets/logo.png';
@@ -42,6 +42,7 @@ const Sidebar = ({ open, onClose }) => {
   }, [open, lenis]);
 
   const role = getAuthRole();
+  const user = getAuthUser();
   const isStaff = role === 'staff';
   const [counts, setCounts] = useState<{ products: number; rentals: number; users: number; pendingUsers: number }>({
     products: 0,
@@ -165,13 +166,17 @@ const Sidebar = ({ open, onClose }) => {
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-white/60 bg-white/40 p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
           <div className="relative h-11 w-11 shrink-0">
             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-100 to-sky-100 text-sm font-bold text-ink border border-white/40">
-              CR
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} className="h-full w-full object-cover" />
+              ) : (
+                user?.fullName?.charAt(0) || 'A'
+              )}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
           </div>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-sm font-bold text-ink">
-              {isStaff ? 'Counter Staff' : 'Admin Manager'}
+              {user?.fullName || (isStaff ? 'Counter Staff' : 'Admin Manager')}
             </p>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted/80">
               {isStaff ? 'Store Counter' : 'Store Manager'}
