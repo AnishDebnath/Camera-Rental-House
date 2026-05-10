@@ -96,7 +96,7 @@ const CategoryHeader = ({
       {/* Desktop Backdrop Animation - Moved outside to blur whole background */}
       <div
         className={clsx(
-          "hidden lg:block fixed inset-0 bg-black/40 backdrop-blur-lg pointer-events-none z-[190] transition-opacity duration-500",
+          "hidden lg:block fixed inset-0 bg-slate-900/30 backdrop-blur-sm pointer-events-none z-[190] transition-opacity duration-500",
           showFilters ? "opacity-100" : "opacity-0"
         )}
         aria-hidden="true"
