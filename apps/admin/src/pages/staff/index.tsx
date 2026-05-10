@@ -1,0 +1,48 @@
+import { useState, useEffect } from 'react';
+import axiosInstance from '../../api/axiosInstance';
+import { useToast } from '@camera-rental-house/ui';
+import StaffHeader from './StaffHeader';
+import StaffList from './StaffList';
+
+const Staff = () => {
+  const [staff, setStaff] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addToast } = useToast();
+
+  const fetchStaff = async () => {
+    try {
+      const response = await axiosInstance.get('/admin/staff');
+      setStaff(response.data || []);
+    } catch (error) {
+      console.error('Staff fetch error:', error);
+      addToast({ title: 'Error', message: 'Failed to fetch staff list', tone: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStaff();
+  }, []);
+
+  return (
+    <div className="admin-shell py-8">
+      <StaffHeader />
+      <div className="mt-6">
+        {isLoading ? (
+          <div className="flex h-[40vh] items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+          </div>
+        ) : staff && staff.length > 0 ? (
+          <StaffList staff={staff} />
+        ) : (
+          <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+            <p className="text-muted font-medium">No team members found.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Staff;

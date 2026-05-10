@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import express, { Request, Response } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
@@ -21,6 +22,58 @@ const extractPublicId = (url: string | null): string | null => {
   const path = parts[1].replace(/^v\d+\//, '');
   return decodeURIComponent(path.split('.')[0]);
 };
+
+router.get('/staff', roleMiddleware(['admin', 'manager']), async (_req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from('staff_accounts')
+      .select('id, username, full_name, phone, role, avatar_url, is_active, last_login_at, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch staff list.' });
+  }
+});
+
+router.post('/staff', roleMiddleware(['admin', 'manager']), async (req: Request, res: Response) => {
+  try {
+    const { username, fullName, phone, role, password } = req.body;
+
+    if (!username || !fullName || !phone || !role || !password) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const { data, error } = await supabase
+      .from('staff_accounts')
+      .insert([
+        {
+          username: username.toLowerCase(),
+          full_name: fullName,
+          phone: phone.replace(/\D/g, ''),
+          role,
+          password_hash: passwordHash,
+          is_active: true,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(400).json({ message: 'Username or phone already exists.' });
+      }
+      throw error;
+    }
+
+    return res.status(201).json({ message: 'Staff member added successfully.', staff: data });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to add staff member.' });
+  }
+});
 
 router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: Response) => {
   try {

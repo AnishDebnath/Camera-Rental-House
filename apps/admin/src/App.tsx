@@ -11,7 +11,7 @@ import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';
 import ProductionHouses from './pages/ProductionHouses';
 import AdminBooking from './pages/AdminBooking';
-import Staff from './pages/Staff';
+import Staff from './pages/staff/index';
 import Accounts from './pages/Accounts';
 import Sidebar from './components/common/Sidebar';
 import AdminNavbar from './components/common/AdminNavbar';
@@ -209,7 +209,7 @@ function App() {
                   <Route
                     path="/staff"
                     element={
-                      <ProtectedRoute allowedRoles={['admin']}>
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
                         <Staff />
                       </ProtectedRoute>
                     }
