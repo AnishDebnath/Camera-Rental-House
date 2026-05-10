@@ -347,6 +347,7 @@ router.post('/login', async (req: Request, res: Response) => {
           id: staff.id,
           username: staff.username,
           fullName: staff.full_name,
+          avatarUrl: staff.avatar_url,
           role: staff.role,
         });
 
@@ -356,6 +357,7 @@ router.post('/login', async (req: Request, res: Response) => {
             id: staff.id,
             fullName: staff.full_name,
             username: staff.username,
+            avatarUrl: staff.avatar_url,
             role: staff.role,
           },
           accessToken: tokens.accessToken,
