@@ -1,6 +1,7 @@
 import { Bell, LogOut, Menu, Search } from 'lucide-react';
 import { clearAdminSession, getAuthRole } from '../../../../../packages/auth';
 import { resolveAuthAppUrl } from '../../../../../packages/auth/appUrls';
+import axiosInstance from '../../api/axiosInstance';
 
 const authAppUrl = resolveAuthAppUrl(import.meta.env.VITE_AUTH_APP_URL);
 
@@ -60,12 +61,17 @@ const AdminNavbar = ({ onOpenSidebar }) => {
               CR
             </div>
           </div>
-
           <button
             type="button"
-            onClick={() => {
-              clearAdminSession();
-              window.location.replace(`${authAppUrl}/login?clear_session=true`);
+            onClick={async () => {
+              try {
+                await axiosInstance.post('/auth/logout');
+              } catch (e) {
+                console.error('Logout request failed:', e);
+              } finally {
+                clearAdminSession();
+                window.location.replace(`${authAppUrl}/login?clear_session=true`);
+              }
             }}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm transition hover:bg-primary hover:text-white"
             aria-label="Logout"

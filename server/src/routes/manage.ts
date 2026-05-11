@@ -50,7 +50,7 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
 
     // Attempt update for rental_items
     const itemUpdate: any = { status: 'released' };
-    
+
     // Check if extra columns exist or just try-catch them
     // For now, we try to include them but handle the specific "column not found" error
     // Fetch current rental to update products array
@@ -174,10 +174,10 @@ router.post('/bulk-return', async (req: Request, res: Response) => {
 router.get('/counts', async (req: Request, res: Response) => {
   try {
     const filterDate = req.query.date as string;
-    
+
     let upcomingQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'confirmed');
     let returningQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['active', 'released']);
-    
+
     if (filterDate) {
       upcomingQuery = upcomingQuery
         .gte('pickup_date', `${filterDate}T00:00:00`)

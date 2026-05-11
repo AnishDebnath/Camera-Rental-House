@@ -59,27 +59,26 @@ const StaffList = ({ staff = [] }: StaffListProps) => {
         const loginTime = row.last_login_at ? new Date(row.last_login_at).getTime() : 0;
         const logoutTime = row.last_logout_at ? new Date(row.last_logout_at).getTime() : 0;
         const isOnline = loginTime > 0 && loginTime > logoutTime;
-        
+
         return (
-          <div className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-bold ${
-            isOnline 
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-              : 'bg-slate-50 text-slate-500 border border-slate-100'
-          }`}>
+          <div className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-bold ${isOnline
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+            : 'bg-slate-50 text-slate-500 border border-slate-100'
+            }`}>
             <span className="relative flex h-1.5 w-1.5">
               {isOnline && (
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
               )}
               <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
             </span>
-            {isOnline ? 'Active' : 'Offline'}
+            {isOnline ? 'Online' : 'Offline'}
           </div>
         );
       }
     },
     {
-      key: 'last_login_at',
-      label: 'Last Active',
+      key: 'last_active',
+      label: 'Last Activity',
       render: (row: any) => {
         const loginTime = row.last_login_at ? new Date(row.last_login_at).getTime() : 0;
         const logoutTime = row.last_logout_at ? new Date(row.last_logout_at).getTime() : 0;
@@ -89,7 +88,7 @@ const StaffList = ({ staff = [] }: StaffListProps) => {
         return (
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] font-black uppercase text-muted/60 tracking-tighter">
-              {isOnline ? 'Logged In At' : 'Logged Out At'}
+              {isOnline ? 'Currently Logged In At' : 'Last Logged Out At'}
             </span>
             <div className="flex items-center gap-1.5 text-xs text-muted font-bold">
               <Clock className="h-3.5 w-3.5" />
@@ -107,7 +106,7 @@ const StaffList = ({ staff = [] }: StaffListProps) => {
                     <span className="text-tertiary">{hours}:{minutes}</span>
                   </span>
                 );
-              })() : 'Never'}
+              })() : <span className="italic text-muted/40 font-medium">No activity recorded</span>}
             </div>
           </div>
         );

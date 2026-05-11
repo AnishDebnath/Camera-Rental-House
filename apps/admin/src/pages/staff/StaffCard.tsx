@@ -58,8 +58,8 @@ const StaffCard = ({ staff }: StaffCardProps) => {
             <Activity className="h-3 w-3" /> Status
           </p>
           <div className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${isOnline
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-              : 'bg-slate-50 text-slate-500 border border-slate-100'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+            : 'bg-slate-50 text-slate-500 border border-slate-100'
             }`}>
             <span className="relative flex h-1.5 w-1.5">
               {isOnline && (
@@ -74,7 +74,7 @@ const StaffCard = ({ staff }: StaffCardProps) => {
         {/* Time */}
         <div className="space-y-1">
           <p className="text-[10px] font-black text-muted uppercase tracking-widest flex items-center gap-1">
-            <Clock className="h-3 w-3" /> {isOnline ? 'Login' : 'Logout'}
+            <Clock className="h-3 w-3" /> {isOnline ? 'Logged In At' : 'Logged Out At'}
           </p>
           <div className="flex items-center gap-1 text-sm font-bold text-ink">
             {timeToDisplay ? (() => {
@@ -91,7 +91,7 @@ const StaffCard = ({ staff }: StaffCardProps) => {
                   <span className="text-tertiary">{hours}:{minutes}</span>
                 </span>
               );
-            })() : <span className="text-xs text-muted font-medium italic">Never</span>}
+            })() : <span className="text-[10px] text-muted/40 font-medium italic">No Activity</span>}
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ router.get('/staff', roleMiddleware(['admin', 'manager']), async (_req: Request,
   try {
     const { data, error } = await supabase
       .from('staff_accounts')
-      .select('id, username, full_name, phone, role, avatar_url, is_active, last_login_at, created_at')
+      .select('id, username, full_name, phone, role, avatar_url, is_active, last_login_at, last_logout_at, created_at')
       .order('created_at', { ascending: false });
 
     if (error) throw error;

@@ -187,7 +187,7 @@ const Sidebar = ({ open, onClose }) => {
           </div>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-sm font-bold text-ink">
-              {staffProfile?.full_name || user?.fullName || user?.full_name || (isStaff ? 'Counter Staff' : 'Admin Manager')}
+              {staffProfile?.full_name || user?.fullName || user?.full_name || (isStaff ? 'Staff' : 'Admin')}
             </p>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted/80">
               {staffProfile?.role || user?.role || role}
@@ -253,9 +253,15 @@ const Sidebar = ({ open, onClose }) => {
 
         <div className="mt-auto pt-6">
           <button
-            onClick={() => {
-              clearAdminSession();
-              window.location.replace(`${authAppUrl}/login?clear_session=true`);
+            onClick={async () => {
+              try {
+                await axiosInstance.post('/auth/logout');
+              } catch (e) {
+                console.error('Logout request failed:', e);
+              } finally {
+                clearAdminSession();
+                window.location.replace(`${authAppUrl}/login?clear_session=true`);
+              }
             }}
             className="group flex w-full items-center gap-3 rounded-xl bg-rose-50 px-4 py-3 text-[13px] font-black text-rose-600 transition-all hover:bg-rose-100 hover:shadow-sm"
           >
