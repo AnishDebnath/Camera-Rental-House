@@ -73,7 +73,7 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
           buffer: processed.buffer,
           key: `proof-${rentalId}-${Date.now()}.jpg`,
           mimetype: processed.mimetype,
-          folder: 'Handover Proof'
+          folder: 'Camera Rental House/Handover Proof'
         });
       } catch (uploadErr) {
         console.error('Proof upload failed:', uploadErr);
