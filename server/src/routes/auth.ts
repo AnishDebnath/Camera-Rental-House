@@ -431,7 +431,7 @@ router.get('/admin/staff', async (req: Request, res: Response) => {
 
     const { data, error } = await supabase
       .from('staff_accounts')
-      .select('id, username, phone, full_name, role, is_active, created_at, last_login_at')
+      .select('id, username, phone, full_name, role, is_active, created_at, last_login_at, last_logout_at')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -836,9 +836,21 @@ router.patch(
   }
 );
 
-router.post('/logout', async (_req: Request, res: Response) => {
-  res.clearCookie('refreshToken', refreshCookieOptions);
-  return res.json({ message: 'Logged out successfully.' });
+router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    if (user && (user.role === 'admin' || user.role === 'staff')) {
+      await supabase
+        .from('staff_accounts')
+        .update({ last_logout_at: new Date().toISOString() })
+        .eq('id', user.id);
+    }
+    res.clearCookie('refreshToken', refreshCookieOptions);
+    return res.json({ message: 'Logged out successfully.' });
+  } catch (error) {
+    res.clearCookie('refreshToken', refreshCookieOptions);
+    return res.json({ message: 'Logged out with errors.' });
+  }
 });
 
 export default router;
