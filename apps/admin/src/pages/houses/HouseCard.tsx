@@ -58,7 +58,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
       label: 'Rental Status',
       render: (row: any) => (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${row.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+          className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold tracking-wider ${row.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
             }`}
         >
           {row.status === 'Active' ? <ShieldCheck className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -111,7 +111,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
                   <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                     {row.ownerName}
                   </span>
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${row.status === 'Active' ? 'bg-success/10 text-emerald-700' : 'bg-warning/10 text-amber-600'
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black tracking-widest ${row.status === 'Active' ? 'bg-success/10 text-emerald-700' : 'bg-warning/10 text-amber-600'
                     }`}>
                     {row.status}
                   </span>

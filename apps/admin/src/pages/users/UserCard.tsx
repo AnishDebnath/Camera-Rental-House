@@ -65,11 +65,10 @@ const UserCard = ({ users }: UserCardProps) => (
         label: 'Status',
         render: (row) => (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
-              row.is_blocked ? 'bg-danger/10 text-danger' : 
-              !row.is_verified ? 'bg-warning/10 text-warning' : 
-              'bg-success/10 text-success'
-            }`}
+            className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold tracking-wider ${row.is_blocked ? 'bg-danger/10 text-danger' :
+              !row.is_verified ? 'bg-warning/10 text-warning' :
+                'bg-success/10 text-success'
+              }`}
           >
             {row.is_blocked ? <Ban className="h-3.5 w-3.5" /> : !row.is_verified ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
             {row.is_blocked ? 'Blocked' : !row.is_verified ? 'Pending' : 'Verified'}
@@ -102,26 +101,24 @@ const UserCard = ({ users }: UserCardProps) => (
                 {row.full_name?.split(' ').map((part: string) => part[0]).slice(0, 2).join('')}
               </div>
             )}
-            <div className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white ${
-              row.is_blocked ? 'bg-danger text-white' : 
-              !row.is_verified ? 'bg-warning text-white' : 
-              'bg-success text-white'
-            }`}>
+            <div className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white ${row.is_blocked ? 'bg-danger text-white' :
+              !row.is_verified ? 'bg-warning text-white' :
+                'bg-success text-white'
+              }`}>
               {row.is_blocked ? <Ban className="h-2.5 w-2.5" /> : !row.is_verified ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <ShieldCheck className="h-2.5 w-2.5" />}
             </div>
           </div>
-          
+
           <div className="flex-1 min-w-0 pt-0.5">
             <h3 className="text-base font-black text-ink truncate tracking-tight">{row.full_name}</h3>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                 ID: {row.member_id || '-'}
               </span>
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${
-                row.is_blocked ? 'bg-danger/10 text-danger' : 
-                !row.is_verified ? 'bg-warning/10 text-amber-600' : 
-                'bg-success/10 text-emerald-700'
-              }`}>
+              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black tracking-widest ${row.is_blocked ? 'bg-danger/10 text-danger' :
+                !row.is_verified ? 'bg-warning/10 text-amber-600' :
+                  'bg-success/10 text-emerald-700'
+                }`}>
                 {row.is_blocked ? 'Blocked' : !row.is_verified ? 'Pending Review' : 'Verified'}
               </span>
             </div>

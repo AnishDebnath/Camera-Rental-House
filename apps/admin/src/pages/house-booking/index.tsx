@@ -5,6 +5,7 @@ import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../
 import { mockHouses } from '../houses/index';
 import { useToast } from '@camera-rental-house/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import axiosInstance from '../../api/axiosInstance';
 
 import { PartnerSelection } from './PartnerSelection';
 import { EquipmentSelection } from './EquipmentSelection';
@@ -69,21 +70,41 @@ const HouseBooking = () => {
     }
   }, [houseId]);
 
-  const filteredProducts = useMemo(() => {
-    return adminProducts.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.unique_code.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === 'All' || p.category === categoryFilter;
-      const matchesBrand = brandFilter === 'All' || p.brand === brandFilter;
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
-      // Handle "in_stock" vs "Available" and "on_rent" vs "Rented"
-      const productStatus = p.status?.toLowerCase() || '';
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'in_stock' && (productStatus === 'in_stock' || productStatus === 'available')) ||
-        (statusFilter === 'on_rent' && (productStatus === 'on_rent' || productStatus === 'rented'));
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axiosInstance.get('/products', {
+          params: {
+            search: searchTerm,
+            category: categoryFilter,
+            brand: brandFilter,
+            status: statusFilter,
+            limit: 100
+          }
+        });
+        const mapped = data.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          brand: item.brand,
+          category: item.category,
+          price_per_day: item.price_per_day,
+          status: item.status,
+          available_quantity: item.available_quantity,
+          unique_code: item.unique_code,
+          image: item.images?.[0] ?? null,
+        }));
+        setFilteredProducts(mapped);
+      } catch (err) {
+        console.error('Failed to load products', err);
+      }
+    };
 
-      return matchesSearch && matchesCategory && matchesBrand && matchesStatus;
-    });
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [searchTerm, categoryFilter, brandFilter, statusFilter]);
 
   const addToCart = (product: any) => {
@@ -130,8 +151,6 @@ const HouseBooking = () => {
         <div className="lg:col-span-8 space-y-6">
           <PartnerSelection 
             selectedHouse={selectedHouse} 
-            setSelectedHouse={setSelectedHouse} 
-            houseId={houseId} 
           />
           <EquipmentSelection
             searchTerm={searchTerm}
@@ -148,7 +167,9 @@ const HouseBooking = () => {
             brandOptions={brandOptions}
             statusOptions={statusOptions}
             filteredProducts={filteredProducts}
+            cart={cart}
             addToCart={addToCart}
+            removeFromCart={removeFromCart}
           />
         </div>
 
