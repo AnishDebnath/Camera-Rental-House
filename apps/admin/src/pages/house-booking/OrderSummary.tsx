@@ -1,10 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, Package, Trash2, ChevronRight, Info } from 'lucide-react';
 
-const Clock = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-);
-
 interface OrderSummaryProps {
   cart: any[];
   removeFromCart: (id: string) => void;
@@ -39,7 +35,7 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar space-y-2.5">
+              <div className="max-h-[400px] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] overscroll-contain pr-2 custom-scrollbar space-y-2.5">
                 <AnimatePresence>
                   {cart.map(item => (
                     <motion.div
@@ -48,20 +44,24 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-line hover:border-primary/20 transition-all shadow-sm"
+                      className="group flex items-center gap-3.5 rounded-2xl border border-line bg-white p-3 transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-line bg-white">
-                          <img src={item.image} className="h-full w-full object-cover" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-black truncate max-w-[130px] leading-tight text-ink">{item.name}</p>
-                          <p className="text-[9px] text-muted uppercase font-black tracking-widest mt-1.5">{item.unique_code}</p>
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50 shadow-sm">
+                        <img src={item.image} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt={item.name} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black leading-tight text-ink line-clamp-1">{item.name}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{item.unique_code}</span>
+                          <div className="h-2.5 w-[1px] bg-line" />
+                          <span className="text-[10px] font-black text-primary">₹{item.price_per_day}</span>
                         </div>
                       </div>
+
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted/40 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500 transition-all hover:bg-danger hover:text-white active:scale-90"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -70,27 +70,26 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
                 </AnimatePresence>
               </div>
 
-              <div className="rounded-2xl border border-line p-5 space-y-4 bg-slate-50/50 shadow-inner">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted">Items for Handover</span>
-                  <span className="text-lg font-black text-ink">{cart.length}</span>
-                </div>
-                <div className="pt-4 border-t border-line flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted">Status</span>
-                  <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-amber-600 border border-amber-100">
-                    <Clock className="h-3 w-3" />
-                    <span className="text-[9px] font-black uppercase tracking-widest">Pending</span>
+              <div className="pt-6 border-t border-line/60">
+                <div className="flex items-center justify-between mb-5 px-1">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted leading-none">Total Gear</span>
+                    <span className="text-sm font-black text-ink mt-1.5">{cart.length} Items</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted leading-none">Daily Total</span>
+                    <span className="text-xl font-black text-primary mt-1.5 tracking-tight">₹{cart.reduce((sum, item) => sum + (Number(item.price_per_day) || 0), 0)}</span>
                   </div>
                 </div>
-              </div>
 
-              <button
-                onClick={handleProcessBooking}
-                className="w-full primary-button h-14 flex items-center justify-center gap-3 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
-              >
-                Confirm Booking
-                <ChevronRight className="h-5 w-5" />
-              </button>
+                <button
+                  onClick={handleProcessBooking}
+                  className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-ink text-white shadow-xl shadow-ink/10 transition-all hover:bg-primary hover:shadow-primary/20 active:scale-[0.98]"
+                >
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">Generate Rental Order</span>
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -98,16 +97,16 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-surface p-5 bg-blue-50/30 border-blue-100 shadow-sm"
+          className="rounded-2xl p-5 bg-sky-50/50 border border-sky-100 shadow-sm"
         >
           <div className="flex gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 border border-white shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sky-500 border border-sky-100 shadow-sm">
               <Info className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xs font-black text-blue-900 uppercase tracking-widest">Collection Policy</h3>
-              <p className="text-[10px] leading-relaxed text-blue-800/80 font-bold">
-                ID verification and photo proof are mandatory during release. Rep name must be recorded.
+              <h3 className="text-[10px] font-black text-sky-900 uppercase tracking-widest">Collection Policy</h3>
+              <p className="text-[10px] leading-relaxed text-sky-800/70 font-bold">
+                ID verification and rep photo proof mandatory during release. Ensure all serial numbers match the generated order sheet.
               </p>
             </div>
           </div>
