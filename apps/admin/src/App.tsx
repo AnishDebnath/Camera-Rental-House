@@ -9,7 +9,7 @@ import UserDetail from './pages/users/UserDetail';
 import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';
-import ProductionHouses from './pages/ProductionHouses';
+import ProductionHouses from './pages/houses';
 import AdminBooking from './pages/AdminBooking';
 import Staff from './pages/staff/index';
 import Accounts from './pages/Accounts';
@@ -198,6 +198,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/admin-booking"
                     element={
