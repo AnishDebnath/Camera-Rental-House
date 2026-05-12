@@ -72,7 +72,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
       render: (row: any) => (
         <div className="flex items-center gap-2">
           <Link
-            to={`/admin-booking?houseId=${row.id}`}
+            to={`/house-booking?houseId=${row.id}`}
             className="flex h-10 items-center justify-center rounded-card border border-emerald-500/20 bg-emerald-500/5 px-4 text-xs font-bold text-emerald-600 transition hover:bg-emerald-500 hover:text-white hover:border-emerald-500"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -142,7 +142,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
 
             <div className="mt-5 flex gap-3">
               <Link
-                to={`/admin-booking?houseId=${row.id}`}
+                to={`/house-booking?houseId=${row.id}`}
                 className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-[13px] font-black uppercase tracking-wide text-emerald-600 transition-all active:scale-[0.98]"
               >
                 <PlusCircle className="h-4 w-4" />

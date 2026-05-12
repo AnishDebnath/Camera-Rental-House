@@ -200,7 +200,7 @@ function App() {
                   />
 
                     <Route
-                      path="/admin-booking"
+                      path="/house-booking"
                       element={
                         <ProtectedRoute allowedRoles={['admin', 'staff']}>
                           <HouseBooking />

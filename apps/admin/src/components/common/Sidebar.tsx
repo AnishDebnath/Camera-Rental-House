@@ -214,6 +214,11 @@ const Sidebar = ({ open, onClose }) => {
                     if (item.href === '/rentals' && pathname.startsWith('/rentals/history')) {
                       active = false;
                     }
+
+                    // Special case: /houses should be active if we are in /house-booking
+                    if (item.href === '/houses' && pathname.startsWith('/house-booking')) {
+                      active = true;
+                    }
                     return (
                       <Link
                         key={item.label}
