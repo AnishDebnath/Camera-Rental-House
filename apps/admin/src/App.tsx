@@ -10,7 +10,7 @@ import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';
 import ProductionHouses from './pages/houses';
-import HouseBooking from './pages/houses/HouseBooking';
+import HouseBooking from './pages/house-booking';
 import Staff from './pages/staff/index';
 import Accounts from './pages/Accounts';
 import Sidebar from './components/common/Sidebar';
