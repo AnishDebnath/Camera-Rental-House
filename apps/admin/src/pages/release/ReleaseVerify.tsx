@@ -13,6 +13,8 @@ interface Props {
   onVerifyProduct: (id: string) => void;
   isUserVerified: boolean;
   onToggleVerify: () => void;
+  representativeName: string;
+  setRepresentativeName: (name: string) => void;
   proofPhoto: string | null;
   onCapture: (photo: string) => void;
   onClearPhoto: () => void;
@@ -27,6 +29,8 @@ const ReleaseVerify = ({
   onVerifyProduct,
   isUserVerified,
   onToggleVerify,
+  representativeName,
+  setRepresentativeName,
   proofPhoto,
   onCapture,
   onClearPhoto,
@@ -85,6 +89,9 @@ const ReleaseVerify = ({
           }}
           isVerified={isUserVerified}
           onToggleVerify={() => setIsVerifyingUser(true)}
+          representativeName={representativeName}
+          setRepresentativeName={setRepresentativeName}
+          isHouseBooking={!!rental.houseName}
         />
 
         <Step3Proof
@@ -101,6 +108,8 @@ const ReleaseVerify = ({
           allProductsScanned={allProductsScanned}
           isUserVerified={isUserVerified}
           hasProofPhoto={!!proofPhoto}
+          representativeName={representativeName}
+          isHouseBooking={!!rental.houseName}
           onRelease={onRelease}
           onReset={onReset}
         />

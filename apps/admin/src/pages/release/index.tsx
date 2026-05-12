@@ -11,6 +11,7 @@ const ReleaseReturn = () => {
   const [activeRental, setActiveRental] = useState<any>(null);
   const [scannedProducts, setScannedProducts] = useState<string[]>([]);
   const [isUserVerified, setIsUserVerified] = useState(false);
+  const [representativeName, setRepresentativeName] = useState('');
   const [proofPhoto, setProofPhoto] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +94,8 @@ const ReleaseReturn = () => {
       await axiosInstance.post(endpoint, {
         rentalId: activeRental.full_id,
         productIds: scannedProducts,
-        proofPhoto: proofPhoto
+        proofPhoto: proofPhoto,
+        receivedBy: representativeName
       });
 
       setIsComplete(true);
@@ -158,6 +160,8 @@ const ReleaseReturn = () => {
               onVerifyProduct={toggleProductScan}
               isUserVerified={isUserVerified}
               onToggleVerify={() => setIsUserVerified((v) => !v)}
+              representativeName={representativeName}
+              setRepresentativeName={setRepresentativeName}
               proofPhoto={proofPhoto}
               onCapture={(photo) => setProofPhoto(photo)}
               onClearPhoto={() => setProofPhoto(null)}

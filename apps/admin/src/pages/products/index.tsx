@@ -6,7 +6,7 @@ import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../
 // Modular Components
 import ProductHeader from './ProductHeader';
 import ProductStats from './ProductStats';
-import ProductFilters from './ProductFilters';
+import ProductInventoryFilters from '../../components/ui/ProductInventoryFilters';
 import ProductCard from './ProductCard';
 import QRLabelModal from './QRLabelModal';
 import ConfirmModal from '../../components/ui/ConfirmModal';
@@ -145,13 +145,11 @@ const Products = () => {
               inStockItems={rows.filter(r => r.available_quantity === 1).length}
             />
 
-            <ProductFilters 
+            <ProductInventoryFilters 
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               showFilters={showFilters}
               setShowFilters={setShowFilters}
-              isExpanded={isExpanded}
-              setIsExpanded={setIsExpanded}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
               brandFilter={brandFilter}

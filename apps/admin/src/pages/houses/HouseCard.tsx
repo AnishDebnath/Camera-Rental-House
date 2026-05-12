@@ -14,7 +14,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
       className: 'min-w-[280px]',
       render: (row: any) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded bg-primary-light text-primary border border-primary/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 shadow-inner border border-indigo-100/50">
             <Building2 className="h-5 w-5" />
           </div>
           <div>

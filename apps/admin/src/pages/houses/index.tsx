@@ -7,7 +7,7 @@ import HouseModal from './HouseModal';
 import { useToast } from '@camera-rental-house/ui';
 
 // Mock data
-const mockHouses = [
+export const mockHouses = [
   {
     id: '1',
     name: 'Yash Raj Films',

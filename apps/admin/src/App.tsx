@@ -10,7 +10,7 @@ import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';
 import ProductionHouses from './pages/houses';
-import AdminBooking from './pages/AdminBooking';
+import HouseBooking from './pages/houses/HouseBooking';
 import Staff from './pages/staff/index';
 import Accounts from './pages/Accounts';
 import Sidebar from './components/common/Sidebar';
@@ -199,14 +199,14 @@ function App() {
                     }
                   />
 
-                  <Route
-                    path="/admin-booking"
-                    element={
-                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
-                        <AdminBooking />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/admin-booking"
+                      element={
+                        <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                          <HouseBooking />
+                        </ProtectedRoute>
+                      }
+                    />
                   <Route
                     path="/staff"
                     element={

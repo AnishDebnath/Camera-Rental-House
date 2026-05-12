@@ -1,4 +1,4 @@
-import { UserCheck, CheckCircle2, Phone } from 'lucide-react';
+import { UserCheck, CheckCircle2, Phone, UserPlus } from 'lucide-react';
 
 interface Props {
   user: {
@@ -9,9 +9,19 @@ interface Props {
   };
   isVerified: boolean;
   onToggleVerify: () => void;
+  representativeName: string;
+  setRepresentativeName: (name: string) => void;
+  isHouseBooking?: boolean;
 }
 
-const Step2UserIdentity = ({ user, isVerified, onToggleVerify }: Props) => {
+const Step2UserIdentity = ({ 
+  user, 
+  isVerified, 
+  onToggleVerify,
+  representativeName,
+  setRepresentativeName,
+  isHouseBooking
+}: Props) => {
   return (
     <section className="card-surface p-6">
       <div className="mb-6 flex items-center gap-4">
@@ -70,6 +80,30 @@ const Step2UserIdentity = ({ user, isVerified, onToggleVerify }: Props) => {
             {isVerified ? 'Verified ✓' : 'Verify Profile'}
           </button>
         </div>
+
+        {/* Representative Input for Production House Bookings */}
+        {isHouseBooking && (
+          <div className="mt-6 border-t border-line/60 pt-6 animate-in slide-in-from-top-2 duration-300">
+             <div className="flex items-center gap-3 mb-3">
+               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                 <UserPlus className="h-4 w-4" />
+               </div>
+               <h4 className="text-[11px] font-black uppercase tracking-widest text-ink">Handover Representative</h4>
+             </div>
+             <div className="relative">
+               <input 
+                 type="text" 
+                 value={representativeName}
+                 onChange={(e) => setRepresentativeName(e.target.value)}
+                 placeholder="Enter full name of person collecting gear..."
+                 className="w-full rounded-xl border-line bg-slate-50/50 px-4 py-3 text-sm font-bold text-ink placeholder:text-muted/40 focus:bg-white focus:ring-primary transition-all"
+               />
+             </div>
+             <p className="mt-2 text-[10px] font-bold text-muted leading-relaxed">
+               As this is a production house booking, please specify the representative who is physically receiving the products.
+             </p>
+          </div>
+        )}
       </div>
     </section>
   );

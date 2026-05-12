@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, ArrowLeft, PackageCheck, UserCheck, Image as ImageIcon, ChevronRight, AlertCircle } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, PackageCheck, UserCheck, Image as ImageIcon, ChevronRight, AlertCircle, UserPlus } from 'lucide-react';
 
 interface Props {
   allProductsScanned: boolean;
   isUserVerified: boolean;
   hasProofPhoto: boolean;
+  representativeName?: string;
+  isHouseBooking?: boolean;
   onRelease: () => void;
   onReset: () => void;
 }
@@ -13,16 +15,24 @@ const ReleaseSummary = ({
   allProductsScanned,
   isUserVerified,
   hasProofPhoto,
+  representativeName,
+  isHouseBooking,
   onRelease,
   onReset,
 }: Props) => {
+  const hasRep = isHouseBooking ? !!representativeName?.trim() : true;
+
   const checklist = [
     { label: 'Products Verified', status: allProductsScanned, icon: PackageCheck, color: 'sky' },
     { label: 'Identity Matched', status: isUserVerified, icon: UserCheck, color: 'purple' },
     { label: 'Photo Evidence', status: hasProofPhoto, icon: ImageIcon, color: 'orange' },
   ];
 
-  const allDone = allProductsScanned && isUserVerified && hasProofPhoto;
+  if (isHouseBooking) {
+    checklist.push({ label: 'Representative Name', status: hasRep, icon: UserPlus, color: 'blue' });
+  }
+
+  const allDone = allProductsScanned && isUserVerified && hasProofPhoto && hasRep;
 
   return (
     <div className="space-y-5">
