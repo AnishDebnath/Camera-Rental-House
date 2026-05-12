@@ -2,44 +2,44 @@ import { useState, useMemo } from 'react';
 import HouseHeader from './HouseHeader';
 import HouseStats from './HouseStats';
 import HouseFilters from './HouseFilters';
-import HouseList from './HouseList';
+import HouseCard from './HouseCard';
 import HouseModal from './HouseModal';
 import { useToast } from '@camera-rental-house/ui';
 
 // Mock data
 const mockHouses = [
-  { 
-    id: '1', 
-    name: 'Dreamscape Studios', 
-    contact: 'John Smith', 
-    email: 'john@dreamscape.com',
-    phone: '+91 98765 43210', 
-    address: 'Bandra West, Mumbai',
-    usersCount: 12, 
+  {
+    id: '1',
+    name: 'Yash Raj Films',
+    ownerName: 'Ajoy Das',
+    email: 'contact@yrf.com',
+    phone: '9876543210',
+    address: 'Andheri, Mumbai',
+    totalBusiness: '₹8,45,000',
+    dueAmount: '₹0',
     status: 'Active',
-    totalSpent: '₹1,24,000'
   },
-  { 
-    id: '2', 
-    name: 'Pixel Perfect Productions', 
-    contact: 'Sarah Wilson', 
-    email: 'sarah@pixelperfect.in',
-    phone: '+91 87654 32109', 
-    address: 'Hitech City, Hyderabad',
-    usersCount: 8, 
+  {
+    id: '2',
+    name: 'Red Chillies',
+    ownerName: 'Sameer Khan',
+    email: 'info@redchillies.com',
+    phone: '8976543211',
+    address: 'Bandra, Mumbai',
+    totalBusiness: '₹4,12,000',
+    dueAmount: '₹12,500',
     status: 'Active',
-    totalSpent: '₹84,500'
   },
-  { 
-    id: '3', 
-    name: 'Urban Frame Media', 
-    contact: 'Mike Johnson', 
-    email: 'mike@urbanframe.com',
-    phone: '+91 76543 21098', 
-    address: 'Indiranagar, Bangalore',
-    usersCount: 5, 
+  {
+    id: '3',
+    name: 'Dreamland Studio',
+    ownerName: 'Rahul Verma',
+    email: 'rahul@dreamland.in',
+    phone: '8976543210',
+    address: 'Kolkata, WB',
+    totalBusiness: '₹1,24,000',
+    dueAmount: '₹45,000',
     status: 'Pending',
-    totalSpent: '₹12,000'
   },
 ];
 
@@ -56,9 +56,10 @@ const ProductionHouses = () => {
     }
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
-      result = result.filter(h => 
-        h.name.toLowerCase().includes(lower) || 
-        h.contact.toLowerCase().includes(lower)
+      result = result.filter(h =>
+        h.name.toLowerCase().includes(lower) ||
+        h.ownerName.toLowerCase().includes(lower) ||
+        h.phone.includes(lower)
       );
     }
     return result;
@@ -76,24 +77,24 @@ const ProductionHouses = () => {
   return (
     <div className="admin-shell space-y-5 py-6">
       <HouseHeader onAddClick={() => setIsModalOpen(true)} />
-      
-      <HouseStats 
-        totalHouses={24} 
-        activeRentals={12} 
-        revenue="₹8.4L" 
+
+      <HouseStats
+        totalHouses={24}
+        activeRentals={12}
+        revenue="₹8.4L"
       />
 
-      <HouseFilters 
-        searchTerm={searchTerm} 
-        setSearchTerm={setSearchTerm} 
+      <HouseFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
       />
 
-      <HouseList houses={filteredHouses} />
+      <HouseCard houses={filteredHouses} />
 
-      <HouseModal 
-        isOpen={isModalOpen} 
+      <HouseModal
+        isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleAddSuccess}
       />

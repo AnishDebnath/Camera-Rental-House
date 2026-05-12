@@ -7,7 +7,7 @@ const DataTable = ({ columns, rows, renderMobileCard }) => (
             {columns.map((column) => (
               <th
                 key={column.key}
-                className="px-3 py-4 text-left text-xs font-bold uppercase tracking-[0.16em] text-tertiary"
+                className={`px-3 py-4 text-left text-xs font-bold uppercase tracking-[0.16em] text-tertiary ${column.className || ''}`}
               >
                 {column.label}
               </th>
@@ -18,7 +18,7 @@ const DataTable = ({ columns, rows, renderMobileCard }) => (
           {rows.map((row) => (
             <tr key={row.id} className="transition hover:bg-primary-light/70">
               {columns.map((column) => (
-                <td key={column.key} className="px-3 py-4 text-sm font-medium text-muted">
+                <td key={column.key} className={`px-3 py-4 text-sm font-medium text-muted ${column.className || ''}`}>
                   {column.render ? column.render(row) : row[column.key]}
                 </td>
               ))}

@@ -1,4 +1,5 @@
-import { Search } from 'lucide-react';
+import { Search, Building2, CheckCircle, Clock } from 'lucide-react';
+import FilterSelect from '../../components/ui/FilterSelect';
 
 type HouseFiltersProps = {
   searchTerm: string;
@@ -7,28 +8,34 @@ type HouseFiltersProps = {
   setStatusFilter: (val: string) => void;
 };
 
+const STATUS_OPTIONS = [
+  { label: 'All Houses', value: 'all', icon: <Building2 className="h-3.5 w-3.5" /> },
+  { label: 'Active', value: 'active', icon: <CheckCircle className="h-3.5 w-3.5 text-success" /> },
+  { label: 'Pending', value: 'pending', icon: <Clock className="h-3.5 w-3.5 text-warning" /> },
+];
+
 const HouseFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: HouseFiltersProps) => (
-  <div className="flex flex-col gap-4 md:flex-row md:items-center">
-    <div className="flex flex-1 items-center gap-3 rounded-card border border-line bg-white px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
-      <Search className="h-5 w-5 text-muted" />
+  <section className="card-surface p-4 flex flex-col md:flex-row items-stretch gap-4">
+    <label className="input-shell flex-1 min-h-11 md:max-w-lg">
+      <Search className="h-4 w-4 text-muted" />
       <input 
-        type="text" 
+        type="search" 
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search partners..." 
-        className="flex-1 border-none bg-transparent p-0 text-sm font-medium focus:ring-0"
+        placeholder="Search partners, contact person..." 
+        className="w-full border-0 bg-transparent p-0 text-sm font-medium focus:ring-0"
+      />
+    </label>
+
+    <div className="md:w-[240px]">
+      <FilterSelect 
+        options={STATUS_OPTIONS}
+        value={statusFilter}
+        onChange={setStatusFilter}
+        placeholder="Filter Status"
       />
     </div>
-    <select 
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value)}
-      className="rounded-card border border-line bg-white px-4 py-2.5 text-sm font-bold text-ink focus:ring-2 focus:ring-primary/20 outline-none"
-    >
-      <option value="all">All Status</option>
-      <option value="active">Active</option>
-      <option value="pending">Pending</option>
-    </select>
-  </div>
+  </section>
 );
 
 export default HouseFilters;
