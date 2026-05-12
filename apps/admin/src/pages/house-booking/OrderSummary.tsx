@@ -12,18 +12,11 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
     <aside className="lg:col-span-4">
       <div className="sticky top-24 space-y-6">
         <section className="card-surface p-6 shadow-xl border-primary/5">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Store className="h-5 w-5 text-primary" />
-                <h2 className="text-base font-black uppercase tracking-widest text-ink leading-none">Your Cart</h2>
-              </div>
+          <div className="flex items-center gap-3 pb-4 border-b border-line/50 mb-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 border border-indigo-100/50 shadow-sm">
+              <Store className="h-5 w-5" />
             </div>
-            {cart.length > 0 && (
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white shadow-lg shadow-primary/20">
-                {cart.length}
-              </span>
-            )}
+            <h2 className="text-lg font-black text-ink leading-none">Booking Summary</h2>
           </div>
 
           {cart.length === 0 ? (
@@ -35,7 +28,7 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="max-h-[400px] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] overscroll-contain pr-2 custom-scrollbar space-y-2.5">
+              <div className="max-h-[370px] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] overscroll-contain pr-2 custom-scrollbar space-y-2.5">
                 <AnimatePresence>
                   {cart.map(item => (
                     <motion.div
@@ -50,12 +43,13 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
                         <img src={item.image} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt={item.name} />
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black leading-tight text-ink line-clamp-1">{item.name}</p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{item.unique_code}</span>
-                          <div className="h-2.5 w-[1px] bg-line" />
-                          <span className="text-[10px] font-black text-primary">₹{item.price_per_day}</span>
+                      <div className="flex-1 min-w-0 py-0.5">
+                        <p className="text-[12px] font-black leading-tight text-ink line-clamp-2 tracking-tight">{item.name}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600">
+                            {item.unique_code}
+                          </span>
+                          <span className="text-[11px] font-black text-primary tracking-tight">₹{item.price_per_day}</span>
                         </div>
                       </div>
 
@@ -70,24 +64,25 @@ export const OrderSummary = ({ cart, removeFromCart, handleProcessBooking }: Ord
                 </AnimatePresence>
               </div>
 
-              <div className="pt-6 border-t border-line/60">
-                <div className="flex items-center justify-between mb-5 px-1">
+              <div className="pt-4 border-t border-line/60 space-y-4">
+                <div className="rounded-2xl bg-slate-50 p-4 flex items-center justify-between shadow-inner border border-line/30">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted leading-none">Total Gear</span>
-                    <span className="text-sm font-black text-ink mt-1.5">{cart.length} Items</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted leading-none">Total Gear</span>
+                    <span className="text-sm font-black text-ink mt-2">{cart.length} Items</span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted leading-none">Daily Total</span>
-                    <span className="text-xl font-black text-primary mt-1.5 tracking-tight">₹{cart.reduce((sum, item) => sum + (Number(item.price_per_day) || 0), 0)}</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted leading-none">Daily Total</span>
+                    <span className="text-xl font-black text-primary mt-2">₹{cart.reduce((sum, item) => sum + (Number(item.price_per_day) || 0), 0)}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handleProcessBooking}
-                  className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-ink text-white shadow-xl shadow-ink/10 transition-all hover:bg-primary hover:shadow-primary/20 active:scale-[0.98]"
+                  className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
                 >
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">Generate Rental Order</span>
-                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <span className="relative text-[12px] font-black uppercase tracking-[0.15em]">Generate Rental Order</span>
+                  <ChevronRight className="relative h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </button>
               </div>
             </div>
