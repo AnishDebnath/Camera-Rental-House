@@ -78,10 +78,13 @@ const HouseCard = ({ houses }: HouseCardProps) => {
             <PlusCircle className="mr-2 h-4 w-4" />
             Book
           </Link>
-          <button className="flex h-10 items-center justify-center rounded-card border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group">
+          <Link 
+            to={`/houses/${row.id}`}
+            className="flex h-10 items-center justify-center rounded-card border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
+          >
             View
             <ChevronRight className="ml-1.5 h-4 w-4 text-muted transition group-hover:text-white" />
-          </button>
+          </Link>
         </div>
       ),
     },
@@ -148,10 +151,13 @@ const HouseCard = ({ houses }: HouseCardProps) => {
                 <PlusCircle className="h-4 w-4" />
                 Book
               </Link>
-              <button className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-white text-[13px] font-black uppercase tracking-wide text-ink transition-all active:scale-[0.98]">
+              <Link 
+                to={`/houses/${row.id}`}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-white text-[13px] font-black uppercase tracking-wide text-ink transition-all active:scale-[0.98]"
+              >
                 Details
                 <ChevronRight className="h-4 w-4 opacity-60" />
-              </button>
+              </Link>
             </div>
           </article>
         )}

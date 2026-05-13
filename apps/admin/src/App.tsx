@@ -10,6 +10,7 @@ import Rentals from './pages/rentals';
 import RentalHistory from './pages/rentals/History';
 import ReleaseReturn from './pages/release';
 import ProductionHouses from './pages/houses';
+import HouseDetail from './pages/houses/HouseDetail';
 import HouseBooking from './pages/house-booking';
 import Staff from './pages/staff/index';
 import Accounts from './pages/Accounts';
@@ -195,6 +196,14 @@ function App() {
                     element={
                       <ProtectedRoute allowedRoles={['admin', 'staff']}>
                         <ProductionHouses />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/houses/:id"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'staff']}>
+                        <HouseDetail />
                       </ProtectedRoute>
                     }
                   />
