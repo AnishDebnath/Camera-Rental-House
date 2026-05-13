@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 
 import { PartnerSelection } from './PartnerSelection';
+import { DateSelection } from './DateSelection';
 import { EquipmentSelection } from './EquipmentSelection';
 import { OrderSummary } from './OrderSummary';
 
@@ -24,6 +25,8 @@ const HouseBooking = () => {
   const [selectedHouse, setSelectedHouse] = useState<any>(null);
   const [cart, setCart] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // Advanced Filter States
   const [showFilters, setShowFilters] = useState(false);
@@ -152,6 +155,12 @@ const HouseBooking = () => {
           <PartnerSelection 
             selectedHouse={selectedHouse} 
           />
+          <DateSelection
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+          />
           <EquipmentSelection
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -177,7 +186,9 @@ const HouseBooking = () => {
         <OrderSummary 
           cart={cart} 
           removeFromCart={removeFromCart} 
-          handleProcessBooking={handleProcessBooking} 
+          handleProcessBooking={handleProcessBooking}
+          startDate={startDate}
+          endDate={endDate}
         />
       </div>
     </div>
