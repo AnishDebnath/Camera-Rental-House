@@ -278,7 +278,7 @@ const HouseDetail = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[900px] table-fixed">
               <thead>
                 <tr className="bg-slate-50/50">
@@ -316,7 +316,7 @@ const HouseDetail = () => {
                         </div>
                         <div className="w-[25%] px-6 py-5">
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-black leading-none truncate">{rental.mainGear}</span>
+                            <span className="text-sm font-black leading-none truncate">{rental.items[0]?.name}</span>
                             <span className="text-[11px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items Total</span>
                           </div>
                         </div>
@@ -325,11 +325,12 @@ const HouseDetail = () => {
                         </div>
                         <div className="w-[14%] px-6 py-5">
                           <div className="flex justify-center">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm
-                              ${rental.status === 'Returned' ? 'bg-emerald-100 text-emerald-700' :
-                                rental.status === 'Active' ? 'bg-blue-100 text-blue-700' :
-                                  'bg-slate-100 text-slate-600'}
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm border
+                              ${rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                  'bg-slate-50 text-slate-500 border-slate-100'}
                             `}>
+                              <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
                               {rental.status}
                             </span>
                           </div>
@@ -352,18 +353,20 @@ const HouseDetail = () => {
                               <div className="bg-white rounded-xl border border-line/60 shadow-sm overflow-hidden">
                                 <div className="bg-slate-50/50 px-4 py-2 border-b border-line/40 flex items-center justify-between">
                                   <span className="text-[10px] font-black uppercase tracking-widest text-muted">Detailed Rentals</span>
-                                  <span className="text-[10px] font-bold text-primary">{rental.itemsCount} Items</span>
+                                  <span className="text-[10px] font-bold text-primary uppercase">{rental.itemsCount} Items</span>
                                 </div>
                                 <div className="divide-y divide-line/40">
                                   {rental.items?.map((item, idx) => (
-                                    <div key={idx} className="px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/30 transition-colors">
-                                      <div className="flex flex-col">
-                                        <span className="text-sm font-black text-ink leading-none">{item.name}</span>
-                                        <div className="mt-0.5">
+                                    <div key={idx} className="px-4 py-3.5 flex items-center justify-between gap-6 hover:bg-slate-50/30 transition-colors">
+                                      <div className="flex flex-col min-w-0 flex-1">
+                                        <span className="text-sm font-black text-ink leading-tight">{item.name}</span>
+                                        <div className="mt-1">
                                           <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tight">{item.code}</span>
                                         </div>
                                       </div>
-                                      <span className="text-[15px] font-black text-ink tabular-nums">{item.price}</span>
+                                      <div className="w-24 text-right flex-shrink-0">
+                                        <span className="text-[15px] font-black text-ink tabular-nums">{item.price}</span>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -380,104 +383,101 @@ const HouseDetail = () => {
           </div>
 
           {/* Mobile/Tablet Card View */}
-          <div className="md:hidden pb-4">
-            {mockHouseRentals.map((rental) => (
-              <div
-                key={rental.id}
-                className={`mx-4 my-3 p-5 rounded-2xl bg-white border shadow-sm transition-all active:scale-[0.98] cursor-pointer ${expandedOrderId === rental.id ? 'border-primary/30 ring-4 ring-primary/5 shadow-md' : 'border-line/40 hover:shadow-md'}`}
-                onClick={() => setExpandedOrderId(expandedOrderId === rental.id ? null : rental.id)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest shadow-sm
-                        ${rental.status === 'Returned' ? 'bg-emerald-100 text-emerald-700' :
-                          rental.status === 'Active' ? 'bg-blue-100 text-blue-700' :
-                            'bg-slate-100 text-slate-600'}
-                      `}>
-                        {rental.status}
-                      </span>
+          <div className="lg:hidden pb-4 px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {mockHouseRentals.map((rental) => (
+                <div
+                  key={rental.id}
+                  className={`p-5 rounded-2xl bg-white border shadow-sm transition-all active:scale-[0.98] cursor-pointer h-fit ${expandedOrderId === rental.id ? 'border-primary/30 ring-4 ring-primary/5 shadow-md' : 'border-line/40 hover:shadow-md'}`}
+                  onClick={() => setExpandedOrderId(expandedOrderId === rental.id ? null : rental.id)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm border
+                          ${rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                            rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                              'bg-slate-50 text-slate-500 border-slate-100'}
+                        `}>
+                          <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
+                          {rental.status}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 inline-flex flex-col">
+                        <span className="text-[9px] font-black text-muted/60 uppercase tracking-widest mb-0.5">Grand Total</span>
+                        <span className="text-[18px] font-black text-ink tabular-nums leading-none">{rental.amount}</span>
+                      </div>
                     </div>
-                    <div className="mt-1.5 inline-flex flex-col">
-                      <span className="text-[9px] font-black text-muted/60 uppercase tracking-widest mb-0.5">Grand Total</span>
-                      <span className="text-[18px] font-black text-ink tabular-nums leading-none">{rental.amount}</span>
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all ${expandedOrderId === rental.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 border-line text-muted'}`}>
+                      <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${expandedOrderId === rental.id ? 'rotate-90' : ''}`} />
                     </div>
                   </div>
-                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all ${expandedOrderId === rental.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 border-line text-muted'}`}>
-                    <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${expandedOrderId === rental.id ? 'rotate-90' : ''}`} />
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between py-4 border-y border-line/20 mb-4 bg-slate-50/30 -mx-5 px-5">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm border border-line/40">
-                      <Calendar className="h-4 w-4" />
+                  <div className="flex items-center justify-between py-4 border-y border-line/20 mb-4 bg-slate-50/30 -mx-5 px-5">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm border border-line/40">
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Pickup</span>
+                        <span className="text-[13px] font-bold text-ink leading-tight">{rental.pickupDate}</span>
+                      </div>
                     </div>
+                    <div className="h-4 w-px bg-line/40" />
+                    <div className="flex items-center gap-3 text-right">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Return</span>
+                        <span className="text-[13px] font-bold text-ink leading-tight">{rental.returnDate}</span>
+                      </div>
+                      <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-rose-500 shadow-sm border border-line/40">
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Pickup</span>
-                      <span className="text-[13px] font-bold text-ink leading-tight">{rental.pickupDate}</span>
+                      <span className="text-xs font-black text-ink truncate max-w-[220px]">{rental.items[0]?.name}</span>
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-widest mt-0.5">{rental.itemsCount} Items Total</span>
                     </div>
                   </div>
-                  <div className="h-4 w-px bg-line/40" />
-                  <div className="flex items-center gap-3 text-right">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Return</span>
-                      <span className="text-[13px] font-bold text-ink leading-tight">{rental.returnDate}</span>
-                    </div>
-                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-rose-500 shadow-sm border border-line/40">
-                      <Calendar className="h-4 w-4" />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-black text-ink truncate max-w-[220px]">{rental.mainGear}</span>
-                    <span className="text-[10px] font-bold text-muted uppercase tracking-widest mt-0.5">{rental.itemsCount} Items Total</span>
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedOrderId === rental.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pt-4 space-y-2.5">
-                        <div className="flex items-center justify-between px-1 mb-1">
-                          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Detailed Rentals</span>
-                          <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items</span>
-                        </div>
-                        {rental.items?.map((item, idx) => (
-                          <div key={idx} className="group/item relative p-4 rounded-2xl border border-line/40 bg-white shadow-sm hover:border-primary/30 transition-all">
-                            <div className="flex items-center justify-between">
-                              <div className="flex flex-col">
-                                <span className="text-[13px] font-black text-ink leading-tight">{item.name}</span>
-                                <div className="mt-0.5">
-                                  <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tighter">{item.code}</span>
+                  <AnimatePresence>
+                    {expandedOrderId === rental.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-4 space-y-2.5">
+                          <div className="flex items-center justify-between px-1 mb-1">
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Detailed Rentals</span>
+                            <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items</span>
+                          </div>
+                          {rental.items?.map((item, idx) => (
+                            <div key={idx} className="group/item relative p-4 rounded-2xl border border-line/40 bg-white shadow-sm hover:border-primary/30 transition-all">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-[13px] font-black text-ink leading-tight">{item.name}</span>
+                                  <div className="mt-1">
+                                    <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tighter">{item.code}</span>
+                                  </div>
+                                </div>
+                                <div className="w-20 text-right flex-shrink-0 pt-0.5">
+                                  <span className="text-[14px] font-black text-ink tabular-nums">{item.price}</span>
                                 </div>
                               </div>
-                              <span className="text-[14px] font-black text-ink tabular-nums">{item.price}</span>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-
-
-          <div className="p-6 border-t border-line/40 bg-slate-50/30 flex justify-center">
-            <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:underline underline-offset-4 flex items-center gap-2">
-              View Full History Archive
-              <ChevronRight className="h-3 w-3" />
-            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </div>
