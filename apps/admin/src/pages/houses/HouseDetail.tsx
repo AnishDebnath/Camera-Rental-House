@@ -29,43 +29,61 @@ import { mockHouses } from './index';
 const mockHouseRentals = [
   {
     id: 'ORD-7624',
-    date: '10 May 2024',
+    pickupDate: '10 May 2024',
+    returnDate: '12 May 2024',
     amount: '₹45,000',
     status: 'Returned',
-    items: 4,
+    itemsCount: 4,
     mainGear: 'Arri Alexa 35 Package',
+    items: [
+      { name: 'Arri Alexa 35 Body', code: 'CAM-A35-01', price: '₹35,000' },
+      { name: 'Arri Signature Prime 35mm lense with light', code: 'LNS-ASP-01', price: '₹5,000' },
+      { name: 'SmallHD Ultra 7', code: 'MON-SHD-05', price: '₹2,500' },
+      { name: 'Teradek Bolt 6 XT', code: 'WRL-TDK-02', price: '₹2,500' }
+    ]
   },
   {
     id: 'ORD-7581',
-    date: '22 Apr 2024',
+    pickupDate: '22 Apr 2024',
+    returnDate: '24 Apr 2024',
     amount: '₹28,500',
     status: 'Returned',
-    items: 2,
+    itemsCount: 2,
     mainGear: 'Sony Venice 2 Body',
+    items: [
+      { name: 'Sony Venice 2 Body', code: 'CAM-SV2-03', price: '₹25,000' },
+      { name: 'Wooden Camera Cage', code: 'ACC-WDC-01', price: '₹3,500' }
+    ]
   },
   {
     id: 'ORD-7512',
-    date: '05 Apr 2024',
+    pickupDate: '05 Apr 2024',
+    returnDate: '06 Apr 2024',
     amount: '₹12,000',
     status: 'Cancelled',
-    items: 1,
+    itemsCount: 1,
     mainGear: 'RED V-Raptor',
+    items: [
+      { name: 'RED V-Raptor 8K VV', code: 'CAM-RED-04', price: '₹12,000' }
+    ]
   },
   {
     id: 'ORD-7440',
-    date: '18 Mar 2024',
+    pickupDate: '18 Mar 2024',
+    returnDate: '22 Mar 2024',
     amount: '₹62,000',
     status: 'Returned',
-    items: 7,
+    itemsCount: 7,
     mainGear: 'Master Prime Lens Set',
-  },
-  {
-    id: 'ORD-7392',
-    date: '02 Mar 2024',
-    amount: '₹18,500',
-    status: 'Returned',
-    items: 3,
-    mainGear: 'DJI Ronin 2 Stabilizer',
+    items: [
+      { name: 'Master Prime 18mm', code: 'LNS-ZMP-01', price: '₹8,500' },
+      { name: 'Master Prime 25mm', code: 'LNS-ZMP-02', price: '₹8,500' },
+      { name: 'Master Prime 35mm', code: 'LNS-ZMP-03', price: '₹8,500' },
+      { name: 'Master Prime 50mm', code: 'LNS-ZMP-04', price: '₹8,500' },
+      { name: 'Master Prime 75mm', code: 'LNS-ZMP-05', price: '₹8,500' },
+      { name: 'Master Prime 100mm', code: 'LNS-ZMP-06', price: '₹8,500' },
+      { name: 'Lens Case (Hard)', code: 'ACC-CSE-09', price: '₹11,000' }
+    ]
   }
 ];
 
@@ -73,6 +91,7 @@ const HouseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const house = useMemo(() => {
     return mockHouses.find(h => h.id === id);
@@ -235,78 +254,224 @@ const HouseDetail = () => {
 
         {/* Rental History Table */}
         <section className="card-surface p-0 overflow-hidden">
-          <div className="p-5 md:p-6 border-b border-line/50 flex flex-col sm:flex-row sm:items-center justify-between bg-white gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
+          <div className="p-5 md:p-6 border-b border-line/40 flex flex-col sm:flex-row sm:items-center justify-between bg-white gap-5">
+            <div className="flex items-center gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 flex items-center justify-center text-indigo-600 border border-slate-200/60 shadow-sm">
                 <History className="h-5 w-5" />
               </div>
-              <div>
-                <h2 className="text-lg font-black text-ink leading-none">Order History</h2>
-                <p className="text-[10px] font-bold text-muted uppercase mt-1.5">Complete record of rental activities</p>
+              <div className='flex flex-col'>
+                <h2 className="text-lg font-black text-ink tracking-tight">Rental History</h2>
+                <p className="text-[10px] font-bold text-muted uppercase">Complete record of rental activities</p>
               </div>
             </div>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Search className="h-3.5 w-3.5 text-muted group-focus-within:text-primary transition-colors duration-300" />
+              </div>
               <input
                 type="text"
-                placeholder="Search orders..."
-                className="h-9 w-full sm:w-64 rounded-xl border border-line bg-slate-50 pl-9 pr-4 text-xs font-medium outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all"
+                placeholder="Search rentals..."
+                className="h-10 w-full sm:w-72 lg:w-[450px] rounded-xl border border-line bg-slate-50/50 pl-10 pr-4 text-[13px] font-bold text-ink outline-none focus:border-primary/50 focus:bg-white focus:ring-[4px] focus:ring-primary/5 transition-all placeholder:text-muted/40"
               />
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[900px] table-fixed">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted border-b border-line/40">Order ID</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted border-b border-line/40">Date</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted border-b border-line/40">Primary Gear</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted border-b border-line/40 text-right">Amount</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted border-b border-line/40 text-center">Status</th>
-                  <th className="px-6 py-4 border-b border-line/40 w-16"></th>
+                  <th className="w-[12%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted border-b border-line/40">Rental ID</th>
+                  <th className="w-[28%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted border-b border-line/40">Rental Period</th>
+                  <th className="w-[25%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted border-b border-line/40">Items</th>
+                  <th className="w-[15%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted border-b border-line/40 text-right">Amount</th>
+                  <th className="w-[14%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted border-b border-line/40 text-center">Status</th>
+                  <th className="w-[6%] px-6 py-4 border-b border-line/40"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/40">
-                {mockHouseRentals.map((order) => (
-                  <tr key={order.id} className="group hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-xs font-bold text-ink">{order.id}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5 text-muted/60" />
-                        <span className="text-xs font-semibold text-ink">{order.date}</span>
+                {mockHouseRentals.map((rental) => (
+                  <tr key={rental.id} className="group transition-colors border-b border-line/20">
+                    <td colSpan={6} className="p-0">
+                      <div
+                        className={`flex items-center w-full group/row cursor-pointer transition-colors ${expandedOrderId === rental.id ? 'bg-indigo-50/30' : 'hover:bg-slate-50/50'}`}
+                        onClick={() => setExpandedOrderId(expandedOrderId === rental.id ? null : rental.id)}
+                      >
+                        <div className="w-[12%] px-6 py-5">
+                          <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
+                        </div>
+                        <div className="w-[28%] px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-tighter mb-0.5">Pickup</span>
+                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{rental.pickupDate}</span>
+                            </div>
+                            <div className="h-px w-4 bg-line/60 mt-4" />
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-tighter mb-0.5">Return</span>
+                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{rental.returnDate}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-[25%] px-6 py-5">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-black leading-none truncate">{rental.mainGear}</span>
+                            <span className="text-[11px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items Total</span>
+                          </div>
+                        </div>
+                        <div className="w-[15%] px-6 py-5 text-right">
+                          <span className="text-[15px] font-black text-ink tabular-nums">{rental.amount}</span>
+                        </div>
+                        <div className="w-[14%] px-6 py-5">
+                          <div className="flex justify-center">
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm
+                              ${rental.status === 'Returned' ? 'bg-emerald-100 text-emerald-700' :
+                                rental.status === 'Active' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-slate-100 text-slate-600'}
+                            `}>
+                              {rental.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-[6%] px-6 py-5 text-center">
+                          <ChevronRight className={`h-5 w-5 text-muted transition-transform duration-300 ${expandedOrderId === rental.id ? 'rotate-90 text-primary' : ''}`} />
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-ink leading-none">{order.mainGear}</p>
-                        <p className="text-[10px] font-medium text-muted">+{order.items - 1} other items</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-black text-ink">{order.amount}</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${order.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                        order.status === 'Cancelled' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                          'bg-sky-50 text-sky-600 border border-sky-100'
-                        }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted hover:bg-white hover:text-primary hover:shadow-sm transition-all border border-transparent hover:border-line/40">
-                        <ExternalLink className="h-4 w-4" />
-                      </button>
+
+                      <AnimatePresence mode="wait">
+                        {expandedOrderId === rental.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                            className="overflow-hidden bg-slate-50/40 border-t border-line/30"
+                          >
+                            <div className="px-6 py-5">
+                              <div className="bg-white rounded-xl border border-line/60 shadow-sm overflow-hidden">
+                                <div className="bg-slate-50/50 px-4 py-2 border-b border-line/40 flex items-center justify-between">
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-muted">Detailed Rentals</span>
+                                  <span className="text-[10px] font-bold text-primary">{rental.itemsCount} Items</span>
+                                </div>
+                                <div className="divide-y divide-line/40">
+                                  {rental.items?.map((item, idx) => (
+                                    <div key={idx} className="px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/30 transition-colors">
+                                      <div className="flex flex-col">
+                                        <span className="text-sm font-black text-ink leading-none">{item.name}</span>
+                                        <div className="mt-0.5">
+                                          <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tight">{item.code}</span>
+                                        </div>
+                                      </div>
+                                      <span className="text-[15px] font-black text-ink tabular-nums">{item.price}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {/* Mobile/Tablet Card View */}
+          <div className="md:hidden pb-4">
+            {mockHouseRentals.map((rental) => (
+              <div
+                key={rental.id}
+                className={`mx-4 my-3 p-5 rounded-2xl bg-white border shadow-sm transition-all active:scale-[0.98] cursor-pointer ${expandedOrderId === rental.id ? 'border-primary/30 ring-4 ring-primary/5 shadow-md' : 'border-line/40 hover:shadow-md'}`}
+                onClick={() => setExpandedOrderId(expandedOrderId === rental.id ? null : rental.id)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest shadow-sm
+                        ${rental.status === 'Returned' ? 'bg-emerald-100 text-emerald-700' :
+                          rental.status === 'Active' ? 'bg-blue-100 text-blue-700' :
+                            'bg-slate-100 text-slate-600'}
+                      `}>
+                        {rental.status}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 inline-flex flex-col">
+                      <span className="text-[9px] font-black text-muted/60 uppercase tracking-widest mb-0.5">Grand Total</span>
+                      <span className="text-[18px] font-black text-ink tabular-nums leading-none">{rental.amount}</span>
+                    </div>
+                  </div>
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all ${expandedOrderId === rental.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 border-line text-muted'}`}>
+                    <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${expandedOrderId === rental.id ? 'rotate-90' : ''}`} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-4 border-y border-line/20 mb-4 bg-slate-50/30 -mx-5 px-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm border border-line/40">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Pickup</span>
+                      <span className="text-[13px] font-bold text-ink leading-tight">{rental.pickupDate}</span>
+                    </div>
+                  </div>
+                  <div className="h-4 w-px bg-line/40" />
+                  <div className="flex items-center gap-3 text-right">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Return</span>
+                      <span className="text-[13px] font-bold text-ink leading-tight">{rental.returnDate}</span>
+                    </div>
+                    <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-rose-500 shadow-sm border border-line/40">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-ink truncate max-w-[220px]">{rental.mainGear}</span>
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-widest mt-0.5">{rental.itemsCount} Items Total</span>
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedOrderId === rental.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pt-4 space-y-2.5">
+                        <div className="flex items-center justify-between px-1 mb-1">
+                          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Detailed Rentals</span>
+                          <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items</span>
+                        </div>
+                        {rental.items?.map((item, idx) => (
+                          <div key={idx} className="group/item relative p-4 rounded-2xl border border-line/40 bg-white shadow-sm hover:border-primary/30 transition-all">
+                            <div className="flex items-center justify-between">
+                              <div className="flex flex-col">
+                                <span className="text-[13px] font-black text-ink leading-tight">{item.name}</span>
+                                <div className="mt-0.5">
+                                  <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tighter">{item.code}</span>
+                                </div>
+                              </div>
+                              <span className="text-[14px] font-black text-ink tabular-nums">{item.price}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+
 
           <div className="p-6 border-t border-line/40 bg-slate-50/30 flex justify-center">
             <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:underline underline-offset-4 flex items-center gap-2">
