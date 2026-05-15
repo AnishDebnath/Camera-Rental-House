@@ -1,6 +1,6 @@
 import { Loader2, Pencil, Trash2, QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DataTable from '../../components/DataTable';
+import DataTable from '../../components/ui/DataTable';
 import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
 
 type ProductCardProps = {

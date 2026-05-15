@@ -1,7 +1,7 @@
 import { ImagePlus, Loader2, Plus, Save, X } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import PrintLabel from '../../components/PrintLabel';
+import PrintLabel from '../../components/ui/PrintLabel';
 import CustomSelect from '../../components/ui/CustomSelect';
 import axiosInstance from '../../api/axiosInstance';
 import { CATEGORIES_LIST as categoryOptions, BRANDS_LIST as brandOptions } from '../../../../../packages/data/categories';

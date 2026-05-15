@@ -1,6 +1,6 @@
 import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, Loader2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DataTable from '../../components/DataTable';
+import DataTable from '../../components/ui/DataTable';
 
 type HouseCardProps = {
   houses: any[];

@@ -1,5 +1,5 @@
 import { Phone, User, Clock } from 'lucide-react';
-import DataTable from '../../components/DataTable';
+import DataTable from '../../components/ui/DataTable';
 import StaffCard from './StaffCard';
 
 interface StaffListProps {

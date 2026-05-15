@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import StatsCard from '../components/StatsCard';
+import StatsCard from '../components/ui/StatsCard';
 import { adminRentals, adminStats, adminUsers } from '../data/mockAdmin';
 import { getAuthRole } from '../../../../packages/auth';
 

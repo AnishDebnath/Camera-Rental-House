@@ -1,6 +1,6 @@
 import { ShieldCheck, UserRoundCheck, Eye, Ban, Loader2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DataTable from '../../components/DataTable';
+import DataTable from '../../components/ui/DataTable';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', {

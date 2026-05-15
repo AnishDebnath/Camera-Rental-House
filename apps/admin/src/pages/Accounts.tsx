@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Wallet, TrendingUp, Receipt, ArrowUpRight, ArrowDownRight, ArrowUpCircle, ArrowDownCircle, History, CalendarDays, Calendar } from 'lucide-react';
-import DataTable from '../components/DataTable';
+import DataTable from '../components/ui/DataTable';
 import clsx from 'clsx';
 
 const mockTransactions = [
