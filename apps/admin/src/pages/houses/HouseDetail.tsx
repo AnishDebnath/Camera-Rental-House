@@ -159,46 +159,63 @@ const HouseDetail = () => {
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-surface p-5 sm:p-6"
+          className="bg-white rounded-[1rem] border border-line shadow-sm relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 sm:gap-5">
-            {/* House Icon/Avatar */}
-            <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0">
-              <div className="flex h-full w-full items-center justify-center rounded-[1.25rem] sm:rounded-[1.75rem] bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 shadow-inner border border-indigo-100/50">
-                <Building2 className="h-8 w-8 sm:h-9 sm:w-9" />
+          {/* Decorative background gradient */}
+          <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:gap-6">
+            <div className="flex items-center gap-4 sm:contents">
+              {/* Premium House Icon/Avatar */}
+              <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 group">
+                <div className="relative flex h-full w-full items-center justify-center rounded-lg sm:rounded-lg bg-white text-indigo-600 shadow-md border border-indigo-100/80 transition-transform duration-500 group-hover:scale-105">
+                  <Building2 className="h-8 w-8 sm:h-9 sm:w-9" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 text-white shadow-sm">
+                  <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 text-white shadow-sm">
-                <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+
+              {/* Mobile Title Row */}
+              <div className="flex-1 min-w-0 sm:hidden">
+                <h1 className="text-xl font-black tracking-tight text-ink truncate leading-tight">
+                  {house.name}
+                </h1>
+                <div className="mt-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Verified
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* House Details */}
-            <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
-              <div className="flex items-center">
-                <h1 className="text-lg sm:text-2xl font-black tracking-tight text-ink truncate leading-tight">
-                  {house.name}
-                </h1>
+            <div className="flex-1 min-w-0 space-y-3 sm:space-y-1.5">
+              <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink truncate leading-tight">
+                    {house.name}
+                  </h1>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Verified
+                  </span>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 sm:gap-x-5 pt-0.5">
-                <div className="flex items-center gap-2 text-ink/80">
-                  <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center text-indigo-500 border border-slate-100">
-                    <UserRound className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <div className="flex flex-wrap items-center gap-3 pt-0.5">
+                {/* Premium Contact Pills */}
+                <div className="group flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md cursor-default">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-100">
+                    <UserRound className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-[11px] sm:text-sm font-bold leading-none">{house.ownerName}</p>
-                  </div>
+                  <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80">{house.ownerName}</span>
                 </div>
 
-                <div className="h-7 w-px bg-line/60 hidden sm:block" />
-
-                <div className="flex items-center gap-2 text-ink/80">
-                  <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center text-sky-500 border border-slate-100">
-                    <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <div className="group flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm transition-all hover:border-sky-200 hover:shadow-md cursor-default">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 transition-colors group-hover:bg-sky-100">
+                    <Phone className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-[11px] sm:text-sm font-bold leading-none">{house.phone}</p>
-                  </div>
+                  <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80 tabular-nums">{house.phone}</span>
                 </div>
               </div>
             </div>
@@ -212,7 +229,7 @@ const HouseDetail = () => {
           className="grid grid-cols-1 sm:grid-cols-3 gap-5"
         >
           {/* Lifetime Business */}
-          <div className="card-surface p-6 bg-slate-900 border-none shadow-xl shadow-slate-200">
+          <div className="p-6 bg-slate-900 rounded-[1.5rem] border border-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400">
                 <TrendingUp className="h-5 w-5" />
@@ -224,7 +241,7 @@ const HouseDetail = () => {
           </div>
 
           {/* This Month Business */}
-          <div className="card-surface p-6 bg-white shadow-sm border border-line">
+          <div className="p-6 bg-white shadow-sm border border-line rounded-[1.5rem]">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
                 <Calendar className="h-5 w-5" />
@@ -236,7 +253,7 @@ const HouseDetail = () => {
           </div>
 
           {/* Pending Dues */}
-          <div className="card-surface p-6 bg-white shadow-sm border border-line">
+          <div className="p-6 bg-white shadow-sm border border-line rounded-[1.5rem]">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 border border-rose-100">
                 <Wallet className="h-5 w-5" />
