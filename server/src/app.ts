@@ -8,6 +8,7 @@ import productsRoutes from './routes/products.js';
 import rentalsRoutes from './routes/rentals.js';
 import adminRoutes from './routes/admin.js';
 import manageRoutes from './routes/manage.js';
+import houseRoutes from './routes/houses.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import roleMiddleware from './middleware/roleMiddleware.js';
 
@@ -88,6 +89,7 @@ app.use('/api/products', productsRoutes);
 app.use('/api/rentals', authMiddleware, roleMiddleware(['user', 'admin', 'manager', 'staff']), rentalsRoutes);
 app.use('/api/manage', authMiddleware, roleMiddleware(['admin', 'manager', 'staff']), manageRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
+app.use('/api/admin/houses', authMiddleware, houseRoutes);
 
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('SERVER ERROR:', error);

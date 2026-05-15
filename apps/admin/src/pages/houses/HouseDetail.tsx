@@ -1,29 +1,24 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Building2,
   UserRound,
   Phone,
-  Mail,
-  MapPin,
-  TrendingUp,
-  Wallet,
-  Clock,
-  ChevronRight,
-  ArrowLeft,
-  Calendar,
-  Package,
-  Receipt,
-  FileText,
   ShieldCheck,
   Loader2,
   ExternalLink,
   History,
   Search,
-  PlusCircle
+  PlusCircle,
+  TrendingUp,
+  Wallet,
+  Calendar,
+  ArrowLeft,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockHouses } from './index';
+import { useToast } from '@camera-rental-house/ui';
+import axiosInstance from '../../api/axiosInstance';
 
 // Mock rental history for houses
 const mockHouseRentals = [
@@ -91,16 +86,43 @@ const HouseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [house, setHouse] = useState<any>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
-
-  const house = useMemo(() => {
-    return mockHouses.find(h => h.id === id);
-  }, [id]);
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [isUpdatingCreds, setIsUpdatingCreds] = useState(false);
+  const { addToast } = useToast();
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchHouse = async () => {
+      try {
+        const response = await axiosInstance.get(`/admin/houses/${id}`);
+        setHouse(response.data);
+        if (response.data.users?.email) {
+          setCredentials(prev => ({ ...prev, username: response.data.users.email }));
+        }
+      } catch (error) {
+        addToast({ title: 'Error', message: 'Failed to fetch house details.', tone: 'error' });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchHouse();
+  }, [id, addToast]);
+
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!credentials.password) return;
+    setIsUpdatingCreds(true);
+    try {
+      await axiosInstance.post(`/admin/houses/${id}/credentials`, credentials);
+      addToast({ title: 'Success', message: 'Credentials updated successfully.', tone: 'success' });
+      setCredentials(prev => ({ ...prev, password: '' }));
+    } catch (error) {
+      addToast({ title: 'Error', message: 'Failed to update credentials.', tone: 'error' });
+    } finally {
+      setIsUpdatingCreds(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -208,7 +230,7 @@ const HouseDetail = () => {
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                     <UserRound className="h-3.5 w-3.5" />
                   </div>
-                  <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80">{house.ownerName}</span>
+                  <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80">{house.owner_name || house.ownerName}</span>
                 </div>
 
                 <div className="flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm cursor-default">
@@ -222,48 +244,144 @@ const HouseDetail = () => {
           </div>
         </motion.section>
 
-        {/* Quick Financial Stats */}
+
+
+        {/* Credentials Section */}
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-5"
+          className="bg-white rounded-[1rem] border border-line shadow-sm overflow-hidden"
         >
-          {/* Lifetime Business */}
-          <div className="p-6 bg-slate-900 rounded-[1.5rem] border border-slate-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400">
+          <div className="p-5 border-b border-line bg-slate-50/50">
+            <h3 className="text-sm font-black text-ink uppercase tracking-wider flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Owner Credentials
+            </h3>
+            <p className="text-[10px] font-bold text-muted uppercase mt-0.5">Manage client-side login for this house</p>
+          </div>
+          <div className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-1.5">User ID (Member ID)</label>
+                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 rounded-xl border border-line/60">
+                    <UserRound className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-black text-ink">{house.users?.member_id || 'NOT LINKED'}</span>
+                  </div>
+                </div>
+                <form onSubmit={handleUpdateCredentials} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-1.5">Username / Email</label>
+                    <input
+                      type="text"
+                      value={credentials.username}
+                      onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                      placeholder="Enter login email"
+                      className="w-full px-4 py-3 bg-white rounded-xl border border-line outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-1.5">New Password</label>
+                    <input
+                      type="password"
+                      value={credentials.password}
+                      onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                      placeholder="Set new password"
+                      className="w-full px-4 py-3 bg-white rounded-xl border border-line outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-bold"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingCreds || !credentials.password}
+                    className="primary-button w-full h-12 flex items-center justify-center gap-2"
+                  >
+                    {isUpdatingCreds ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Update Credentials'}
+                  </button>
+                </form>
+              </div>
+              <div className="bg-indigo-50/30 rounded-2xl p-5 border border-indigo-100/50 flex flex-col justify-center">
+                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100 mb-3">
+                  <ExternalLink className="h-5 w-5" />
+                </div>
+                <h4 className="text-sm font-black text-ink leading-tight mb-2">Client Portal Access</h4>
+                <p className="text-[11px] font-bold text-muted leading-relaxed">
+                  The house owner can use these credentials to login at the client-side portal.
+                  They will be able to see their active rentals, history, and financial statements.
+                </p>
+                <div className="mt-4 pt-4 border-t border-indigo-100/50 flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Account is Active
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Lifetime Card - Dark */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-slate-900 rounded-[1.5rem] p-6 shadow-lg border border-white/5 relative overflow-hidden group"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
                 <TrendingUp className="h-5 w-5" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Business</span>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Business</span>
             </div>
-            <p className="text-xs font-bold text-slate-400 mb-1">Lifetime</p>
-            <p className="text-2xl font-black text-white tracking-tight">{house.totalBusiness}</p>
-          </div>
+            <div>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1">Lifetime</p>
+              <h3 className="text-2xl font-black text-white tabular-nums tracking-tight">
+                ₹{Number(house.revenue || 0).toLocaleString()}
+              </h3>
+            </div>
+          </motion.div>
 
-          {/* This Month Business */}
-          <div className="p-6 bg-white shadow-sm border border-line rounded-[1.5rem]">
-            <div className="flex items-center justify-between mb-4">
+          {/* Monthly Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-line relative overflow-hidden group"
+          >
+            <div className="flex items-center justify-between mb-6">
               <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
                 <Calendar className="h-5 w-5" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted">Monthly</span>
+              <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">Monthly</span>
             </div>
-            <p className="text-xs font-bold text-muted mb-1">This Month</p>
-            <p className="text-2xl font-black text-ink tracking-tight">₹1,25,000</p>
-          </div>
+            <div>
+              <p className="text-[11px] font-black text-muted uppercase tracking-wider mb-1">This Month</p>
+              <h3 className="text-2xl font-black text-ink tabular-nums tracking-tight">
+                ₹{Number(house.monthly_revenue || 0).toLocaleString()}
+              </h3>
+            </div>
+          </motion.div>
 
-          {/* Pending Dues */}
-          <div className="p-6 bg-white shadow-sm border border-line rounded-[1.5rem]">
-            <div className="flex items-center justify-between mb-4">
+          {/* Pending Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-line relative overflow-hidden group"
+          >
+            <div className="flex items-center justify-between mb-6">
               <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 border border-rose-100">
                 <Wallet className="h-5 w-5" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted">Pending</span>
+              <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">Pending</span>
             </div>
-            <p className="text-xs font-bold text-muted mb-1">Pending Due</p>
-            <p className={`text-2xl font-black tracking-tight ${house.dueAmount === '₹0' ? 'text-muted/20' : 'text-rose-600'}`}>{house.dueAmount}</p>
-          </div>
-        </motion.section>
+            <div>
+              <p className="text-[11px] font-black text-muted uppercase tracking-wider mb-1">Pending Due</p>
+              <h3 className="text-2xl font-black text-ink/20 tabular-nums tracking-tight">
+                ₹{Number(house.pending_due || 0).toLocaleString()}
+              </h3>
+            </div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Order History Table Section */}

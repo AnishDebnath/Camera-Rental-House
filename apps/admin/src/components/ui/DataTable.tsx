@@ -1,6 +1,6 @@
 const DataTable = ({ columns, rows, renderMobileCard }) => (
   <>
-    <div className="hidden overflow-hidden rounded-card border border-white/70 bg-white/[0.86] shadow-card backdrop-blur-xl lg:block">
+    <div className="hidden overflow-hidden rounded-[1rem] border border-line bg-white shadow-sm lg:block">
       <table className="min-w-full divide-y divide-line">
         <thead className="bg-white/70">
           <tr>

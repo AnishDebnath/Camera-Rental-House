@@ -4,9 +4,25 @@ import DataTable from '../../components/ui/DataTable';
 
 type HouseCardProps = {
   houses: any[];
+  isLoading?: boolean;
 };
 
-const HouseCard = ({ houses }: HouseCardProps) => {
+const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
+  if (isLoading) {
+    return (
+      <div className="card-surface p-6 space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex items-center gap-4 animate-pulse">
+            <div className="h-10 w-10 rounded-xl bg-slate-100" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-48 bg-slate-100 rounded" />
+              <div className="h-3 w-32 bg-slate-100 rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   const columns = [
     {
       key: 'house',
@@ -19,7 +35,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
           </div>
           <div>
             <p className="font-bold text-ink leading-tight whitespace-nowrap">{row.name}</p>
-            <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase">{row.ownerName}</p>
+            <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase">{row.owner_name || row.ownerName}</p>
           </div>
         </div>
       ),

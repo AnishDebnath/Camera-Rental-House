@@ -81,29 +81,42 @@ router.get('/dashboard', roleMiddleware(['admin']), async (_req: Request, res: R
     const monthStart = new Date();
     monthStart.setDate(1);
 
-    const [productsCount, usersCount, pendingUsersCount, activeTodayCount, activeRentals, recentRentals, revenueRentals] =
-      await Promise.all([
+    let productsCount: any = { count: 0 };
+    let usersCount: any = { count: 0 };
+    let pendingUsersCount: any = { count: 0 };
+    let activeTodayCount: any = { count: 0 };
+    let activeRentals: any = { data: [] };
+    let recentRentals: any = { data: [] };
+    let revenueRentals: any = { data: [] };
+
+    try {
+      const results = await Promise.allSettled([
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('users').select('id', { count: 'exact', head: true }),
         supabase.from('users').select('id', { count: 'exact', head: true }).not('is_verified', 'is', true).not('is_blocked', 'is', true),
-        supabase
-          .from('rentals')
-          .select('id', { count: 'exact', head: true })
-          .eq('pickup_date', today),
-        supabase
-          .from('rentals')
-          .select('products')
-          .eq('status', 'active'),
-        supabase
-          .from('rentals')
-          .select('*, users(full_name)')
-          .order('created_at', { ascending: false })
-          .limit(10),
-        supabase
-          .from('rentals')
-          .select('created_at, products, total_amount')
-          .gte('created_at', monthStart.toISOString()),
+        supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('pickup_date', today),
+        supabase.from('rentals').select('products').eq('status', 'released'),
+        supabase.from('rentals').select('*, users(full_name)').order('created_at', { ascending: false }).limit(10),
+        supabase.from('rentals').select('created_at, products, total_amount').gte('created_at', monthStart.toISOString())
       ]);
+
+      if (results[0].status === 'fulfilled') productsCount = results[0].value;
+      if (results[1].status === 'fulfilled') usersCount = results[1].value;
+      if (results[2].status === 'fulfilled') pendingUsersCount = results[2].value;
+      if (results[3].status === 'fulfilled') activeTodayCount = results[3].value;
+      if (results[4].status === 'fulfilled') activeRentals = results[4].value;
+      
+      if (results[5].status === 'fulfilled' && !results[5].value.error) {
+        recentRentals = results[5].value;
+      } else {
+        const simple = await supabase.from('rentals').select('*').order('created_at', { ascending: false }).limit(10);
+        recentRentals = simple;
+      }
+
+      if (results[6].status === 'fulfilled') revenueRentals = results[6].value;
+    } catch (err) {
+      console.error('Dashboard fetch partial failure:', err);
+    }
 
     const activeItemsCount = (activeRentals.data || []).reduce((sum: number, rental: any) => {
       return sum + (rental.products || []).reduce((itemSum: number, p: any) => itemSum + (p.qty || 1), 0);
@@ -141,6 +154,7 @@ router.get('/users', roleMiddleware(['admin']), async (req: Request, res: Respon
     let query: any = supabase
       .from('users')
       .select('*, rentals(id, products, total_amount)')
+      .eq('is_house_owner', false)
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -152,11 +166,56 @@ router.get('/users', roleMiddleware(['admin']), async (req: Request, res: Respon
     const { data, error } = await query;
 
     if (error) {
-      throw error;
+      console.warn('User join failed, trying fallback query:', error.message);
+      
+      const runFallback = async (useHouseFilter: boolean) => {
+        let fallbackQuery: any = supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (useHouseFilter) fallbackQuery = fallbackQuery.eq('is_house_owner', false);
+        if (search) {
+          fallbackQuery = fallbackQuery.or(`full_name.ilike.%${search}%,phone.ilike.%${search}%,email.ilike.%${search}%`);
+        }
+        return await fallbackQuery;
+      };
+
+      let { data: userData, error: userError } = await runFallback(true);
+      
+      // If fails because of is_house_owner column, try without it
+      if (userError && userError.message.includes('is_house_owner')) {
+        console.warn('is_house_owner column missing, skipping filter.');
+        const retry = await runFallback(false);
+        userData = retry.data;
+        userError = retry.error;
+      }
+
+      if (userError) throw userError;
+
+      // Fetch all rentals to map them manually
+      const { data: rentalsData } = await supabase.from('rentals').select('user_id, products, total_amount, status');
+      
+      const users = (userData || []).map((user: any) => {
+        const userRentals = (rentalsData || []).filter((r: any) => r.user_id === user.id && r.status === 'returned');
+        const totalSpent = userRentals.reduce((sum: number, r: any) => {
+          if (r.total_amount) return sum + Number(r.total_amount);
+          return sum + (r.products || []).reduce((iSum: number, p: any) => iSum + (Number(p.qty || 1) * Number(p.price || 0)), 0);
+        }, 0);
+
+        return {
+          ...user,
+          totalRentals: userRentals.length,
+          totalSpent
+        };
+      });
+
+      return res.json(users);
     }
 
     const users = (data || []).map((user: any) => {
-      const totalSpent = (user.rentals || []).reduce((sum: number, rental: any) => {
+      const completedRentals = (user.rentals || []).filter((r: any) => r.status === 'returned');
+      const totalSpent = completedRentals.reduce((sum: number, rental: any) => {
         if (rental.total_amount) return sum + Number(rental.total_amount);
         return (
           sum +
@@ -168,7 +227,7 @@ router.get('/users', roleMiddleware(['admin']), async (req: Request, res: Respon
 
       return {
         ...user,
-        totalRentals: user.rentals?.length || 0,
+        totalRentals: completedRentals.length,
         totalSpent,
       };
     });
@@ -188,14 +247,38 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
       .maybeSingle();
 
     if (error) {
-      throw error;
+      console.warn('Single user join failed, falling back:', error.message);
+      const [userRes, rentalsRes] = await Promise.all([
+        supabase.from('users').select('*').eq('id', req.params.id).maybeSingle(),
+        supabase.from('rentals').select('*').eq('user_id', req.params.id).order('pickup_date', { ascending: false })
+      ]);
+      
+      if (userRes.error) throw userRes.error;
+      if (!userRes.data) return res.status(404).json({ message: 'User not found.' });
+      
+      const rentals = rentalsRes.data || [];
+      const completedRentals = rentals.filter((r: any) => r.status === 'returned');
+      const totalSpent = completedRentals.reduce((sum: number, r: any) => {
+        if (r.total_amount) return sum + Number(r.total_amount);
+        return sum + (r.products || []).reduce((iSum: number, p: any) => iSum + (Number(p.qty || 1) * Number(p.price || 0)), 0);
+      }, 0);
+
+      return res.json({
+        ...userRes.data,
+        rentals,
+        totalRentals: completedRentals.length,
+        totalSpent,
+        aadhaar_signed_url: userRes.data.aadhaar_doc_url,
+        voter_signed_url: userRes.data.voter_doc_url,
+      });
     }
 
     if (!data) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const totalSpent = (data.rentals || []).reduce((sum: number, rental: any) => {
+    const completedRentals = (data.rentals || []).filter((r: any) => r.status === 'returned');
+    const totalSpent = completedRentals.reduce((sum: number, rental: any) => {
       if (rental.total_amount) return sum + Number(rental.total_amount);
       return (
         sum +
@@ -207,7 +290,7 @@ router.get('/users/:id', roleMiddleware(['admin']), async (req: Request, res: Re
 
     return res.json({
       ...data,
-      totalRentals: data.rentals?.length || 0,
+      totalRentals: completedRentals.length,
       totalSpent,
       aadhaar_signed_url: data.aadhaar_doc_url,
       voter_signed_url: data.voter_doc_url,

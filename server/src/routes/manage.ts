@@ -94,7 +94,7 @@ router.post('/bulk-release', async (req: Request, res: Response) => {
       .from('rentals')
       .update({
         products: updatedProducts,
-        status: allReleased ? 'active' : rental.status,
+        status: allReleased ? 'released' : rental.status,
         released_at: now,
         released_by_staff_name: staffName,
         handover_proof_url: proofUrl || rental.handover_proof_url
@@ -176,7 +176,7 @@ router.get('/counts', async (req: Request, res: Response) => {
     const filterDate = req.query.date as string;
 
     let upcomingQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'confirmed');
-    let returningQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['active', 'released']);
+    let returningQuery = supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['released']);
 
     if (filterDate) {
       upcomingQuery = upcomingQuery
@@ -189,8 +189,8 @@ router.get('/counts', async (req: Request, res: Response) => {
 
     const [productsCount, activeRentalsCount, activeRentalsData, upcomingCount, returningCount, pendingUsersCount] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['active', 'released']),
-      supabase.from('rentals').select('products').in('status', ['active', 'released']),
+      supabase.from('rentals').select('id', { count: 'exact', head: true }).in('status', ['released']),
+      supabase.from('rentals').select('products').in('status', ['released']),
       upcomingQuery,
       returningQuery,
       supabase.from('users').select('id', { count: 'exact', head: true }).not('is_verified', 'is', true).not('is_blocked', 'is', true),

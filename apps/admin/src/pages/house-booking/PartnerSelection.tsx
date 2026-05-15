@@ -1,4 +1,4 @@
-import { Building2, ShieldCheck, Loader2, UserRound, Phone } from 'lucide-react';
+import { Building2, ShieldCheck, Loader2, UserRound, Phone, Hash } from 'lucide-react';
 
 interface PartnerSelectionProps {
   selectedHouse: any;
@@ -30,12 +30,18 @@ export const PartnerSelection = ({ selectedHouse }: PartnerSelectionProps) => {
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-bold text-ink/80">
                 <div className="flex items-center gap-1.5">
                   <UserRound className="h-3.5 w-3.5 text-indigo-500/60" />
-                  <span>{selectedHouse.ownerName}</span>
+                  <span>{selectedHouse.owner_name || selectedHouse.ownerName}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Phone className="h-3.5 w-3.5 text-sky-500/60" />
                   <span>{selectedHouse.phone}</span>
                 </div>
+                {selectedHouse.users?.member_id && (
+                  <div className="flex items-center gap-1.5">
+                    <Hash className="h-3.5 w-3.5 text-primary/60" />
+                    <span className="font-mono text-primary font-black">{selectedHouse.users.member_id}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

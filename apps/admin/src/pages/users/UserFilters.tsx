@@ -15,7 +15,7 @@ const STATUS_OPTIONS = [
 ];
 
 const UserFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: UserFiltersProps) => (
-  <section className="card-surface p-4 flex flex-col md:flex-row items-stretch gap-4">
+  <section className="bg-white rounded-[1rem] border border-line shadow-sm p-4 flex flex-col md:flex-row items-stretch gap-4">
     <label className="input-shell flex-1 min-h-11 md:max-w-lg">
       <Search className="h-4 w-4 text-muted" />
       <input

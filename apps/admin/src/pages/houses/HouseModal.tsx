@@ -3,11 +3,12 @@ import { Building2, User, Phone, X, Loader2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useLenis } from '@camera-rental-house/ui';
+import axiosInstance from '../../api/axiosInstance';
 
 type HouseModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (house: any) => void;
 };
 
 type HouseFormState = {
@@ -48,7 +49,7 @@ export default function HouseModal({ isOpen, onClose, onSuccess }: HouseModalPro
     e.preventDefault();
 
     if (!form.name.trim() || !form.ownerName.trim() || !form.phone.trim()) {
-      setError('All fields are required.');
+      setError('Name, Owner Name, and Phone are required.');
       return;
     }
 
@@ -56,9 +57,8 @@ export default function HouseModal({ isOpen, onClose, onSuccess }: HouseModalPro
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      onSuccess();
+      const { data } = await axiosInstance.post('/admin/houses', form);
+      onSuccess(data);
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register production house.');

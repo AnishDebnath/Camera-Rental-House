@@ -8,7 +8,7 @@ const enrichProduct = async (product: any) => {
     const { data, error } = await supabase
       .from('rentals')
       .select('products')
-      .in('status', ['confirmed', 'active']);
+      .in('status', ['confirmed', 'released']);
 
     if (error) {
       console.warn('Error fetching rentals for enrichment:', error);

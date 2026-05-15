@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { adminProducts } from '../../data/mockAdmin';
 import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../packages/data/categories';
-import { mockHouses } from '../houses/index';
 import { useToast } from '@camera-rental-house/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
@@ -68,8 +67,9 @@ const HouseBooking = () => {
 
   useEffect(() => {
     if (houseId) {
-      const house = mockHouses.find(h => h.id === houseId);
-      if (house) setSelectedHouse(house);
+      axiosInstance.get(`/admin/houses/${houseId}`)
+        .then(({ data }) => setSelectedHouse(data))
+        .catch(() => {/* house not found, stay null */});
     }
   }, [houseId]);
 

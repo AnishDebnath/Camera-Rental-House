@@ -16,7 +16,7 @@ const UserStats = ({ totalUsers, verifiedUsers, pendingUsers }: UserStatsProps) 
       {stats.map((item) => (
         <article
           key={item.label}
-          className={`flex flex-col items-center justify-between rounded-card border border-white/70 p-3 text-center shadow-card sm:p-4 ${item.tone}`}
+          className={`flex flex-col items-center justify-between rounded-[1rem] border border-line p-3 text-center shadow-sm sm:p-4 ${item.tone}`}
         >
           <p className="flex min-h-[24px] items-center text-[9px] font-bold uppercase tracking-wider text-tertiary sm:text-xs">
             {item.label}
