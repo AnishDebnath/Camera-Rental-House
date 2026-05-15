@@ -165,8 +165,8 @@ const HouseDetail = () => {
           <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:gap-6">
             <div className="flex items-center gap-4 sm:contents">
               {/* Premium House Icon/Avatar */}
-              <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 group">
-                <div className="relative flex h-full w-full items-center justify-center rounded-lg sm:rounded-lg bg-white text-indigo-600 shadow-md border border-indigo-100/80 transition-transform duration-500 group-hover:scale-105">
+              <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0">
+                <div className="relative flex h-full w-full items-center justify-center rounded-lg sm:rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 shadow-inner border border-indigo-100/50">
                   <Building2 className="h-8 w-8 sm:h-9 sm:w-9" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 text-white shadow-sm">
@@ -181,7 +181,7 @@ const HouseDetail = () => {
                 </h1>
                 <div className="mt-1.5">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <ShieldCheck className="h-3 w-3" />
                     Verified
                   </span>
                 </div>
@@ -192,11 +192,11 @@ const HouseDetail = () => {
             <div className="flex-1 min-w-0 space-y-3 sm:space-y-1.5">
               <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink truncate leading-tight">
+                  <h1 className="text-xl sm:text-2xl font-black tracking-tight text-ink truncate leading-tight">
                     {house.name}
                   </h1>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <ShieldCheck className="h-3 w-3" />
                     Verified
                   </span>
                 </div>
@@ -204,15 +204,15 @@ const HouseDetail = () => {
 
               <div className="flex flex-wrap items-center gap-3 pt-0.5">
                 {/* Premium Contact Pills */}
-                <div className="group flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md cursor-default">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-100">
+                <div className="flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm cursor-default">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                     <UserRound className="h-3.5 w-3.5" />
                   </div>
                   <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80">{house.ownerName}</span>
                 </div>
 
-                <div className="group flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm transition-all hover:border-sky-200 hover:shadow-md cursor-default">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 transition-colors group-hover:bg-sky-100">
+                <div className="flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm cursor-default">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
                     <Phone className="h-3.5 w-3.5" />
                   </div>
                   <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80 tabular-nums">{house.phone}</span>

@@ -27,7 +27,7 @@ export const PartnerSelection = ({ selectedHouse }: PartnerSelectionProps) => {
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-xl font-black text-ink tracking-tight">{selectedHouse.name}</h3>
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-bold text-muted">
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-bold text-ink/80">
                 <div className="flex items-center gap-1.5">
                   <UserRound className="h-3.5 w-3.5 text-indigo-500/60" />
                   <span>{selectedHouse.ownerName}</span>

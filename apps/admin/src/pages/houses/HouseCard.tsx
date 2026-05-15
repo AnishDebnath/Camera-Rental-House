@@ -32,12 +32,12 @@ const HouseCard = ({ houses }: HouseCardProps) => {
       ),
     },
     {
-      key: 'totalBusiness',
-      label: 'Total Business',
+      key: 'thisMonthBusiness',
+      label: 'This Month',
       render: (row: any) => (
         <div className="flex items-center gap-2">
           <TrendingUp className="h-3.5 w-3.5 text-success" />
-          <span className="font-bold text-ink">{row.totalBusiness}</span>
+          <span className="font-bold text-ink">{row.thisMonthBusiness || '₹1,25,000'}</span>
         </div>
       ),
     },
@@ -78,7 +78,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
             <PlusCircle className="mr-2 h-4 w-4" />
             Book
           </Link>
-          <Link 
+          <Link
             to={`/houses/${row.id}`}
             className="flex h-10 items-center justify-center rounded-card border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
           >
@@ -128,10 +128,10 @@ const HouseCard = ({ houses }: HouseCardProps) => {
 
             <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 border border-line/60">
               <div className="flex flex-col gap-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted">Total Business</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted">This Month</p>
                 <div className="flex items-center gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-success" />
-                  <p className="text-sm font-black text-ink">{row.totalBusiness}</p>
+                  <p className="text-sm font-black text-ink">{row.thisMonthBusiness || '₹1,25,000'}</p>
                 </div>
               </div>
               <div className="flex flex-col gap-1 text-right items-end">
@@ -151,7 +151,7 @@ const HouseCard = ({ houses }: HouseCardProps) => {
                 <PlusCircle className="h-4 w-4" />
                 Book
               </Link>
-              <Link 
+              <Link
                 to={`/houses/${row.id}`}
                 className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-white text-[13px] font-black uppercase tracking-wide text-ink transition-all active:scale-[0.98]"
               >
