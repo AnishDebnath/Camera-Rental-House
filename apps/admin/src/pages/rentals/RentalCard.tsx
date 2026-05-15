@@ -8,6 +8,7 @@ type Product = {
   price: number;
   qty: number;
   image: string;
+  unique_code?: string;
 };
 
 type Rental = {
@@ -248,8 +249,11 @@ const RentalItem = ({ rental, activeTab, index, total }: { rental: Rental; activ
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line bg-slate-50">
                         <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-ink">{product.name}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-ink truncate leading-tight">{product.name}</p>
+                        <p className="mt-1 inline-block w-max rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold tracking-widest text-slate-500 uppercase">
+                          {product.unique_code || 'N/A'}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">

@@ -67,6 +67,7 @@ const Rentals = () => {
           price: p.price || 0,
           qty: p.qty || 1,
           image: p.image || '',
+          unique_code: p.unique_code || '',
         })),
         handover_proof: rental.handover_proof_url,
       };

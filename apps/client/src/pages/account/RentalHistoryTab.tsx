@@ -58,12 +58,12 @@ const RentalHistoryTab = ({ pastRentals }: RentalHistoryTabProps) => {
                 >
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white shadow-sm backdrop-blur-md">
-                      <span className={`h-1.5 w-1.5 rounded-full ${['failed', 'cancelled'].includes(rental.status) ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
+                      <span className={`h-1.5 w-1.5 rounded-full ${['failed', 'cancelled', 'lost', 'closed'].includes(rental.status) ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`} />
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Order {rental.rental_no || `#${rental.id.slice(0, 8)}`}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${['failed', 'cancelled'].includes(rental.status) ? 'text-red-500' : 'text-success'}`}>
-                        {rental.status === 'failed' ? 'Failed' : rental.status === 'cancelled' ? 'Cancelled' : 'Completed'}
+                      <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${['failed', 'cancelled', 'lost', 'closed'].includes(rental.status) ? 'text-red-500' : 'text-success'}`}>
+                        {['failed', 'lost', 'closed'].includes(rental.status) ? 'Failed' : rental.status === 'cancelled' ? 'Cancelled' : 'Completed'}
                       </span>
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/50 border border-white">
                         <ChevronDown className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />

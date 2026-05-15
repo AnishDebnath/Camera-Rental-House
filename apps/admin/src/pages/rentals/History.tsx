@@ -42,6 +42,7 @@ const RentalHistory = () => {
         price: p.price || 0,
         qty: p.qty || 1,
         image: p.image || '',
+        unique_code: p.unique_code || '',
       })),
       received_at: rental.received_at,
       created_at: rental.created_at
