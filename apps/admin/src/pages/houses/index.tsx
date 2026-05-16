@@ -38,7 +38,13 @@ const ProductionHouses = () => {
   const filteredHouses = useMemo(() => {
     let result = houses;
     if (statusFilter !== 'all') {
-      result = result.filter(h => h.status?.toLowerCase() === statusFilter);
+      if (statusFilter === 'active') {
+        result = result.filter(h => h.hasActiveRental);
+      } else if (statusFilter === 'no-rental') {
+        result = result.filter(h => !h.hasActiveRental);
+      } else {
+        result = result.filter(h => h.status?.toLowerCase() === statusFilter);
+      }
     }
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();

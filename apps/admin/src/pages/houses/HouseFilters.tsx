@@ -10,8 +10,8 @@ type HouseFiltersProps = {
 
 const STATUS_OPTIONS = [
   { label: 'All Houses', value: 'all', icon: <Building2 className="h-3.5 w-3.5" /> },
-  { label: 'Active', value: 'active', icon: <CheckCircle className="h-3.5 w-3.5 text-success" /> },
-  { label: 'Pending', value: 'pending', icon: <Clock className="h-3.5 w-3.5 text-warning" /> },
+  { label: 'Active', value: 'active', icon: <div className="h-2 w-2 rounded-full bg-emerald-500 mr-1" /> },
+  { label: 'No Rental', value: 'no-rental', icon: <div className="h-2 w-2 rounded-full bg-slate-400 mr-1" /> },
 ];
 
 const HouseFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: HouseFiltersProps) => (
