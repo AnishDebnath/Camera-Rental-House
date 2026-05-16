@@ -158,7 +158,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// 3. Get single house detail
+// 3. Get single house detail by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { data: house, error } = await supabase
@@ -180,6 +180,52 @@ router.get('/:id', async (req: Request, res: Response) => {
     const currentYear = now.getFullYear();
 
     const houseRentals = rentals || [];
+    const thisMonthTotal = houseRentals
+      .filter(r => {
+        const d = new Date(r.created_at);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear && r.status !== 'cancelled';
+      })
+      .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+    const totalDue = houseRentals
+      .filter(r => r.status !== 'cancelled')
+      .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+    return res.json({
+      ...house,
+      thisMonthBusiness: `₹${thisMonthTotal.toLocaleString()}`,
+      dueAmount: `₹${totalDue.toLocaleString()}`
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch house detail.' });
+  }
+});
+
+// 3.5 Get single house detail by Slug
+router.get('/slug/:slug', async (req: Request, res: Response) => {
+  try {
+    const slug = req.params.slug as string;
+    const name = slug.replace(/-/g, ' ');
+
+    const { data: house, error } = await supabase
+      .from('production_houses')
+      .select('*, users(*)')
+      .ilike('name', name)
+      .single();
+
+    if (error || !house) return res.status(404).json({ message: 'House not found.' });
+
+    // Fetch rentals for stats
+    const { data: rentals } = await supabase
+      .from('rentals')
+      .select('total_amount, created_at, status')
+      .eq('user_id', house.user_id);
+
+    const houseRentals = rentals || [];
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
     const thisMonthTotal = houseRentals
       .filter(r => {
         const d = new Date(r.created_at);

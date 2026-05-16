@@ -1,0 +1,110 @@
+import { useNavigate, Link } from 'react-router-dom';
+import { Building2, ShieldCheck, UserRound, Phone, Hash, ArrowLeft, PlusCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+type DetailHeaderProps = {
+  house: any;
+};
+
+const DetailHeader = ({ house }: DetailHeaderProps) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="space-y-5">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between gap-4 mb-2">
+        <button
+          onClick={() => navigate('/houses')}
+          className="group flex items-center gap-2 text-sm font-bold text-muted transition-colors hover:text-primary"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white shadow-sm transition-all group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary">
+            <ArrowLeft className="h-4 w-4" />
+          </div>
+          Back to Houses
+        </button>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to={`/houses/booking?houseId=${house.id}`}
+            className="primary-button group text-[11px] font-black uppercase tracking-widest px-6"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            New Booking
+          </Link>
+        </div>
+      </div>
+
+      {/* Profile Header */}
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-[1rem] border border-line shadow-sm relative overflow-hidden"
+      >
+        <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:gap-6">
+          <div className="flex items-center gap-4 sm:contents">
+            <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0">
+              <div className="relative flex h-full w-full items-center justify-center rounded-lg sm:rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 shadow-inner border border-indigo-100/50">
+                <Building2 className="h-8 w-8 sm:h-9 sm:w-9" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 text-white shadow-sm">
+                <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0 sm:hidden">
+              <h1 className="text-xl font-black tracking-tight text-ink truncate leading-tight">
+                {house.name}
+              </h1>
+              <div className="mt-1.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
+                  <ShieldCheck className="h-3 w-3" />
+                  Verified
+                </span>
+                <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
+                  <Hash className="h-3 w-3" />
+                  {house.house_id}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-3 sm:space-y-1.5">
+            <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-ink truncate leading-tight">
+                  {house.name}
+                </h1>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
+                  <ShieldCheck className="h-3 w-3" />
+                  Verified
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
+                  <Hash className="h-3 w-3" />
+                  {house.house_id}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-0.5">
+              <div className="flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm cursor-default">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                  <UserRound className="h-3.5 w-3.5" />
+                </div>
+                <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80">{house.owner_name}</span>
+              </div>
+
+              <div className="flex items-center rounded-xl bg-white border border-line/60 p-1 shadow-sm cursor-default">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                  <Phone className="h-3.5 w-3.5" />
+                </div>
+                <span className="px-3 text-[11px] sm:text-[13px] font-bold text-ink/80 tabular-nums">{house.phone}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+    </div>
+  );
+};
+
+export default DetailHeader;

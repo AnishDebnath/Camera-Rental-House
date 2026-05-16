@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { adminProducts } from '../../data/mockAdmin';
-import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../packages/data/categories';
+import { ArrowLeft, CheckCircle2, Loader2, Building2 } from 'lucide-react';
+import { BRAND_ICONS, CATEGORY_ICONS, CATEGORIES, BRANDS } from '../../../../../../packages/data/categories';
 import { useToast } from '@camera-rental-house/ui';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import axiosInstance from '../../api/axiosInstance';
+import { useNavigate, useParams } from 'react-router-dom';
+import axiosInstance from '../../../api/axiosInstance';
 
 import { PartnerSelection } from './PartnerSelection';
 import { DateSelection } from './DateSelection';
@@ -18,10 +17,26 @@ const Clock = ({ className }: { className?: string }) => (
 const HouseBooking = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const houseId = searchParams.get('houseId');
+  const { slug } = useParams();
 
   const [selectedHouse, setSelectedHouse] = useState<any>(null);
+  const [isLoadingHouse, setIsLoadingHouse] = useState(false);
+
+  useEffect(() => {
+    const fetchHouse = async () => {
+      if (!slug) return;
+      setIsLoadingHouse(true);
+      try {
+        const res = await axiosInstance.get(`/admin/houses/slug/${slug}`);
+        setSelectedHouse(res.data);
+      } catch (error) {
+        addToast({ title: 'Error', message: 'Failed to fetch house details.', tone: 'error' });
+      } finally {
+        setIsLoadingHouse(false);
+      }
+    };
+    fetchHouse();
+  }, [slug, addToast]);
   const [cart, setCart] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -65,13 +80,7 @@ const HouseBooking = () => {
     }
   ];
 
-  useEffect(() => {
-    if (houseId) {
-      axiosInstance.get(`/admin/houses/${houseId}`)
-        .then(({ data }) => setSelectedHouse(data))
-        .catch(() => {/* house not found, stay null */});
-    }
-  }, [houseId]);
+
 
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
@@ -135,6 +144,14 @@ const HouseBooking = () => {
     navigate('/rentals');
   };
 
+  if (isLoadingHouse) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/30" />
+      </div>
+    );
+  }
+
   return (
     <div className="admin-shell space-y-6 py-6">
       {/* Header */}
@@ -149,48 +166,58 @@ const HouseBooking = () => {
         Back to Houses
       </button>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left Column */}
-        <div className="lg:col-span-8 space-y-6">
-          <PartnerSelection 
-            selectedHouse={selectedHouse} 
-          />
-          <DateSelection
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
-          />
-          <EquipmentSelection
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            brandFilter={brandFilter}
-            setBrandFilter={setBrandFilter}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            categoryOptions={categoryOptions}
-            brandOptions={brandOptions}
-            statusOptions={statusOptions}
-            filteredProducts={filteredProducts}
+      {!selectedHouse ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="h-20 w-20 rounded-[2.5rem] bg-slate-50 flex items-center justify-center text-slate-300 mb-6">
+            <Building2 className="h-10 w-10" />
+          </div>
+          <h2 className="text-xl font-black text-ink">House Not Found</h2>
+          <p className="mt-2 text-sm font-medium text-muted">The production house could not be identified.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Left Column */}
+          <div className="lg:col-span-8 space-y-6">
+            <PartnerSelection
+              selectedHouse={selectedHouse}
+            />
+            <DateSelection
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+            />
+            <EquipmentSelection
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              brandFilter={brandFilter}
+              setBrandFilter={setBrandFilter}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              categoryOptions={categoryOptions}
+              brandOptions={brandOptions}
+              statusOptions={statusOptions}
+              filteredProducts={filteredProducts}
+              cart={cart}
+              addToCart={addToCart}
+              removeFromCart={removeFromCart}
+            />
+          </div>
+
+          {/* Right Column: Order Summary */}
+          <OrderSummary
             cart={cart}
-            addToCart={addToCart}
             removeFromCart={removeFromCart}
+            handleProcessBooking={handleProcessBooking}
+            startDate={startDate}
+            endDate={endDate}
           />
         </div>
-
-        {/* Right Column: Order Summary */}
-        <OrderSummary 
-          cart={cart} 
-          removeFromCart={removeFromCart} 
-          handleProcessBooking={handleProcessBooking}
-          startDate={startDate}
-          endDate={endDate}
-        />
-      </div>
+      )}
     </div>
   );
 };

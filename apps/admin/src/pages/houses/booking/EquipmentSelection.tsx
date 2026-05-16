@@ -1,5 +1,5 @@
 import { Package, Filter } from 'lucide-react';
-import ProductInventoryFilters from '../../components/ui/ProductInventoryFilters';
+import ProductInventoryFilters from '../../../components/ui/ProductInventoryFilters';
 import { BookingProductCard } from './BookingProductCard';
 
 interface EquipmentSelectionProps {

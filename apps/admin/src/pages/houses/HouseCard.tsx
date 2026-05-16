@@ -2,6 +2,8 @@ import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, L
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/ui/DataTable';
 
+const slugify = (text: string) => text.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+
 type HouseCardProps = {
   houses: any[];
   isLoading?: boolean;
@@ -108,14 +110,14 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
       render: (row: any) => (
         <div className="flex items-center gap-2">
           <Link
-            to={`/house-booking?houseId=${row.id}`}
+            to={`/houses/${slugify(row.name)}/booking`}
             className="flex h-10 items-center justify-center rounded-card border border-emerald-500/20 bg-emerald-500/5 px-4 text-xs font-bold text-emerald-600 transition hover:bg-emerald-500 hover:text-white hover:border-emerald-500"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             Book
           </Link>
           <Link
-            to={`/houses/${row.id}`}
+            to={`/houses/${slugify(row.name)}`}
             className="flex h-10 items-center justify-center rounded-card border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-sky-500 hover:text-white hover:border-sky-500 group"
           >
             View

@@ -1,5 +1,5 @@
 import { Package, Plus, Check } from 'lucide-react';
-import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
+import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../../packages/data/categories';
 
 interface BookingProductCardProps {
   product: any;
@@ -66,11 +66,10 @@ export const BookingProductCard = ({
         <button
           onClick={() => isInCart ? removeFromCart(product.id) : addToCart(product)}
           disabled={product.available_quantity === 0 && !isInCart}
-          className={`group/btn flex h-8 px-3 items-center gap-1.5 rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 ${
-            isInCart 
-              ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+          className={`group/btn flex h-8 px-3 items-center gap-1.5 rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 ${isInCart
+              ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
               : 'bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105'
-          } text-[10px] font-black uppercase tracking-widest`}
+            } text-[10px] font-black uppercase tracking-widest`}
         >
           {isInCart ? (
             <Check className="h-3.5 w-3.5" />
