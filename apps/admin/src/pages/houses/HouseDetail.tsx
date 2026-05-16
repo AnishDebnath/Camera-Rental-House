@@ -14,7 +14,8 @@ import {
   Wallet,
   Calendar,
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
+  Hash
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@camera-rental-house/ui';
@@ -206,6 +207,10 @@ const HouseDetail = () => {
                     <ShieldCheck className="h-3 w-3" />
                     Verified
                   </span>
+                  <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
+                    <Hash className="h-3 w-3" />
+                    {house.house_id}
+                  </span>
                 </div>
               </div>
             </div>
@@ -220,6 +225,10 @@ const HouseDetail = () => {
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
                     <ShieldCheck className="h-3 w-3" />
                     Verified
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
+                    <Hash className="h-3 w-3" />
+                    {house.house_id}
                   </span>
                 </div>
               </div>

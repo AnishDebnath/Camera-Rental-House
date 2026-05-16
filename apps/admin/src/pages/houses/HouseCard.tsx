@@ -1,4 +1,4 @@
-import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, Loader2, Phone } from 'lucide-react';
+import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, Loader2, Phone, Hash } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/ui/DataTable';
 
@@ -23,6 +23,20 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
       </div>
     );
   }
+
+  if (!isLoading && houses.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-slate-50/50 py-24 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white shadow-card border border-line/60 mb-6">
+          <Building2 className="h-10 w-10 text-muted/20" />
+        </div>
+        <h3 className="text-xl font-black text-ink">No Houses Found</h3>
+        <p className="mx-auto mt-2 max-w-xs text-sm font-medium text-muted leading-relaxed">
+          There are no production houses registered in the system yet. Start by adding your first partner.
+        </p>
+      </div>
+    );
+  }
   const columns = [
     {
       key: 'house',
@@ -35,7 +49,13 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
           </div>
           <div>
             <p className="font-bold text-ink leading-tight whitespace-nowrap">{row.name}</p>
-            <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase">{row.owner_name || row.ownerName}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase">{row.owner_name || row.ownerName}</p>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 rounded">
+                <Hash className="h-2.5 w-2.5" />
+                {row.house_id}
+              </span>
+            </div>
           </div>
         </div>
       ),
@@ -128,7 +148,11 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
                 <h3 className="text-base font-black text-ink truncate tracking-tight">{row.name}</h3>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                    {row.ownerName}
+                    {row.owner_name || row.ownerName}
+                  </span>
+                  <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[9px] font-black tracking-widest text-indigo-600">
+                    <Hash className="h-2.5 w-2.5 mr-0.5" />
+                    {row.house_id}
                   </span>
                   <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black tracking-widest ${row.status === 'Active' ? 'bg-success/10 text-emerald-700' : 'bg-warning/10 text-amber-600'
                     }`}>

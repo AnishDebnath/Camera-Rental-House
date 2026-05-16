@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import supabase from '../db/supabase.js';
 import generateMemberId from '../utils/memberIdGenerator.js';
+import generateHouseId from '../utils/houseIdGenerator.js';
 import generateQrBase64 from '../utils/qrGenerator.js';
 
 const router = express.Router();
@@ -76,18 +77,19 @@ router.get('/', async (_req: Request, res: Response) => {
 // 2. Create new production house
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, ownerName, phone } = req.body;
+    const { name, ownerName, phone, email, address } = req.body;
 
     if (!name || !ownerName || !phone) {
       return res.status(400).json({ message: 'Name, Owner Name, and Phone are required.' });
     }
 
-    // 1. Create a User record for this house (generates a linked User ID)
+    // 1. Generate IDs and QR
     const userId = crypto.randomUUID();
     const memberId = await generateMemberId();
+    const houseId = await generateHouseId();
     const userQrBase64 = await generateQrBase64({ memberId });
 
-    // Placeholder password hash (unusable until set via /credentials)
+    // Generate a placeholder password hash (unloggable until credentials are set via /credentials)
     const placeholderHash = await bcrypt.hash(crypto.randomUUID(), 12);
 
     const { data: user, error: userError } = await supabase
@@ -97,7 +99,7 @@ router.post('/', async (req: Request, res: Response) => {
         member_id: memberId,
         full_name: ownerName,
         phone: phone.replace(/\D/g, ''),
-        email: null,
+        email: email ? email.toLowerCase() : null,
         password_hash: placeholderHash,
         is_house_owner: true,
         user_qr_base64: userQrBase64,
@@ -113,8 +115,10 @@ router.post('/', async (req: Request, res: Response) => {
       .from('production_houses')
       .insert({
         name,
+        house_id: houseId,
         owner_name: ownerName,
         phone: phone.replace(/\D/g, ''),
+        address,
         user_id: userId,
         status: 'Active'
       })

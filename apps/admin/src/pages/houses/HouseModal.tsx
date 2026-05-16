@@ -53,6 +53,11 @@ export default function HouseModal({ isOpen, onClose, onSuccess }: HouseModalPro
       return;
     }
 
+    if (form.phone.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
@@ -144,9 +149,15 @@ export default function HouseModal({ isOpen, onClose, onSuccess }: HouseModalPro
                     <input
                       required
                       type="tel"
+                      maxLength={10}
                       value={form.phone}
-                      onChange={(e) => setForm(c => ({ ...c, phone: e.target.value }))}
-                      placeholder="+91 98765 43210"
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 10) {
+                          setForm(c => ({ ...c, phone: val }));
+                        }
+                      }}
+                      placeholder="Enter 10-digit number"
                       className="w-full border-0 bg-transparent p-0 text-base font-medium focus:ring-0"
                     />
                   </div>

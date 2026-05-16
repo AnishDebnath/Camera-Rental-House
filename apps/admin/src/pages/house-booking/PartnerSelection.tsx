@@ -38,8 +38,14 @@ export const PartnerSelection = ({ selectedHouse }: PartnerSelectionProps) => {
                 </div>
                 {selectedHouse.users?.member_id && (
                   <div className="flex items-center gap-1.5">
-                    <Hash className="h-3.5 w-3.5 text-primary/60" />
+                    <UserRound className="h-3.5 w-3.5 text-primary/60" />
                     <span className="font-mono text-primary font-black">{selectedHouse.users.member_id}</span>
+                  </div>
+                )}
+                {selectedHouse.house_id && (
+                  <div className="flex items-center gap-1.5">
+                    <Hash className="h-3.5 w-3.5 text-indigo-500/60" />
+                    <span className="font-mono text-indigo-600 font-black">{selectedHouse.house_id}</span>
                   </div>
                 )}
               </div>
