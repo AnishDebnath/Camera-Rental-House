@@ -110,9 +110,8 @@ router.post('/', async (req: Request, res: Response) => {
 
     // 1. Generate IDs and QR
     const userId = crypto.randomUUID();
-    const memberId = await generateMemberId();
     const houseId = await generateHouseId();
-    const userQrBase64 = await generateQrBase64({ memberId });
+    const userQrBase64 = await generateQrBase64({ memberId: houseId });
 
     // Generate a placeholder password hash (unloggable until credentials are set via /credentials)
     const placeholderHash = await bcrypt.hash(crypto.randomUUID(), 12);
@@ -121,7 +120,7 @@ router.post('/', async (req: Request, res: Response) => {
       .from('users')
       .insert({
         id: userId,
-        member_id: memberId,
+        member_id: houseId,
         full_name: ownerName,
         phone: phone.replace(/\D/g, ''),
         email: email ? email.toLowerCase() : null,

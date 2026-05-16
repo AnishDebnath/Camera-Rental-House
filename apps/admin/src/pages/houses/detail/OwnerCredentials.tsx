@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, UserRound, ExternalLink, Loader2 } from 'lucide-react';
+import { ShieldCheck, UserRound, ExternalLink, Loader2, Hash } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 type OwnerCredentialsProps = {
@@ -28,10 +28,9 @@ const OwnerCredentials = ({ house, credentials, setCredentials, isUpdating, onUp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-1.5">User ID (Member ID)</label>
-              <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 rounded-xl border border-line/60">
-                <UserRound className="h-4 w-4 text-primary" />
-                <span className="text-sm font-black text-ink">{house.users?.member_id || 'NOT LINKED'}</span>
+              <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-1.5">House ID</label>
+              <div className="flex items-center px-4 py-3 bg-slate-50 rounded-xl border border-line/60">
+                <span className="text-sm font-black text-ink">{house.house_id}</span>
               </div>
             </div>
             <form onSubmit={onUpdate} className="space-y-4">

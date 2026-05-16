@@ -25,7 +25,7 @@ const DetailHeader = ({ house }: DetailHeaderProps) => {
 
         <div className="flex items-center gap-3">
           <Link
-            to={`/houses/booking?houseId=${house.id}`}
+            to={`/houses/${house.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '')}/booking`}
             className="primary-button group text-[11px] font-black uppercase tracking-widest px-6"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -60,10 +60,6 @@ const DetailHeader = ({ house }: DetailHeaderProps) => {
                   <ShieldCheck className="h-3 w-3" />
                   Verified
                 </span>
-                <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
-                  <Hash className="h-3 w-3" />
-                  {house.house_id}
-                </span>
               </div>
             </div>
           </div>
@@ -77,10 +73,6 @@ const DetailHeader = ({ house }: DetailHeaderProps) => {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
                   <ShieldCheck className="h-3 w-3" />
                   Verified
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-100/50">
-                  <Hash className="h-3 w-3" />
-                  {house.house_id}
                 </span>
               </div>
             </div>
