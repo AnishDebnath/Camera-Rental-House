@@ -21,67 +21,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@camera-rental-house/ui';
 import axiosInstance from '../../api/axiosInstance';
 
-// Mock rental history for houses
-const mockHouseRentals = [
-  {
-    id: 'ORD-7624',
-    pickupDate: '10 May 2024',
-    returnDate: '12 May 2024',
-    amount: '₹45,000',
-    status: 'Returned',
-    itemsCount: 4,
-    mainGear: 'Arri Alexa 35 Package',
-    items: [
-      { name: 'Arri Alexa 35 Body', code: 'CAM-A35-01', price: '₹35,000' },
-      { name: 'Arri Signature Prime 35mm lense with light', code: 'LNS-ASP-01', price: '₹5,000' },
-      { name: 'SmallHD Ultra 7', code: 'MON-SHD-05', price: '₹2,500' },
-      { name: 'Teradek Bolt 6 XT', code: 'WRL-TDK-02', price: '₹2,500' }
-    ]
-  },
-  {
-    id: 'ORD-7581',
-    pickupDate: '22 Apr 2024',
-    returnDate: '24 Apr 2024',
-    amount: '₹28,500',
-    status: 'Returned',
-    itemsCount: 2,
-    mainGear: 'Sony Venice 2 Body',
-    items: [
-      { name: 'Sony Venice 2 Body', code: 'CAM-SV2-03', price: '₹25,000' },
-      { name: 'Wooden Camera Cage', code: 'ACC-WDC-01', price: '₹3,500' }
-    ]
-  },
-  {
-    id: 'ORD-7512',
-    pickupDate: '05 Apr 2024',
-    returnDate: '06 Apr 2024',
-    amount: '₹12,000',
-    status: 'Cancelled',
-    itemsCount: 1,
-    mainGear: 'RED V-Raptor',
-    items: [
-      { name: 'RED V-Raptor 8K VV', code: 'CAM-RED-04', price: '₹12,000' }
-    ]
-  },
-  {
-    id: 'ORD-7440',
-    pickupDate: '18 Mar 2024',
-    returnDate: '22 Mar 2024',
-    amount: '₹62,000',
-    status: 'Returned',
-    itemsCount: 7,
-    mainGear: 'Master Prime Lens Set',
-    items: [
-      { name: 'Master Prime 18mm', code: 'LNS-ZMP-01', price: '₹8,500' },
-      { name: 'Master Prime 25mm', code: 'LNS-ZMP-02', price: '₹8,500' },
-      { name: 'Master Prime 35mm', code: 'LNS-ZMP-03', price: '₹8,500' },
-      { name: 'Master Prime 50mm', code: 'LNS-ZMP-04', price: '₹8,500' },
-      { name: 'Master Prime 75mm', code: 'LNS-ZMP-05', price: '₹8,500' },
-      { name: 'Master Prime 100mm', code: 'LNS-ZMP-06', price: '₹8,500' },
-      { name: 'Lens Case (Hard)', code: 'ACC-CSE-09', price: '₹11,000' }
-    ]
-  }
-];
+// Real rental history will be fetched from API
+
 
 const HouseDetail = () => {
   const { id } = useParams();
@@ -93,13 +34,21 @@ const HouseDetail = () => {
   const [isUpdatingCreds, setIsUpdatingCreds] = useState(false);
   const { addToast } = useToast();
 
+  const [houseRentals, setHouseRentals] = useState<any[]>([]);
+
   useEffect(() => {
-    const fetchHouse = async () => {
+    const fetchHouseData = async () => {
       try {
-        const response = await axiosInstance.get(`/admin/houses/${id}`);
-        setHouse(response.data);
-        if (response.data.users?.email) {
-          setCredentials(prev => ({ ...prev, username: response.data.users.email }));
+        const [detailRes, rentalsRes] = await Promise.all([
+          axiosInstance.get(`/admin/houses/${id}`),
+          axiosInstance.get(`/admin/rentals/house/${id}`)
+        ]);
+        
+        setHouse(detailRes.data);
+        setHouseRentals(rentalsRes.data || []);
+
+        if (detailRes.data.users?.email) {
+          setCredentials(prev => ({ ...prev, username: detailRes.data.users.email }));
         }
       } catch (error) {
         addToast({ title: 'Error', message: 'Failed to fetch house details.', tone: 'error' });
@@ -107,7 +56,7 @@ const HouseDetail = () => {
         setIsLoading(false);
       }
     };
-    if (id) fetchHouse();
+    if (id) fetchHouseData();
   }, [id, addToast]);
 
   const handleUpdateCredentials = async (e: React.FormEvent) => {
@@ -344,7 +293,7 @@ const HouseDetail = () => {
             <div>
               <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1">Lifetime</p>
               <h3 className="text-2xl font-black text-white tabular-nums tracking-tight">
-                ₹{Number(house.revenue || 0).toLocaleString()}
+                {house.dueAmount || '₹0'}
               </h3>
             </div>
           </motion.div>
@@ -365,7 +314,7 @@ const HouseDetail = () => {
             <div>
               <p className="text-[11px] font-black text-muted uppercase tracking-wider mb-1">This Month</p>
               <h3 className="text-2xl font-black text-ink tabular-nums tracking-tight">
-                ₹{Number(house.monthly_revenue || 0).toLocaleString()}
+                {house.thisMonthBusiness || '₹0'}
               </h3>
             </div>
           </motion.div>
@@ -385,8 +334,8 @@ const HouseDetail = () => {
             </div>
             <div>
               <p className="text-[11px] font-black text-muted uppercase tracking-wider mb-1">Pending Due</p>
-              <h3 className="text-2xl font-black text-ink/20 tabular-nums tracking-tight">
-                ₹{Number(house.pending_due || 0).toLocaleString()}
+              <h3 className="text-2xl font-black text-ink tabular-nums tracking-tight">
+                {house.dueAmount || '₹0'}
               </h3>
             </div>
           </motion.div>
@@ -435,7 +384,7 @@ const HouseDetail = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/40">
-                {mockHouseRentals.map((rental) => (
+                {houseRentals.map((rental) => (
                   <tr key={rental.id} className="group transition-colors border-b border-line/20">
                     <td colSpan={6} className="p-0">
                       <div
@@ -443,38 +392,38 @@ const HouseDetail = () => {
                         onClick={() => setExpandedOrderId(expandedOrderId === rental.id ? null : rental.id)}
                       >
                         <div className="w-[12%] px-6 py-5">
-                          <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
+                          <span className="text-sm font-black tracking-tight text-ink uppercase">{rental.rental_no || rental.id.slice(0, 8)}</span>
                         </div>
                         <div className="w-[28%] px-6 py-5">
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col">
                               <span className="text-[9px] font-black text-muted uppercase tracking-tighter mb-0.5">Pickup</span>
-                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{rental.pickupDate}</span>
+                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{new Date(rental.pickup_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                             </div>
                             <div className="h-px w-4 bg-line/60 mt-4" />
                             <div className="flex flex-col">
                               <span className="text-[9px] font-black text-muted uppercase tracking-tighter mb-0.5">Return</span>
-                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{rental.returnDate}</span>
+                              <span className="text-sm font-bold text-ink/80 whitespace-nowrap">{new Date(rental.event_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                             </div>
                           </div>
                         </div>
                         <div className="w-[25%] px-6 py-5">
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-black leading-none truncate">{rental.items[0]?.name}</span>
-                            <span className="text-[11px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items Total</span>
+                            <span className="text-sm font-black leading-none truncate">{rental.products?.[0]?.name || 'N/A'}</span>
+                            <span className="text-[11px] font-bold text-muted uppercase tracking-widest">{rental.products?.length || 0} Items Total</span>
                           </div>
                         </div>
                         <div className="w-[15%] px-6 py-5 text-right">
-                          <span className="text-[15px] font-black text-ink tabular-nums">{rental.amount}</span>
+                          <span className="text-[15px] font-black text-ink tabular-nums">₹{Number(rental.total_amount || 0).toLocaleString()}</span>
                         </div>
                         <div className="w-[14%] px-6 py-5">
                           <div className="flex justify-center">
                             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm border
-                              ${rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                              ${rental.status === 'returned' || rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                rental.status === 'confirmed' || rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                   'bg-slate-50 text-slate-500 border-slate-100'}
                             `}>
-                              <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
+                              <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'returned' || rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'confirmed' || rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
                               {rental.status}
                             </span>
                           </div>
@@ -497,19 +446,19 @@ const HouseDetail = () => {
                               <div className="bg-white rounded-xl border border-line/60 shadow-sm overflow-hidden">
                                 <div className="bg-slate-50/50 px-4 py-2 border-b border-line/40 flex items-center justify-between">
                                   <span className="text-[10px] font-black uppercase tracking-widest text-muted">Detailed Rentals</span>
-                                  <span className="text-[10px] font-bold text-primary uppercase">{rental.itemsCount} Items</span>
+                                  <span className="text-[10px] font-bold text-primary uppercase">{rental.products?.length || 0} Items</span>
                                 </div>
                                 <div className="divide-y divide-line/40">
-                                  {rental.items?.map((item, idx) => (
+                                  {rental.products?.map((item: any, idx: number) => (
                                     <div key={idx} className="px-4 py-3.5 flex items-center justify-between gap-6 hover:bg-slate-50/30 transition-colors">
                                       <div className="flex flex-col min-w-0 flex-1">
                                         <span className="text-sm font-black text-ink leading-tight">{item.name}</span>
                                         <div className="mt-1">
-                                          <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tight">{item.code}</span>
+                                          <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tight">{item.unique_code || item.code}</span>
                                         </div>
                                       </div>
                                       <div className="w-24 text-right flex-shrink-0">
-                                        <span className="text-[15px] font-black text-ink tabular-nums">{item.price}</span>
+                                        <span className="text-[15px] font-black text-ink tabular-nums">₹{Number(item.price || 0).toLocaleString()}</span>
                                       </div>
                                     </div>
                                   ))}
@@ -529,7 +478,7 @@ const HouseDetail = () => {
           {/* Mobile/Tablet Card View */}
           <div className="lg:hidden pb-4 px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {mockHouseRentals.map((rental) => (
+              {houseRentals.map((rental) => (
                 <div
                   key={rental.id}
                   className={`p-5 rounded-2xl bg-white border shadow-sm transition-all active:scale-[0.98] cursor-pointer h-fit ${expandedOrderId === rental.id ? 'border-primary/30 ring-4 ring-primary/5 shadow-md' : 'border-line/40 hover:shadow-md'}`}
@@ -538,19 +487,19 @@ const HouseDetail = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-black tracking-tight text-ink">{rental.id}</span>
+                        <span className="text-sm font-black tracking-tight text-ink uppercase">{rental.rental_no || rental.id.slice(0, 8)}</span>
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm border
-                          ${rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                            rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                          ${rental.status === 'returned' || rental.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                            rental.status === 'confirmed' || rental.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                               'bg-slate-50 text-slate-500 border-slate-100'}
                         `}>
-                          <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
+                          <div className={`h-1.5 w-1.5 rounded-full ${rental.status === 'returned' || rental.status === 'Returned' ? 'bg-emerald-500' : rental.status === 'confirmed' || rental.status === 'Active' ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'}`} />
                           {rental.status}
                         </span>
                       </div>
                       <div className="mt-1.5 inline-flex flex-col">
                         <span className="text-[9px] font-black text-muted/60 uppercase tracking-widest mb-0.5">Grand Total</span>
-                        <span className="text-[18px] font-black text-ink tabular-nums leading-none">{rental.amount}</span>
+                        <span className="text-[18px] font-black text-ink tabular-nums leading-none">₹{Number(rental.total_amount || 0).toLocaleString()}</span>
                       </div>
                     </div>
                     <div className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all ${expandedOrderId === rental.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 border-line text-muted'}`}>
@@ -565,14 +514,14 @@ const HouseDetail = () => {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Pickup</span>
-                        <span className="text-[13px] font-bold text-ink leading-tight">{rental.pickupDate}</span>
+                        <span className="text-[13px] font-bold text-ink leading-tight">{new Date(rental.pickup_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                       </div>
                     </div>
                     <div className="h-4 w-px bg-line/40" />
                     <div className="flex items-center gap-3 text-right">
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">Return</span>
-                        <span className="text-[13px] font-bold text-ink leading-tight">{rental.returnDate}</span>
+                        <span className="text-[13px] font-bold text-ink leading-tight">{new Date(rental.event_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                       </div>
                       <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-rose-500 shadow-sm border border-line/40">
                         <Calendar className="h-4 w-4" />
@@ -582,8 +531,8 @@ const HouseDetail = () => {
 
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-ink truncate max-w-[220px]">{rental.items[0]?.name}</span>
-                      <span className="text-[10px] font-bold text-muted uppercase tracking-widest mt-0.5">{rental.itemsCount} Items Total</span>
+                      <span className="text-xs font-black text-ink truncate max-w-[220px]">{rental.products?.[0]?.name || 'N/A'}</span>
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-widest mt-0.5">{rental.products?.length || 0} Items Total</span>
                     </div>
                   </div>
 
@@ -598,19 +547,19 @@ const HouseDetail = () => {
                         <div className="pt-4 space-y-2.5">
                           <div className="flex items-center justify-between px-1 mb-1">
                             <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Detailed Rentals</span>
-                            <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{rental.itemsCount} Items</span>
+                            <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{rental.products?.length || 0} Items</span>
                           </div>
-                          {rental.items?.map((item, idx) => (
+                          {rental.products?.map((item: any, idx: number) => (
                             <div key={idx} className="group/item relative p-4 rounded-2xl border border-line/40 bg-white shadow-sm hover:border-primary/30 transition-all">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <span className="text-[13px] font-black text-ink leading-tight">{item.name}</span>
                                   <div className="mt-1">
-                                    <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tighter">{item.code}</span>
+                                    <span className="text-[10px] font-mono font-black text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase tracking-tighter">{item.unique_code || item.code}</span>
                                   </div>
                                 </div>
                                 <div className="w-20 text-right flex-shrink-0 pt-0.5">
-                                  <span className="text-[14px] font-black text-ink tabular-nums">{item.price}</span>
+                                  <span className="text-[14px] font-black text-ink tabular-nums">₹{Number(item.price || 0).toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>

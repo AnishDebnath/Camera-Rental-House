@@ -1,4 +1,4 @@
-import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, Loader2, Phone, Hash } from 'lucide-react';
+import { Building2, PlusCircle, ChevronRight, Wallet, TrendingUp, ShieldCheck, Loader2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/ui/DataTable';
 
@@ -49,16 +49,16 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
           </div>
           <div>
             <p className="font-bold text-ink leading-tight whitespace-nowrap">{row.name}</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase">{row.owner_name || row.ownerName}</p>
-              <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 rounded">
-                <Hash className="h-2.5 w-2.5" />
-                {row.house_id}
-              </span>
-            </div>
+            <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase mt-0.5">{row.owner_name}</p>
           </div>
         </div>
       ),
+    },
+    {
+      key: 'house_id',
+      label: 'House ID',
+      className: 'min-w-[120px]',
+      render: (row) => <span className="font-mono text-xs font-bold text-primary bg-slate-50 px-2 py-1 rounded border border-line whitespace-nowrap">{row.house_id || '-'}</span>,
     },
     {
       key: 'contact',
@@ -73,7 +73,7 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
       render: (row: any) => (
         <div className="flex items-center gap-2">
           <TrendingUp className="h-3.5 w-3.5 text-success" />
-          <span className="font-bold text-ink">{row.thisMonthBusiness || '₹1,25,000'}</span>
+          <span className="font-bold text-ink">{row.thisMonthBusiness}</span>
         </div>
       ),
     },
@@ -83,7 +83,7 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
       render: (row: any) => (
         <div className="flex items-center gap-2">
           <Wallet className="h-3.5 w-3.5 text-danger" />
-          <span className={`font-bold ${row.dueAmount === '₹0' ? 'text-muted/40' : 'text-danger'}`}>
+          <span className={`font-bold ${(row.dueAmount === '₹0' || !row.dueAmount) ? 'text-ink' : 'text-danger'}`}>
             {row.dueAmount}
           </span>
         </div>
@@ -94,11 +94,11 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
       label: 'Rental Status',
       render: (row: any) => (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[10px] font-bold tracking-wider ${row.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+          className={`inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-[10px] font-bold tracking-wider ${row.hasActiveRental ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
             }`}
         >
-          {row.status === 'Active' ? <ShieldCheck className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {row.status}
+          <div className={`h-1.5 w-1.5 rounded-full ${row.hasActiveRental ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+          {row.hasActiveRental ? 'Active' : 'No Rental'}
         </span>
       ),
     },
@@ -146,17 +146,17 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
 
               <div className="flex-1 min-w-0 pt-0.5">
                 <h3 className="text-base font-black text-ink truncate tracking-tight">{row.name}</h3>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                    {row.owner_name || row.ownerName}
+                <p className="text-[11px] font-semibold text-muted/60 tracking-wide uppercase mt-0.5">{row.owner_name}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[9px] font-black tracking-widest text-indigo-600 border border-indigo-100/50">
+                    ID: {row.house_id}
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[9px] font-black tracking-widest text-indigo-600">
-                    <Hash className="h-2.5 w-2.5 mr-0.5" />
-                    {row.house_id}
-                  </span>
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-black tracking-widest ${row.status === 'Active' ? 'bg-success/10 text-emerald-700' : 'bg-warning/10 text-amber-600'
-                    }`}>
-                    {row.status}
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest border ${row.hasActiveRental ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-100'
+                      }`}
+                  >
+                    <div className={`h-1.5 w-1.5 rounded-full ${row.hasActiveRental ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                    {row.hasActiveRental ? 'Active' : 'No Rental'}
                   </span>
                 </div>
                 <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-tertiary">
@@ -171,14 +171,14 @@ const HouseCard = ({ houses, isLoading }: HouseCardProps) => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted">This Month</p>
                 <div className="flex items-center gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-success" />
-                  <p className="text-sm font-black text-ink">{row.thisMonthBusiness || '₹1,25,000'}</p>
+                  <p className="text-sm font-black text-ink">{row.thisMonthBusiness || '₹0'}</p>
                 </div>
               </div>
               <div className="flex flex-col gap-1 text-right items-end">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted">Due Amount</p>
                 <div className="flex items-center gap-1.5 justify-end">
                   <Wallet className="h-3.5 w-3.5 text-danger" />
-                  <p className={`text-sm font-black ${row.dueAmount === '₹0' ? 'text-muted/40' : 'text-danger'}`}>{row.dueAmount}</p>
+                  <p className={`text-sm font-black ${(row.dueAmount === '₹0' || !row.dueAmount) ? 'text-ink' : 'text-danger'}`}>{row.dueAmount || '₹0'}</p>
                 </div>
               </div>
             </div>

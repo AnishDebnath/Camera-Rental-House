@@ -50,25 +50,50 @@ router.get('/stats', async (_req: Request, res: Response) => {
 // 2. Get all production houses
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    // Attempt join first
-    const { data, error } = await supabase
+    const { data: houses, error } = await supabase
       .from('production_houses')
-      .select('*, users(member_id, email, full_name)')
+      .select('*, users(member_id, email, full_name, id)')
       .order('created_at', { ascending: false });
 
-    if (!error) {
-      return res.json(data || []);
-    }
+    if (error) throw error;
 
-    // Fallback: If join fails (missing column/relation), fetch houses only
-    console.warn('House join failed, falling back to simple fetch:', error.message);
-    const { data: simpleData, error: simpleError } = await supabase
-      .from('production_houses')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Fetch all rentals for these houses to calculate stats
+    const userIds = houses.map(h => h.user_id).filter(Boolean);
+    const { data: rentals } = await supabase
+      .from('rentals')
+      .select('total_amount, created_at, user_id, status')
+      .in('user_id', userIds);
 
-    if (simpleError) throw simpleError;
-    return res.json(simpleData || []);
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const housesWithStats = houses.map(house => {
+      const houseRentals = rentals?.filter(r => r.user_id === house.user_id) || [];
+      
+      const thisMonthTotal = houseRentals
+        .filter(r => {
+          const d = new Date(r.created_at);
+          return d.getMonth() === currentMonth && d.getFullYear() === currentYear && r.status !== 'cancelled';
+        })
+        .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+      // Simple due amount logic: all non-cancelled rentals (placeholder for actual payment tracking)
+      const totalDue = houseRentals
+        .filter(r => r.status !== 'cancelled')
+        .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+      const hasActiveRental = houseRentals.some(r => r.status === 'confirmed' || r.status === 'released');
+
+      return {
+        ...house,
+        thisMonthBusiness: `₹${thisMonthTotal.toLocaleString()}`,
+        dueAmount: `₹${totalDue.toLocaleString()}`,
+        hasActiveRental
+      };
+    });
+
+    return res.json(housesWithStats);
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch houses.' });
   }
@@ -136,23 +161,41 @@ router.post('/', async (req: Request, res: Response) => {
 // 3. Get single house detail
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase
+    const { data: house, error } = await supabase
       .from('production_houses')
       .select('*, users(*)')
       .eq('id', req.params.id)
       .single();
 
-    if (!error) return res.json(data);
+    if (error) throw error;
 
-    // Fallback
-    const { data: simpleData, error: simpleError } = await supabase
-      .from('production_houses')
-      .select('*')
-      .eq('id', req.params.id)
-      .single();
+    // Fetch rentals for stats
+    const { data: rentals } = await supabase
+      .from('rentals')
+      .select('total_amount, created_at, status')
+      .eq('user_id', house.user_id);
 
-    if (simpleError) throw simpleError;
-    return res.json(simpleData);
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const houseRentals = rentals || [];
+    const thisMonthTotal = houseRentals
+      .filter(r => {
+        const d = new Date(r.created_at);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear && r.status !== 'cancelled';
+      })
+      .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+    const totalDue = houseRentals
+      .filter(r => r.status !== 'cancelled')
+      .reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+
+    return res.json({
+      ...house,
+      thisMonthBusiness: `₹${thisMonthTotal.toLocaleString()}`,
+      dueAmount: `₹${totalDue.toLocaleString()}`
+    });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch house detail.' });
   }

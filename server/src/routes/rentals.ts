@@ -104,4 +104,34 @@ router.get('/my', async (req: Request, res: Response) => {
   }
 });
 
+// Fetch rentals for a specific production house (by house ID)
+router.get('/house/:houseId', async (req: Request, res: Response) => {
+  try {
+    const { houseId } = req.params;
+    
+    // 1. Get the user_id for this house
+    const { data: house, error: houseError } = await supabase
+      .from('production_houses')
+      .select('user_id')
+      .eq('id', houseId)
+      .single();
+      
+    if (houseError || !house?.user_id) {
+      return res.status(404).json({ message: 'House not found or not linked to a user.' });
+    }
+
+    // 2. Fetch all rentals for that user
+    const { data, error } = await supabase
+      .from('rentals')
+      .select('*')
+      .eq('user_id', house.user_id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch house rentals.' });
+  }
+});
+
 export default router;
