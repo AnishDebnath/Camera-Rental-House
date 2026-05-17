@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../store/CartContext';
 import { useFavourites } from '../../store/FavouritesContext';
 import formatCurrency from '../../utils/formatCurrency';
+import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
 
 import { LazyImage } from '@camera-rental-house/ui';
 
@@ -44,10 +45,30 @@ const ProductCard = ({ product }) => {
       </div>
 
       <div className="flex flex-1 flex-col justify-between p-3.5 pt-2.5 z-10">
-        <div className="space-y-1">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-            {product.category}
-          </p>
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+            <span className="flex items-center gap-1">
+              {product.category && (
+                <img
+                  src={CATEGORY_ICONS[product.category] || CATEGORY_ICONS[product.category.endsWith('s') ? product.category : `${product.category}s`]}
+                  alt=""
+                  className="h-3 w-3 object-contain"
+                />
+              )}
+              {product.category}
+            </span>
+            <span className="opacity-40">•</span>
+            <span className="flex items-center gap-1">
+              {product.brand && (
+                <img
+                  src={BRAND_ICONS[product.brand] || BRAND_ICONS[Object.keys(BRAND_ICONS).find(k => k.toLowerCase() === product.brand?.toLowerCase()) || '']}
+                  alt=""
+                  className="h-3 w-3 object-contain"
+                />
+              )}
+              {product.brand}
+            </span>
+          </div>
           <Link to={`/product/${product.id}`} className="block">
             <h3 className="line-clamp-2 h-[2.5em] text-xs font-bold leading-tight text-slate-800 md:text-sm transition-colors md:group-hover:text-primary">
               {product.name}
@@ -56,13 +77,20 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div className="mt-3 flex flex-col justify-end">
-          <div className="flex items-baseline gap-1 mb-2.5">
-            <span className="text-base font-extrabold tracking-tight text-primary md:text-lg leading-none">
-              {formatCurrency(product.price_per_day)}
-            </span>
-            <span className="text-[10px] font-bold tracking-wider text-slate-400">
-              / Per Day
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+            <div className="flex items-baseline gap-1 order-2 sm:order-1">
+              <span className="text-base font-extrabold tracking-tight text-primary md:text-lg leading-none">
+                {formatCurrency(product.price_per_day)}
+              </span>
+              <span className="text-[10px] font-bold tracking-wider text-slate-400">
+                / Per Day
+              </span>
+            </div>
+            {product.unique_code && (
+              <span className="text-[10px] font-mono font-black text-primary bg-primary/5 px-2 py-0.5 rounded-[6px] border border-primary/10 shrink-0 self-start sm:self-auto order-1 sm:order-2">
+                {product.unique_code}
+              </span>
+            )}
           </div>
 
           <button
