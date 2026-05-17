@@ -7,6 +7,9 @@ import Footer from '../../components/common/footer/Footer';
 import axiosInstance from '../../api/axiosInstance';
 import useDebounce from '../../hooks/useDebounce';
 import usePullToRefresh from '../../hooks/usePullToRefresh';
+import { format } from 'date-fns';
+
+import { useCart } from '../../store/CartContext';
 
 const Category = () => {
   const [params, setParams] = useSearchParams();
@@ -16,6 +19,7 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [itemsToShow, setItemsToShow] = useState(12);
+  const { pickupDate, dropDate, setPickupDate, setDropDate } = useCart();
 
   const activeCategory = params.get('category') || 'All';
   const activeBrand = params.get('brand') || 'All';
@@ -42,6 +46,24 @@ const Category = () => {
     }
   }, [debouncedSearch, params, setParams]);
 
+  // Focus date picker if redirected with focus_dates param
+  useEffect(() => {
+    if (params.get('focus_dates') === 'true') {
+      setTimeout(() => {
+        const element = document.getElementById('date-picker-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const buttons = element.querySelectorAll('button[type="button"]');
+          const targetBtn = pickupDate ? buttons[1] : buttons[0];
+          if (targetBtn) (targetBtn as HTMLButtonElement).click();
+        }
+      }, 300);
+      const nextParams = new URLSearchParams(params);
+      nextParams.delete('focus_dates');
+      setParams(nextParams, { replace: true });
+    }
+  }, [params, setParams, pickupDate]);
+
   const refresh = async () => {
     setLoading(true);
     try {
@@ -50,7 +72,11 @@ const Category = () => {
           category: activeCategory,
           brand: activeBrand,
           search: debouncedSearch,
-          limit: itemsToShow
+          limit: itemsToShow,
+          ...(pickupDate && dropDate ? {
+            pickup_date: format(pickupDate, 'yyyy-MM-dd'),
+            drop_date: format(dropDate, 'yyyy-MM-dd'),
+          } : {})
         }
       });
       
@@ -74,7 +100,7 @@ const Category = () => {
 
   useEffect(() => {
     refresh();
-  }, [activeCategory, activeBrand, debouncedSearch, itemsToShow]);
+  }, [activeCategory, activeBrand, debouncedSearch, itemsToShow, pickupDate, dropDate]);
 
   const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
 
@@ -99,6 +125,10 @@ const Category = () => {
         activeCategory={activeCategory}
         activeBrand={activeBrand}
         onSelectFilter={handleFilterSelect}
+        pickupDate={pickupDate}
+        dropDate={dropDate}
+        setPickupDate={setPickupDate}
+        setDropDate={setDropDate}
       />
       <div className="app-shell mt-4 md:mt-6">
         <CategoryProducts

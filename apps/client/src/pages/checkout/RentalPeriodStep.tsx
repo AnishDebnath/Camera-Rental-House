@@ -83,6 +83,7 @@ const RentalPeriodStep = ({ pickupDate, dropDate, onDateClick, onPrev, onNext }:
               pickupDate={pickupDate}
               dropDate={dropDate}
               onDateClick={onDateClick}
+              readOnly={true}
             />
           </div>
         </div>

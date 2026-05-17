@@ -21,15 +21,11 @@ const STEPS = [
 ];
 const Checkout = () => {
   const { user } = useAuth();
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, pickupDate, dropDate, setPickupDate, setDropDate } = useCart();
   const { addToast } = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
-
-  // Dates
-  const [pickupDate, setPickupDate] = useState<Date | null>(null);
-  const [dropDate, setDropDate] = useState<Date | null>(null);
 
   const [finalTotal, setFinalTotal] = useState<number>(0);
   const [rentalNo, setRentalNo] = useState<string>('');

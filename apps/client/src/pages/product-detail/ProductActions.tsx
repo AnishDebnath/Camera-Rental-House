@@ -1,5 +1,8 @@
 import { createPortal } from 'react-dom';
-import { Heart, ShoppingBag, CheckCheck, ShieldCheck } from 'lucide-react';
+import { Heart, ShoppingBag, CheckCheck, ShieldCheck, Calendar, CalendarX } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../store/CartContext';
+import { useToast } from '@camera-rental-house/ui';
 
 interface ProductActionsProps {
   product: any;
@@ -16,6 +19,35 @@ const ProductActions = ({
   toggleFavourite,
   handleCartAction
 }: ProductActionsProps) => {
+  const { pickupDate, dropDate } = useCart();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  const hasDatesSelected = !!(pickupDate && dropDate);
+  const baseStatus = product.booking_status || (product.available_quantity > 0 ? 'available' : 'out_of_stock');
+  // If dates are not selected, we override to 'select_dates' for all products
+  const status = !hasDatesSelected ? 'select_dates' : baseStatus;
+  const isDisabled = status === 'out_of_stock' || status === 'booked';
+
+  const handleActionClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (status === 'select_dates') {
+      addToast({
+        title: 'Select Rental Dates',
+        message: pickupDate ? 'Please choose your return date.' : 'Please choose pick-up and return dates first.',
+        tone: 'warning'
+      });
+      navigate('/category?focus_dates=true');
+      return;
+    }
+
+    if (status === 'available') {
+      handleCartAction();
+    }
+  };
+
   return (
     <>
       {/* Desktop Actions (Exact BottomNav Liquid Glass) */}
@@ -37,19 +69,35 @@ const ProductActions = ({
 
           <button
             type="button"
-            onClick={handleCartAction}
-            disabled={product.available_quantity === 0}
-            className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98] ${product.available_quantity === 0
-              ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
-              : inCart
-                ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
-                : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20 font-black text-white'
+            onClick={handleActionClick}
+            disabled={isDisabled}
+            className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98]
+              ${
+                status === 'out_of_stock'
+                  ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
+                  : status === 'booked'
+                    ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20 cursor-not-allowed font-bold'
+                    : status === 'select_dates'
+                      ? 'bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 cursor-pointer font-bold'
+                      : inCart
+                        ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
+                        : 'bg-primary shadow-lg shadow-primary/25 hover:bg-primary-hover hover:translate-y-[-1px] hover:shadow-xl hover:shadow-primary/20 font-black text-white'
               }`}
           >
-            {product.available_quantity === 0 ? (
+            {status === 'out_of_stock' ? (
               <>
                 <ShoppingBag className="h-4.5 w-4.5" />
                 <span className="uppercase tracking-[0.1em] text-[10px]">Out of Stock</span>
+              </>
+            ) : status === 'booked' ? (
+              <>
+                <CalendarX className="h-4.5 w-4.5" />
+                <span className="uppercase tracking-[0.1em] text-[10px]">Booked on Dates</span>
+              </>
+            ) : status === 'select_dates' ? (
+              <>
+                <Calendar className="h-4.5 w-4.5" />
+                <span className="uppercase tracking-[0.1em] text-[10px]">Select Dates</span>
               </>
             ) : inCart ? (
               <>
@@ -88,19 +136,35 @@ const ProductActions = ({
 
             <button
               type="button"
-              onClick={handleCartAction}
-              disabled={product.available_quantity === 0}
-              className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98] ${product.available_quantity === 0
-                ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
-                : inCart
-                  ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
-                  : 'bg-primary shadow-md shadow-primary/30 hover:bg-primary-hover font-black text-white'
+              onClick={handleActionClick}
+              disabled={isDisabled}
+              className={`relative z-10 flex h-12 flex-1 items-center justify-center gap-3 rounded-full transition-all active:scale-[0.98]
+                ${
+                  status === 'out_of_stock'
+                    ? 'bg-danger/10 text-danger border border-danger/20 cursor-not-allowed font-bold'
+                    : status === 'booked'
+                      ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20 cursor-not-allowed font-bold'
+                      : status === 'select_dates'
+                        ? 'bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 cursor-pointer font-bold'
+                        : inCart
+                          ? 'bg-success/10 text-success border border-success/20 hover:bg-success/20 shadow-sm font-bold'
+                          : 'bg-primary shadow-md shadow-primary/30 hover:bg-primary-hover font-black text-white'
                 }`}
             >
-              {product.available_quantity === 0 ? (
+              {status === 'out_of_stock' ? (
                 <>
                   <ShoppingBag className="h-4.5 w-4.5" />
                   <span className="text-[10px] font-black uppercase tracking-[0.1em]">Out of Stock</span>
+                </>
+              ) : status === 'booked' ? (
+                <>
+                  <CalendarX className="h-4.5 w-4.5" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em]">Booked on Dates</span>
+                </>
+              ) : status === 'select_dates' ? (
+                <>
+                  <Calendar className="h-4.5 w-4.5" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em]">Select Dates</span>
                 </>
               ) : inCart ? (
                 <>

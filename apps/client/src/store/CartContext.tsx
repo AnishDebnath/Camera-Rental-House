@@ -10,6 +10,34 @@ export const CartProvider = ({ children }) => {
     return stored ? JSON.parse(stored) : [];
   });
 
+  const [pickupDate, setPickupDateState] = useState<Date | null>(() => {
+    const stored = localStorage.getItem('camera_rental_house_demo_pickup');
+    return stored ? new Date(stored) : null;
+  });
+
+  const [dropDate, setDropDateState] = useState<Date | null>(() => {
+    const stored = localStorage.getItem('camera_rental_house_demo_drop');
+    return stored ? new Date(stored) : null;
+  });
+
+  const setPickupDate = (date: Date | null) => {
+    setPickupDateState(date);
+    if (date) {
+      localStorage.setItem('camera_rental_house_demo_pickup', date.toISOString());
+    } else {
+      localStorage.removeItem('camera_rental_house_demo_pickup');
+    }
+  };
+
+  const setDropDate = (date: Date | null) => {
+    setDropDateState(date);
+    if (date) {
+      localStorage.setItem('camera_rental_house_demo_drop', date.toISOString());
+    } else {
+      localStorage.removeItem('camera_rental_house_demo_drop');
+    }
+  };
+
   const persist = (next) => {
     setItems(next);
     localStorage.setItem('camera_rental_house_demo_cart', JSON.stringify(next));
@@ -19,6 +47,10 @@ export const CartProvider = ({ children }) => {
     () => ({
       items,
       subtotal: items.reduce((sum, item) => sum + item.price_per_day, 0),
+      pickupDate,
+      dropDate,
+      setPickupDate,
+      setDropDate,
       addToCart: (product) => {
         if (items.some((item) => item.id === product.id)) return;
         persist([...items, product]);
@@ -30,7 +62,7 @@ export const CartProvider = ({ children }) => {
       },
       clearCart: () => persist([]),
     }),
-    [addToast, items],
+    [addToast, items, pickupDate, dropDate],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

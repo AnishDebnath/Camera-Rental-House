@@ -20,9 +20,10 @@ interface CustomCalendarProps {
   pickupDate: Date | null;
   dropDate: Date | null;
   onDateClick: (date: Date) => void;
+  readOnly?: boolean;
 }
 
-const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarProps) => {
+const CustomCalendar = ({ pickupDate, dropDate, onDateClick, readOnly = false }: CustomCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const renderHeader = () => {
@@ -89,20 +90,20 @@ const CustomCalendar = ({ pickupDate, dropDate, onDateClick }: CustomCalendarPro
 
 
         const cellClasses = `
-          relative flex h-11 md:h-12 items-center justify-center text-sm font-semibold transition-all cursor-pointer
+          relative flex h-11 md:h-12 items-center justify-center text-sm font-semibold transition-all
           ${!isCurrentMonth ? 'text-muted/20' : 'text-ink'}
-          ${isSelected ? 'bg-primary text-white z-10 rounded-xl scale-105' : ''}
-          ${isInRange && !isSelected ? 'bg-primary/10 text-primary' : ''}
-          ${isDisabled ? 'cursor-not-allowed opacity-10' : 'hover:scale-105 active:scale-95'}
-          ${!isSelected && !isDisabled ? 'hover:bg-page rounded-xl' : ''}
-          ${isToday && !isSelected ? 'ring-2 ring-primary/20' : ''}
+          ${isSelected ? 'bg-primary text-white z-10 rounded-xl scale-105 shadow-sm shadow-primary/20' : ''}
+          ${isInRange && !isSelected ? 'bg-primary/10 text-primary rounded-xl' : ''}
+          ${isDisabled ? 'cursor-not-allowed opacity-10' : readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-105 active:scale-95'}
+          ${!isSelected && !isDisabled && !readOnly ? 'hover:bg-page rounded-xl' : ''}
+          ${isToday && !isSelected ? 'ring-2 ring-primary/20 rounded-xl' : ''}
         `.replace(/\s+/g, ' ').trim();
 
         days.push(
           <div
             key={day.toString()}
             className={cellClasses}
-            onClick={() => !isDisabled && onDateClick(cloneDay)}
+            onClick={() => !isDisabled && !readOnly && onDateClick(cloneDay)}
           >
             <span className="relative z-10">{formattedDate}</span>
             {isToday && !isSelected && (

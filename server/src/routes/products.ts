@@ -3,28 +3,82 @@ import supabase from '../db/supabase.js';
 
 const router = express.Router();
 
-const enrichProduct = async (product: any) => {
+/**
+ * Convert UTC timestamp to local YYYY-MM-DD format (aligns with India Time +05:30)
+ */
+const toLocalDateString = (isoString: string) => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString.slice(0, 10);
+  
+  // Align with India Standard Time (+05:30)
+  const localTime = date.getTime() + (5.5 * 60 * 60 * 1000);
+  const localDate = new Date(localTime);
+  return localDate.toISOString().slice(0, 10);
+};
+
+/**
+ * Overlap check: does rental [rStart, rEnd] overlap with [reqStart, reqEnd]?
+ * True if rental starts before or on request end AND ends on or after request start.
+ */
+const datesOverlap = (rStartStr: string, rEndStr: string, reqStart: string, reqEnd: string) => {
+  const rStart = toLocalDateString(rStartStr);
+  const rEnd = toLocalDateString(rEndStr);
+  return rStart <= reqEnd && rEnd >= reqStart;
+};
+
+const enrichProduct = async (product: any, pickupDate?: string, dropDate?: string) => {
   try {
+    // Admin-marked out of stock: available_quantity column on product row itself is 0
+    // (This is separate from date-based booking)
+    if (product.available_quantity !== undefined && product.available_quantity === 0) {
+      return { ...product, booking_status: 'out_of_stock' };
+    }
+
     const { data, error } = await supabase
       .from('rentals')
-      .select('products')
+      .select('products, pickup_date, event_date')
       .in('status', ['confirmed', 'released']);
 
     if (error) {
       console.warn('Error fetching rentals for enrichment:', error);
-      return { ...product, available_quantity: 1 };
+      return { ...product, available_quantity: 1, booking_status: 'available' };
     }
 
-    const reservedQuantity = (data || []).reduce((sum: number, r: any) => {
+    const rentalsForProduct = (data || []).filter((r: any) =>
+      (r.products || []).some((p: any) => p.id === product.id)
+    );
+
+    const booked_ranges = rentalsForProduct.map((r: any) => ({
+      pickup_date: toLocalDateString(r.pickup_date),
+      event_date: toLocalDateString(r.event_date)
+    }));
+
+    // If date range provided: check only overlapping rentals
+    if (pickupDate && dropDate) {
+      const isBooked = rentalsForProduct.some((r: any) =>
+        datesOverlap(r.pickup_date, r.event_date, pickupDate, dropDate)
+      );
+      return {
+        ...product,
+        available_quantity: isBooked ? 0 : 1,
+        booking_status: isBooked ? 'booked' : 'available',
+        booked_ranges,
+      };
+    }
+
+    // No date range: fallback to old behavior (any active rental = reserved)
+    const reservedQuantity = rentalsForProduct.reduce((sum: number, r: any) => {
       const item = (r.products || []).find((p: any) => p.id === product.id);
       return sum + (item ? Number(item.qty || 1) : 0);
     }, 0);
 
     const available_quantity = Math.max(0, 1 - reservedQuantity);
-    return { ...product, available_quantity };
+    const booking_status = available_quantity > 0 ? 'available' : 'booked';
+    return { ...product, available_quantity, booking_status, booked_ranges };
   } catch (err) {
     console.error('Enrichment exception:', err);
-    return { ...product, available_quantity: 1 };
+    return { ...product, available_quantity: 1, booking_status: 'available', booked_ranges: [] };
   }
 };
 
@@ -36,12 +90,14 @@ router.get('/', async (req: Request, res: Response) => {
     const category = String(req.query.category || '').trim();
     const brand = String(req.query.brand || '').trim();
     const status = String(req.query.status || 'all').toLowerCase();
+    const pickupDate = req.query.pickup_date ? String(req.query.pickup_date) : undefined;
+    const dropDate = req.query.drop_date ? String(req.query.drop_date) : undefined;
+
+    const sort = req.query.sort ? String(req.query.sort).toLowerCase() : undefined;
 
     let query = supabase
       .from('products')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .select('*', { count: 'exact' });
 
     if (category && category.toLowerCase() !== 'all') {
       query = query.ilike('category', category);
@@ -55,14 +111,46 @@ router.get('/', async (req: Request, res: Response) => {
       query = query.or(`name.ilike.%${search}%,unique_code.ilike.%${search}%`);
     }
 
+    if (sort !== 'most_rented') {
+      query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
+    }
+
     const { data, count, error } = await query;
 
     if (error) {
       throw error;
     }
 
-    const items = await Promise.all((data || []).map(enrichProduct));
-    
+    let items = await Promise.all((data || []).map((p) => enrichProduct(p, pickupDate, dropDate)));
+
+    if (sort === 'most_rented') {
+      // Fetch rentals count to sort by popularity
+      const { data: rentals } = await supabase
+        .from('rentals')
+        .select('products')
+        .in('status', ['confirmed', 'released', 'returned']);
+
+      const rentalCounts: Record<string, number> = {};
+      (rentals || []).forEach((r: any) => {
+        (r.products || []).forEach((p: any) => {
+          if (p.id) {
+            rentalCounts[p.id] = (rentalCounts[p.id] || 0) + (p.qty || 1);
+          }
+        });
+      });
+
+      // Sort items by count descending
+      items.sort((a: any, b: any) => {
+        const countA = rentalCounts[a.id] || 0;
+        const countB = rentalCounts[b.id] || 0;
+        if (countA !== countB) return countB - countA;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // fallback
+      });
+
+      // Slice manually for pagination
+      items = items.slice(offset, offset + limit);
+    }
+
     let filteredItems = items;
     if (status === 'in_stock') {
       filteredItems = items.filter((item) => item.available_quantity > 0);
@@ -100,7 +188,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Product not found.' });
     }
 
-    return res.json(await enrichProduct(data));
+    const pickupDate = req.query.pickup_date ? String(req.query.pickup_date) : undefined;
+    const dropDate = req.query.drop_date ? String(req.query.drop_date) : undefined;
+
+    return res.json(await enrichProduct(data, pickupDate, dropDate));
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Unable to fetch product.' });
   }

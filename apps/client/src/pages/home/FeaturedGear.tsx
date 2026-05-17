@@ -11,7 +11,7 @@ const FeaturedGear = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axiosInstance.get('/products?limit=8');
+        const { data } = await axiosInstance.get('/products?limit=8&sort=most_rented');
         const mappedProducts = data.items.map((p: any) => ({
           ...p,
           images: (p.images || []).map((url: string, i: number) => ({
@@ -45,7 +45,7 @@ const FeaturedGear = () => {
       <div className="flex items-center justify-between px-4">
         <div>
           <h2 className="text-xl font-bold text-ink md:text-2xl">
-            Available Now
+            Most Rented Gear
           </h2>
         </div>
         <Link
@@ -59,7 +59,7 @@ const FeaturedGear = () => {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
         {products.map((product, index) => (
           <div key={product.id} className={index >= 6 ? 'hidden lg:block' : 'block'}>
-            <ProductCard product={product} />
+            <ProductCard product={product} hideCart={true} />
           </div>
         ))}
       </div>

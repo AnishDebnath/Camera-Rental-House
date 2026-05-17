@@ -5,6 +5,7 @@ import { Transition } from '@headlessui/react';
 import clsx from 'clsx';
 import FilterChips from './FilterChips';
 import { useLenis } from '@camera-rental-house/ui';
+import DateRangePicker from './DateRangePicker';
 
 interface CategoryHeaderProps {
   pullDistance: number;
@@ -15,6 +16,10 @@ interface CategoryHeaderProps {
   activeCategory: string;
   activeBrand: string;
   onSelectFilter: (type: 'category' | 'brand', value: string) => void;
+  pickupDate: Date | null;
+  dropDate: Date | null;
+  setPickupDate: (date: Date | null) => void;
+  setDropDate: (date: Date | null) => void;
 }
 
 const CategoryHeader = ({
@@ -24,7 +29,11 @@ const CategoryHeader = ({
   setShowFilters,
   activeCategory,
   activeBrand,
-  onSelectFilter
+  onSelectFilter,
+  pickupDate,
+  dropDate,
+  setPickupDate,
+  setDropDate,
 }: CategoryHeaderProps) => {
   const [isFixed, setIsFixed] = useState(false);
   const [barHeight, setBarHeight] = useState(0);
@@ -130,6 +139,16 @@ const CategoryHeader = ({
               setShowFilters(!showFilters);
             }}
           />
+
+          {/* Date Range Picker */}
+          <div id="date-picker-section" className="mt-2.5">
+            <DateRangePicker
+              pickupDate={pickupDate}
+              dropDate={dropDate}
+              onPickupChange={setPickupDate}
+              onDropChange={setDropDate}
+            />
+          </div>
 
           {/* Desktop Filters Dropdown Overlay */}
           <div className={clsx(

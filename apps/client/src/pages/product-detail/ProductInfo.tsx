@@ -1,5 +1,7 @@
-import { Sparkles, ShieldCheck } from 'lucide-react';
+import { Sparkles, ShieldCheck, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
 import formatCurrency from '../../utils/formatCurrency';
+import { useCart } from '../../store/CartContext';
 
 import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
 
@@ -8,6 +10,13 @@ interface ProductInfoProps {
 }
 
 const ProductInfo = ({ product }: ProductInfoProps) => {
+  const { pickupDate, dropDate } = useCart();
+  const hasDatesSelected = !!(pickupDate && dropDate);
+
+  const baseStatus = product.booking_status || (product.available_quantity > 0 ? 'available' : 'out_of_stock');
+  // If dates are not selected, we override to 'select_dates' for all products
+  const status = !hasDatesSelected ? 'select_dates' : baseStatus;
+
   return (
     <div className="space-y-3.5">
       {/* Row 1: Gear & Brand Tags */}
@@ -66,16 +75,81 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
 
       {/* Row 5: Availability */}
       <div className="flex">
-        <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 bg-card/30 transition-all ${product.available_quantity > 0 ? 'border-success/30 bg-success/5' : 'border-danger/30 bg-danger/5'
-          }`}>
-          <div className={`h-2 w-2 rounded-full ${product.available_quantity > 0 ? 'bg-success animate-pulse' : 'bg-danger'
-            }`} />
-          <span className={`text-[10px] font-black uppercase tracking-widest ${product.available_quantity > 0 ? 'text-success' : 'text-danger'
-            }`}>
-            {product.available_quantity > 0 ? 'Available' : 'Out of Stock'}
-          </span>
-        </div>
+        {(() => {
+          const badgeClass =
+            status === 'out_of_stock'
+              ? 'border-danger/30 bg-danger/5 text-danger'
+              : status === 'booked'
+                ? 'border-amber-500/30 bg-amber-500/5 text-amber-600'
+                : status === 'select_dates'
+                  ? 'border-primary/30 bg-primary/5 text-primary'
+                  : 'border-success/30 bg-success/5 text-success';
+
+          const dotClass =
+            status === 'out_of_stock'
+              ? 'bg-danger'
+              : status === 'booked'
+                ? 'bg-amber-500 animate-pulse'
+                : status === 'select_dates'
+                  ? 'bg-primary animate-pulse'
+                  : 'bg-success animate-pulse';
+
+          const text =
+            status === 'out_of_stock'
+              ? 'Out of Stock'
+              : status === 'booked'
+                ? 'Booked on Dates'
+                : status === 'select_dates'
+                  ? 'Select Dates to Rent'
+                  : 'Available';
+
+          return (
+            <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 bg-card/30 transition-all ${badgeClass}`}>
+              <div className={`h-2 w-2 rounded-full ${dotClass}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                {text}
+              </span>
+            </div>
+          );
+        })()}
       </div>
+
+      {/* Row 5b: Selected Dates (Only if selected) */}
+      {hasDatesSelected && pickupDate && dropDate && (
+        <div className="flex flex-col sm:flex-row gap-3 pt-1">
+          <div className={`flex-1 flex items-center gap-3 rounded-2xl border p-3 shadow-sm transition-all ${
+            status === 'booked' 
+              ? 'border-amber-500/30 bg-amber-500/5' 
+              : 'border-line bg-card/10'
+          }`}>
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+              status === 'booked' ? 'bg-amber-500/10 text-amber-600' : 'bg-primary/5 text-primary'
+            }`}>
+              <Calendar className="h-4.5 w-4.5" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted">Pick-up Date</p>
+              <p className="text-xs font-black text-ink">{format(pickupDate, 'MMM d, yyyy')}</p>
+            </div>
+          </div>
+
+          <div className={`flex-1 flex items-center gap-3 rounded-2xl border p-3 shadow-sm transition-all ${
+            status === 'booked' 
+              ? 'border-amber-500/30 bg-amber-500/5' 
+              : 'border-line bg-card/10'
+          }`}>
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+              status === 'booked' ? 'bg-amber-500/10 text-amber-600' : 'bg-primary/5 text-primary'
+            }`}>
+              <Calendar className="h-4.5 w-4.5" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted">Return Date</p>
+              <p className="text-xs font-black text-ink">{format(dropDate, 'MMM d, yyyy')}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Row 6: Description */}
       <div className="max-w-4xl space-y-3 border-t border-black/10 pt-5">
