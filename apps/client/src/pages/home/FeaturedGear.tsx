@@ -1,7 +1,8 @@
-import { ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/product/ProductCard';
+import SkeletonCard from '../../components/product/SkeletonCard';
 import axiosInstance from '../../api/axiosInstance';
 
 const FeaturedGear = () => {
@@ -32,9 +33,20 @@ const FeaturedGear = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <section className="app-shell space-y-4">
+        <div className="flex items-center justify-between px-4">
+          <div>
+            <h2 className="text-xl font-bold text-ink md:text-2xl">
+              Most Rented Gear
+            </h2>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      </section>
     );
   }
 
