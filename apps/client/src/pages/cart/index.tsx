@@ -1,14 +1,27 @@
-import { ShoppingBag, Trash2, ArrowRight, Plus } from 'lucide-react';
+import { ShoppingBag, Trash2, ArrowRight, Plus, Calendar, AlertCircle, CalendarX } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import EmptyState from '../../components/ui/EmptyState';
 import { useCart } from '../../store/CartContext';
 import formatCurrency from '../../utils/formatCurrency';
 import Footer from '../../components/common/footer/Footer';
+import { BRAND_ICONS, CATEGORY_ICONS } from '../../../../../packages/data/categories';
+import { format, parseISO } from 'date-fns';
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, subtotal, removeFromCart } = useCart();
+
   const hasOutOfStock = items.some((item) => item.available_quantity === 0);
+
+  const uniqueDateRanges = Array.from(
+    new Set(
+      items.map(item =>
+        `${format(parseISO(item.pickup_date), 'yyyy-MM-dd')}_${format(parseISO(item.drop_date), 'yyyy-MM-dd')}`
+      )
+    )
+  );
+
+  const hasDifferentDates = uniqueDateRanges.length > 1;
 
   return (
     <div className="page-animate space-y-10 md:space-y-12">
@@ -27,43 +40,87 @@ const Cart = () => {
             <>
               <div className="flex flex-col gap-3 md:gap-4 px-2 md:px-0">
                 {items.map((item) => (
-                  <article key={item.id} className="group relative flex items-center gap-3 md:gap-4 rounded-[1.5rem] md:rounded-[2rem] border border-white/60 bg-white/40 p-3 md:p-4 backdrop-blur-xl transition-all duration-300 hover:bg-white/60 hover:shadow-sm">
+                  <article key={item.id} className="group relative flex items-center gap-3 md:gap-4 rounded-[1.5rem] md:rounded-[2rem] border border-white/60 bg-white/40 p-3.5 backdrop-blur-xl transition-all duration-300 hover:bg-white/60 hover:shadow-sm">
                     <Link
                       to={`/product/${item.id}`}
-                      className="flex flex-1 items-center gap-3 md:gap-4 cursor-pointer"
+                      className="flex flex-1 items-center gap-3 md:gap-4 cursor-pointer min-w-0"
                     >
                       <div className="h-16 w-16 md:h-20 md:w-20 shrink-0 overflow-hidden rounded-[1rem] md:rounded-[1.2rem] border border-white shadow-sm bg-white/50 transition-transform group-hover:scale-[1.02]">
                         <img src={item.images?.[0]?.image_url} alt={item.name} className="h-full w-full object-cover" />
                       </div>
-                      <div className="flex-1 space-y-0.5 md:space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          <span className="flex items-center gap-1">
+                            {item.category && (
+                              <img
+                                src={CATEGORY_ICONS[item.category] || CATEGORY_ICONS[item.category.endsWith('s') ? item.category : `${item.category}s`]}
+                                alt=""
+                                className="h-3 w-3 object-contain"
+                              />
+                            )}
+                            {item.category}
+                          </span>
+                          <span className="opacity-40">•</span>
+                          <span className="flex items-center gap-1">
+                            {item.brand && (
+                              <img
+                                src={BRAND_ICONS[item.brand] || BRAND_ICONS[Object.keys(BRAND_ICONS).find(k => k.toLowerCase() === item.brand?.toLowerCase()) || '']}
+                                alt=""
+                                className="h-3 w-3 object-contain"
+                              />
+                            )}
+                            {item.brand}
+                          </span>
+                        </div>
+
                         <div className="flex items-center gap-2">
-                          <h3 className="text-xs md:text-sm font-bold text-ink leading-tight line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
+                          <h3 className="text-xs md:text-sm font-extrabold text-ink leading-tight line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
                           {item.available_quantity === 0 && (
                             <span className="shrink-0 text-[8px] font-black text-danger bg-danger/10 px-2 py-0.5 rounded-full uppercase tracking-wider border border-danger/20">
                               Out of Stock
                             </span>
                           )}
                         </div>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 line-clamp-1">{item.category || 'Premium Equipment'}</p>
-                        <p className="mt-1 flex items-baseline text-base md:text-lg font-extrabold tracking-tight text-primary">
-                          {formatCurrency(item.price_per_day)}
-                          <span className="ml-1 text-[10px] font-bold text-slate-400 tracking-wider">/ Per Day</span>
-                        </p>
+
+                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none pt-0.5">
+                          <Calendar className="h-3 w-3 text-slate-400 shrink-0" />
+                          <span className="text-ink font-extrabold">{format(parseISO(item.pickup_date), 'MMM d')} - {format(parseISO(item.drop_date), 'MMM d, yyyy')}</span>
+                        </div>
+
+                        <div className="flex items-baseline gap-1 pt-0.5">
+                          <span className="text-sm md:text-base font-extrabold tracking-tight text-primary">
+                            {formatCurrency(item.price_per_day)}
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-400 tracking-wider">/ Per Day</span>
+                        </div>
                       </div>
                     </Link>
                     <button
                       type="button"
                       onClick={() => removeFromCart(item.id)}
-                      className="relative z-10 flex h-9 w-9 md:h-11 md:w-11 shrink-0 items-center justify-center rounded-xl md:rounded-2xl bg-danger/10 text-danger transition-all hover:bg-danger hover:text-white mr-1 md:mr-2 active:scale-95"
+                      className="relative z-10 flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl bg-danger/10 text-danger transition-all hover:bg-danger hover:text-white mr-1 active:scale-95 shadow-sm"
                       title="Remove from cart"
                     >
-                      <Trash2 className="h-4 w-4 md:h-4.5 md:w-4.5" />
+                      <Trash2 className="h-4.5 w-4.5" />
                     </button>
                   </article>
                 ))}
               </div>
 
               <div className="mt-8 flex flex-col gap-4 px-2 md:px-0">
+                {/* Date Mismatches/Warnings */}
+                {hasDifferentDates && (
+                  <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3 shadow-sm">
+                    <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-amber-900">Rental Period Mismatch</p>
+                      <p className="text-xs font-medium text-amber-700 leading-relaxed">
+                        Items in your cart have different rental dates. If renting on different dates, please rent them separately.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Order Summary Card */}
                 <div className="relative overflow-hidden rounded-[2rem] border border-line bg-white/40 p-6 md:p-8 backdrop-blur-xl transition-all duration-300">
                   {/* Decorative background element */}
@@ -97,15 +154,14 @@ const Cart = () => {
                       <button
                         type="button"
                         onClick={() => navigate('/checkout')}
-                        disabled={hasOutOfStock}
-                        className={`primary-button group flex-[1.5] py-4 shadow-xl ring-1 ring-white/20 transition-all ${
-                          hasOutOfStock 
-                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none ring-0' 
+                        disabled={hasOutOfStock || hasDifferentDates}
+                        className={`primary-button group flex-[1.5] py-4 shadow-xl ring-1 ring-white/20 transition-all ${hasOutOfStock || hasDifferentDates
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none ring-0'
                             : 'shadow-primary/20'
-                        }`}
+                          }`}
                       >
                         {hasOutOfStock ? 'Remove Out of Stock Items' : 'Proceed to Rent'}
-                        {!hasOutOfStock && <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />}
+                        {!(hasOutOfStock || hasDifferentDates) && <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />}
                       </button>
                     </div>
                   </div>

@@ -53,7 +53,12 @@ export const CartProvider = ({ children }) => {
       setDropDate,
       addToCart: (product) => {
         if (items.some((item) => item.id === product.id)) return;
-        persist([...items, product]);
+        const productWithDates = {
+          ...product,
+          pickup_date: product.pickup_date || (pickupDate ? pickupDate.toISOString() : null),
+          drop_date: product.drop_date || (dropDate ? dropDate.toISOString() : null),
+        };
+        persist([...items, productWithDates]);
         addToast({ title: 'Added to cart', message: product.name, tone: 'success' });
       },
       removeFromCart: (productId) => {

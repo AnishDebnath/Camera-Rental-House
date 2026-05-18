@@ -21,50 +21,43 @@ const STEPS = [
 ];
 const Checkout = () => {
   const { user } = useAuth();
-  const { items, subtotal, clearCart, pickupDate, dropDate, setPickupDate, setDropDate } = useCart();
+  const { items, subtotal, clearCart } = useCart();
   const { addToast } = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
 
   const [finalTotal, setFinalTotal] = useState<number>(0);
+  const [finalPickupDate, setFinalPickupDate] = useState<Date | null>(null);
+  const [finalDropDate, setFinalDropDate] = useState<Date | null>(null);
   const [rentalNo, setRentalNo] = useState<string>('');
 
+  const checkoutPickupDate = useMemo(() => items[0]?.pickup_date ? new Date(items[0].pickup_date) : null, [items]);
+  const checkoutDropDate = useMemo(() => items[0]?.drop_date ? new Date(items[0].drop_date) : null, [items]);
+
   const totalDays = useMemo(() => {
-    if (!pickupDate || !dropDate) return 1;
-    const diff = differenceInDays(dropDate, pickupDate) + 1;
+    if (!checkoutPickupDate || !checkoutDropDate) return 1;
+    const diff = differenceInDays(checkoutDropDate, checkoutPickupDate) + 1;
     return Math.max(diff, 1);
-  }, [pickupDate, dropDate]);
+  }, [checkoutPickupDate, checkoutDropDate]);
 
   const totalCost = subtotal * totalDays;
 
-  const handleDateClick = (date: Date) => {
-    if (!pickupDate || (pickupDate && dropDate)) {
-      setPickupDate(date);
-      setDropDate(null);
-    } else if (pickupDate && !dropDate) {
-      if (date < pickupDate) {
-        setPickupDate(date);
-        setDropDate(null);
-      } else {
-        setDropDate(date);
-      }
-    }
-  };
-
   const handleConfirm = async () => {
-    if (!pickupDate || !dropDate) {
+    if (!checkoutPickupDate || !checkoutDropDate) {
       addToast({ title: 'Select Dates', message: 'Please select pickup and return dates.', tone: 'warning' });
       return;
     }
     
     setLoading(true);
     setFinalTotal(totalCost);
+    setFinalPickupDate(checkoutPickupDate);
+    setFinalDropDate(checkoutDropDate);
     
     try {
       const { data } = await axiosInstance.post('/rentals', {
-        pickupDate: pickupDate.toISOString(),
-        eventDate: dropDate.toISOString(),
+        pickupDate: checkoutPickupDate.toISOString(),
+        eventDate: checkoutDropDate.toISOString(),
         items: items.map(item => ({
           productId: item.id,
           quantity: 1
@@ -92,8 +85,8 @@ const Checkout = () => {
   if (complete) {
     return (
       <SuccessScreen
-        pickupDate={pickupDate}
-        dropDate={dropDate}
+        pickupDate={finalPickupDate}
+        dropDate={finalDropDate}
         totalCost={finalTotal}
         rentalNo={rentalNo}
       />
@@ -121,9 +114,9 @@ const Checkout = () => {
           {step === 1 && (
             <RentalPeriodStep
               key="step1"
-              pickupDate={pickupDate}
-              dropDate={dropDate}
-              onDateClick={handleDateClick}
+              pickupDate={checkoutPickupDate}
+              dropDate={checkoutDropDate}
+              onDateClick={() => {}}
               onPrev={() => setStep(0)}
               onNext={() => setStep(2)}
             />

@@ -52,7 +52,7 @@ const SuccessScreen = ({ pickupDate, dropDate, totalCost, rentalNo }: SuccessScr
         <div className="inline-block px-5 py-2.5 rounded-2xl bg-white border border-line/10 shadow-sm mb-8 transition-all hover:border-primary/20">
           <p className="text-xs font-bold uppercase tracking-[0.2em]">
             <span className="text-muted/60">Rental ID:</span>
-            <span className="text-primary ml-2">{rentalNo || 'N/A'}</span>
+            <span className="text-primary ml-2">{rentalNo}</span>
           </p>
         </div>
 
